@@ -14,3 +14,6 @@ RUN composer install --no-dev --no-scripts --no-autoloader \
     && chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 80
+
+# C'est cette ligne qui manquait pour lancer le serveur web !
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
