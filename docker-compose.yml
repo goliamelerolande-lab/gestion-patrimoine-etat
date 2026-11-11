@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gpe-postgres
+    environment:
+      POSTGRES_USER: patrimoine
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: patrimoine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - patrinet
+
+  auth-service:
+    build: ./services/auth
+    container_name: gpe-auth
+    volumes:
+      - ./services/auth:/var/www
+    depends_on:
+      - postgres
+    networks:
+      - patrinet
+
+  patrimoine-service:
+    build: ./services/patrimoine
+    container_name: gpe-patrimoine
+    volumes:
+      - ./services/patrimoine:/var/www
+    depends_on:
+      - postgres
+    networks:
+      - patrinet
+
+  localisation-service:
+    build: ./services/localisation
+    container_name: gpe-localisation
+    volumes:
+      - ./services/localisation:/var/www
+    depends_on:
+      - postgres
+    networks:
+      - patrinet
+
+  gateway:
+    image: nginx:alpine
+    container_name: gpe-gateway
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - auth-service
+      - patrimoine-service
+      - localisation-service
+    networks:
+      - patrinet
+
+networks:
+  patrinet:
+    driver: bridge
+
+volumes:
+  pgdata:
