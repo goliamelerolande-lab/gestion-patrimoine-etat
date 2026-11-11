@@ -1,0 +1,71 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+title GPE — Diagramme de classes
+
+package "Schéma auth" {
+  class User {
+    - id : Long
+    - name : String
+    - email : String
+    - password : String
+    - role : Role
+  }
+  enum Role {
+    ADMIN
+    GESTIONNAIRE
+    MAINTENANCE
+    INVENTAIRE
+    DIRECTION
+    AUDITEUR
+  }
+}
+
+package "Schéma patrimoine" {
+  class Categorie {
+    - id : Long
+    - code : String
+    - libelle : String
+  }
+  class Bien {
+    - id : Long
+    - codeInventaire : String
+    - libelle : String
+    - dateAcquisition : Date
+    - valeurAcquisition : BigDecimal
+    - dureeAmortissementMois : Integer
+    - etat : Etat
+  }
+  enum Etat {
+    NEUF
+    BON
+    USAGE
+    REFORME
+  }
+}
+
+package "Schéma localisation" {
+  class Site {
+    - id : Long
+    - nom : String
+    - ville : String
+  }
+  class Affectation {
+    - id : Long
+    - dateDebut : Date
+    - dateFin : Date
+    - statut : String
+  }
+  class Inventaire {
+    - id : Long
+    - dateInventaire : Date
+  }
+}
+
+User --> Role
+Categorie "1" -- "0..*" Bien
+Bien "1" -- "0..*" Affectation : <<FK logique>>
+Site "1" -- "0..*" Affectation
+Site "1" -- "0..*" Inventaire
+User "1" -- "0..*" Affectation : <<FK logique>>
+@enduml

@@ -1,0 +1,25 @@
+@startuml
+title GPE — Déploiement Docker
+node "Navigateur" {
+  [Web App] as Browser
+}
+
+node "Serveur Docker" {
+  [Nginx Gateway] as GW
+  [auth-service] as AUTH
+  [patrimoine-service] as PATR
+  [localisation-service] as LOC
+}
+
+node "Base de données" {
+  database "PostgreSQL 16" as DB
+}
+
+Browser --> GW : HTTPS
+GW --> AUTH
+GW --> PATR
+GW --> LOC
+AUTH --> DB
+PATR --> DB
+LOC --> DB
+@enduml

@@ -1,0 +1,26 @@
+@startuml
+title GPE — Séquence : Création d'un bien
+actor Gestionnaire
+participant "Frontend" as FE
+participant "Gateway" as GW
+participant "patrimoine-service" as PATR
+participant "auth-service" as AUTH
+database "PostgreSQL" as DB
+
+Gestionnaire -> FE : Remplit formulaire
+FE -> GW : POST /api/patrimoine/biens (Token)
+GW -> PATR : POST /biens
+PATR -> AUTH : Vérifie Token
+AUTH --> PATR : Token Valide
+alt Données invalides
+  PATR --> GW : 422 Erreur
+  GW --> FE : 422
+  FE --> Gestionnaire : Affiche erreurs
+else Données valides
+  PATR -> DB : INSERT INTO biens
+  DB --> PATR : OK
+  PATR --> GW : 201 Created
+  GW --> FE : 201
+  FE --> Gestionnaire : Succès
+end
+@enduml
