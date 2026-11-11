@@ -1,0 +1,24 @@
+@startuml
+title GPE — Séquence : Authentification
+actor Utilisateur
+participant "Frontend" as FE
+participant "API Gateway" as GW
+participant "auth-service" as AUTH
+database "PostgreSQL" as DB
+
+Utilisateur -> FE : Saisit identifiants
+FE -> GW : POST /api/auth/login
+GW -> AUTH : POST /login
+AUTH -> DB : SELECT user
+DB --> AUTH : User + Hash
+alt Mot de passe valide
+  AUTH -> DB : INSERT token
+  AUTH --> GW : 200 { token }
+  GW --> FE : 200 { token }
+  FE --> Utilisateur : Redirection Dashboard
+else Mot de passe invalide
+  AUTH --> GW : 401 Unauthorized
+  GW --> FE : 401
+  FE --> Utilisateur : Erreur
+end
+@enduml
