@@ -1,19 +1,23 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.4-apache
 
-RUN apk add --no-cache bash git unzip libpq-dev oniguruma-dev \
-    && docker-php-ext-install pdo pdo_pgsql mbstring opcache
+# Installation des extensions PHP pour PostgreSQL et mbstring
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libonig-dev \
+    unzip \
+    && docker-php-ext-install pdo pdo_pgsql mbstring
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Activation du module de réécriture d'URL d'Apache
+RUN a2enmod rewrite
 
-WORKDIR /var/www
+# AUTORISER le fichier .htaccess de Laravel (Très important !)
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
-COPY . .
+# On dit à Apache de pointer vers le dossier /public de Laravel
+ENV APACHE_DOCUMENT_ROOT /var/www/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-RUN composer install --no-dev --no-scripts --no-autoloader \
-    && composer dump-autoload --optimize \
-    && chown -R www-data:www-data storage bootstrap/cache
-
-EXPOSE 80
-
-# C'est cette ligne qui manquait pour lancer le serveur web !
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=80"]
+# Copie du projet et permissions
+COPY . /var/www
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
