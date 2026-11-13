@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Gestion des Biens - GPE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 h-screen overflow-hidden flex">
@@ -54,6 +54,7 @@
                 </tbody>
             </table>
         </div>
+        <div class="px-6 py-4">{{ $biens->links() }}</div>
     </main>
 </body>
 </html>

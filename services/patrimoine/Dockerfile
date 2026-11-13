@@ -1,3 +1,12 @@
+FROM node:24-alpine AS frontend
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY resources ./resources
+COPY resources/views ./resources/views
+COPY vite.config.js ./
+RUN npm run build
+
 FROM php:8.4-apache
 
 # Installation des extensions PHP pour PostgreSQL et mbstring
@@ -20,4 +29,5 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.
 
 # Copie du projet et permissions
 COPY . /var/www
+COPY --from=frontend /app/public/build /var/www/public/build
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache

@@ -4,35 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPE - Gestion du Patrimoine de l'État</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { primary: '#1e40af', dark: '#0f172a' },
-                    animation: {
-                        'wave': 'wave 7s ease-in-out infinite',
-                        'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'pulse-slower': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite reverse',
-                    },
-                    keyframes: {
-                        wave: {
-                            '0%, 100%': { transform: 'translate(0, 0) scale(1) rotate(0deg) skewX(0deg) skewY(0deg)', opacity: '0.15' },
-                            '25%': { transform: 'translate(-30px, -20px) scale(1.15) rotate(-3deg) skewX(8deg) skewY(-5deg)', opacity: '0.25' },
-                            '50%': { transform: 'translate(20px, 30px) scale(1.05) rotate(3deg) skewX(-8deg) skewY(5deg)', opacity: '0.20' },
-                            '75%': { transform: 'translate(30px, -20px) scale(1.1) rotate(2deg) skewX(5deg) skewY(-3deg)', opacity: '0.25' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -46,7 +18,7 @@
 
     <!-- ✨ ARRIÈRE-PLAN ANIMÉ ✨ -->
     <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-slate-100">
-        <div class="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/6/68/Flag_of_Togo.svg')] bg-[position:right_top] bg-no-repeat bg-[length:80%] animate-wave filter blur-[1px]"></div>
+        <div class="absolute inset-0 bg-[url('/images/togo-flag.svg')] bg-[position:right_top] bg-no-repeat bg-[length:80%] animate-wave filter blur-[1px]"></div>
         <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-400 rounded-full mix-blend-multiply filter blur-[120px] animate-pulse-slow"></div>
         <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-yellow-400 rounded-full mix-blend-multiply filter blur-[120px] animate-pulse-slower"></div>
     </div>
@@ -122,7 +94,7 @@
                         <i class="fas fa-boxes text-9xl"></i>
                     </div>
                     <p class="text-blue-100 font-semibold text-lg mb-2">Total des Biens</p>
-                    <h2 class="text-5xl font-extrabold">{{ count($biens) }}</h2>
+                    <h2 class="text-5xl font-extrabold">{{ number_format((int) $stats->total_biens, 0, ',', ' ') }}</h2>
                 </div>
 
                 <div class="bg-white/90 backdrop-blur-xl rounded-2xl p-8 shadow-xl shadow-slate-200/50 border border-white/50 relative overflow-hidden group">
@@ -130,7 +102,7 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-slate-500 font-semibold text-lg mb-2">Valeur Totale (FCFA)</p>
-                            <h2 class="text-4xl font-extrabold text-slate-800">{{ number_format($biens->sum('valeur_acquisition'), 0, ',', ' ') }}</h2>
+                            <h2 class="text-4xl font-extrabold text-slate-800">{{ number_format($stats->valeur_totale, 0, ',', ' ') }}</h2>
                         </div>
                         <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shadow-inner">
                             <i class="fas fa-money-bill-wave text-2xl"></i>
@@ -143,7 +115,7 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-slate-500 font-semibold text-lg mb-2">Biens en usage</p>
-                            <h2 class="text-4xl font-extrabold text-slate-800">{{ $biens->where('etat', 'usage')->count() }}</h2>
+                            <h2 class="text-4xl font-extrabold text-slate-800">{{ $stats->biens_usage }}</h2>
                         </div>
                         <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shadow-inner">
                             <i class="fas fa-tools text-2xl"></i>
@@ -237,17 +209,21 @@
                 <!-- Widget Graphique -->
                 <div class="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl shadow-slate-200/50 border border-white/50 p-8 flex flex-col justify-between">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800 mb-6">Répartition par Catégorie</h2>
+                        <h2 class="text-xl font-bold text-slate-800 mb-6">Répartition par état</h2>
                         <div class="flex justify-center items-center h-48 mb-6 relative">
                             <div class="w-40 h-40 rounded-full border-[16px] border-blue-100 flex items-center justify-center shadow-inner">
-                                <span class="text-2xl font-bold text-slate-700">100%</span>
+                                <span class="text-2xl font-bold text-slate-700">{{ $stats->total_biens > 0 ? 100 : 0 }}%</span>
                             </div>
                         </div>
                         <div class="space-y-4 mt-4">
-                            <div class="flex justify-between items-center p-2 rounded-lg hover:bg-slate-50 transition">
-                                <span class="flex items-center text-base font-medium text-slate-600"><span class="w-3 h-3 bg-blue-600 rounded-full mr-3"></span> Informatique</span>
-                                <span class="font-bold text-slate-800 text-lg">1</span>
-                            </div>
+                            @forelse($byState as $item)
+                                <div class="flex justify-between items-center p-2 rounded-lg hover:bg-slate-50 transition">
+                                    <span class="flex items-center text-sm font-medium text-slate-600"><span class="w-3 h-3 {{ $item->etat === 'neuf' ? 'bg-emerald-500' : ($item->etat === 'usage' ? 'bg-amber-500' : 'bg-slate-400') }} rounded-full mr-3"></span>{{ $item->etat === 'usage' ? 'En usage' : ucfirst($item->etat ?? 'Non précisé') }}</span>
+                                    <span class="font-bold text-slate-800">{{ $item->total }}</span>
+                                </div>
+                            @empty
+                                <p class="text-sm text-slate-500">Aucune donnée disponible.</p>
+                            @endforelse
                         </div>
                     </div>
                     <div class="mt-8 pt-6 border-t border-slate-100">
@@ -270,6 +246,10 @@
             </div>
             <form id="formNouveauBien" class="p-6 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Code inventaire</label>
+                        <input type="text" id="new_code" required maxlength="100" placeholder="Ex. GPE-001" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-1">Libellé</label>
                         <input type="text" id="new_libelle" required class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -362,7 +342,8 @@
         document.getElementById('formNouveauBien').addEventListener('submit', async function(e) {
             e.preventDefault(); 
             const formData = {
-                libelle: document.getElementById('new_libelle').value,
+                code_inventaire: document.getElementById('new_code').value.trim(),
+                libelle: document.getElementById('new_libelle').value.trim(),
                 category_id: 1,
                 date_acquisition: document.getElementById('new_date').value,
                 valeur_acquisition: parseFloat(document.getElementById('new_valeur').value),

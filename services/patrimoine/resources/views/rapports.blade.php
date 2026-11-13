@@ -4,38 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapports - GPE</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { primary: '#1e40af', dark: '#0f172a' },
-                    animation: {
-                        'wave': 'wave 15s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        wave: {
-                            '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
-                            '50%': { transform: 'translate(20px, -20px) scale(1.05)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 antialiased h-screen overflow-hidden flex relative">
 
     <!-- ✨ ARRIÈRE-PLAN ANIMÉ ✨ -->
     <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-slate-50">
-        <div class="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/6/68/Flag_of_Togo.svg')] bg-[position:right_top] bg-no-repeat bg-[length:70%] animate-wave opacity-10"></div>
+        <div class="absolute inset-0 bg-[url('/images/togo-flag.svg')] bg-[position:right_top] bg-no-repeat bg-[length:70%] animate-wave opacity-10"></div>
     </div>
 
     <!-- SIDEBAR -->
@@ -112,14 +88,14 @@
                         <i class="fas fa-boxes text-9xl"></i>
                     </div>
                     <p class="text-blue-100 font-semibold text-lg mb-2">Total des Biens</p>
-                    <h2 class="text-5xl font-extrabold">{{ count($biens) }}</h2>
+                    <h2 class="text-5xl font-extrabold">{{ number_format((int) $stats->total_biens, 0, ',', ' ') }}</h2>
                 </div>
 
                 <div class="bg-white rounded-2xl p-8 shadow-lg border border-slate-100 relative overflow-hidden group">
                     <div class="flex justify-between items-start">
                         <div>
                             <p class="text-slate-500 font-semibold text-lg mb-2">Valeur Cumulée</p>
-                            <h2 class="text-4xl font-extrabold text-slate-800">{{ number_format($biens->sum('valeur_acquisition'), 0, ',', ' ') }} <span class="text-xl text-slate-500">FCFA</span></h2>
+                            <h2 class="text-4xl font-extrabold text-slate-800">{{ number_format($stats->valeur_totale, 0, ',', ' ') }} <span class="text-xl text-slate-500">FCFA</span></h2>
                         </div>
                         <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
                             <i class="fas fa-money-bill-wave text-2xl"></i>
@@ -143,8 +119,8 @@
             <!-- Tableau Détaillé -->
             <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden flex flex-col">
                 <div class="px-8 py-6 border-b border-slate-100">
-                    <h2 class="text-xl font-bold text-slate-800">Détail complet de l'inventaire</h2>
-                    <p class="text-base text-slate-500 mt-1">Liste exhaustive de tous les actifs enregistrés dans la base de données</p>
+                    <h2 class="text-xl font-bold text-slate-800">Derniers biens enregistrés</h2>
+                    <p class="text-base text-slate-500 mt-1">Les 20 biens les plus récents du registre</p>
                 </div>
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left border-collapse">

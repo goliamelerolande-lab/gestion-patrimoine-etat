@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-label="Drapeau du Togo">
+  <rect width="900" height="600" fill="#006a4e"/>
+  <path fill="#ffce00" d="M0 0h900v120H0zm0 240h900v120H0zm0 240h900v120H0z"/>
+  <rect width="360" height="360" fill="#d21034"/>
+  <path fill="#fff" d="m180 55 29 89h94l-76 55 29 89-76-55-76 55 29-89-76-55h94z"/>
+</svg>
