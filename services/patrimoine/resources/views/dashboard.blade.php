@@ -208,7 +208,7 @@
                                             </button>
                                             
                                             <!-- Bouton Supprimer -->
-                                            <button onclick="supprimerBien({{ $bien->id }})" class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors" title="Supprimer">
+                                            <button onclick="supprimerBien({{ $bien->id }}, this)" class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-colors" title="Supprimer">
                                                 <i class="fas fa-trash text-xs"></i>
                                             </button>
                                         </div>
@@ -445,9 +445,15 @@
         // 3b. ENVOYER LA MODIFICATION (POST + _method PUT)
         document.getElementById('formModifierBien').addEventListener('submit', async function(e) {
             e.preventDefault();
+            if (this.dataset.submitting === 'true') return;
+            this.dataset.submitting = 'true';
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalLabel = submitButton.innerText;
+            submitButton.disabled = true;
+            submitButton.innerText = 'Enregistrement…';
             const id = document.getElementById('edit_id').value;
             const formData = {
-                libelle: document.getElementById('edit_libelle').value,
+                libelle: document.getElementById('edit_libelle').value.trim(),
                 etat: document.getElementById('edit_etat').value,
                 valeur_acquisition: parseFloat(document.getElementById('edit_valeur').value)
             };
@@ -458,36 +464,43 @@
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify(formData)
                 });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.message || 'La modification du bien a échoué.');
 
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    const err = await response.json();
-                    alert("Erreur : " + JSON.stringify(err));
-                }
+                document.getElementById('modalModifierBien').classList.add('hidden');
+                afficherToast('Bien modifié avec succès. Actualisation de la liste…');
+                window.setTimeout(() => window.location.reload(), 800);
             } catch (error) {
-                alert("Erreur réseau : " + error.message);
+                alert(error.message || 'Erreur réseau lors de la modification.');
+                this.dataset.submitting = 'false';
+                submitButton.disabled = false;
+                submitButton.innerText = originalLabel;
             }
         });
 
-        // 4. SUPPRIMER (Méthode POST + _method DELETE)
-        async function supprimerBien(id) {
-            if (confirm("Êtes-vous sûr de vouloir supprimer définitivement ce bien ?")) {
-                try {
-                    const response = await fetch(`/api/patrimoine/biens/${id}`, {
-                        method: 'DELETE',
-                        headers: { 'Accept': 'application/json' }
-                    });
+        const suppressionsEnCours = new Set();
+        async function supprimerBien(id, bouton) {
+            if (suppressionsEnCours.has(id)) return;
+            if (!confirm('Êtes-vous sûr de vouloir supprimer définitivement ce bien ?')) return;
 
-                    if (response.ok) {
-                        window.location.reload();
-                    } else {
-                        const err = await response.json();
-                        alert("Erreur lors de la suppression : " + JSON.stringify(err));
-                    }
-                } catch (error) {
-                    alert("Erreur réseau : " + error.message);
+            suppressionsEnCours.add(id);
+            if (bouton) bouton.disabled = true;
+            try {
+                const response = await fetch(`/api/patrimoine/biens/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!response.ok) {
+                    const result = await response.json().catch(() => ({}));
+                    throw new Error(result.message || 'La suppression du bien a échoué.');
                 }
+
+                afficherToast('Bien supprimé avec succès. Actualisation de la liste…');
+                window.setTimeout(() => window.location.reload(), 800);
+            } catch (error) {
+                alert(error.message || 'Erreur réseau lors de la suppression.');
+                suppressionsEnCours.delete(id);
+                if (bouton) bouton.disabled = false;
             }
         }
     </script>

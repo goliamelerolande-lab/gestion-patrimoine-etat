@@ -25,7 +25,10 @@
 
     <!-- MAIN -->
     <main class="flex-1 p-10 overflow-y-auto bg-white/80">
-        <h1 class="text-3xl font-bold mb-8">Sites & Localisations</h1>
+                <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+            <div><h1 class="text-3xl font-bold">Sites & Localisations</h1><p class="mt-1 text-slate-500">Gérez les lieux d’affectation du patrimoine.</p></div>
+            <button type="button" onclick="ouvrirFormulaireSite()" class="rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-lg hover:bg-emerald-800"><i class="fas fa-plus mr-2"></i>Nouveau site</button>
+        </div>
         <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
             <table class="w-full text-left">
                 <thead class="bg-slate-50 text-slate-500 text-sm uppercase tracking-wider">
@@ -34,6 +37,7 @@
                         <th class="px-6 py-4 font-bold">Nom du site</th>
                         <th class="px-6 py-4 font-bold">Ville</th>
                         <th class="px-6 py-4 font-bold">Région</th>
+                        <th class="px-6 py-4 font-bold text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -42,14 +46,58 @@
                         <td class="px-6 py-4 font-bold text-slate-700">{{ $site['code'] }}</td>
                         <td class="px-6 py-4">{{ $site['nom'] }}</td>
                         <td class="px-6 py-4">{{ $site['ville'] }}</td>
-                        <td class="px-6 py-4">{{ $site['region'] }}</td>
+                        <td class="px-6 py-4">{{ $site['region'] ?? '—' }}</td>
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            <button type="button" onclick="modifierSite({{ Js::from($site) }})" title="Modifier" class="rounded-lg bg-amber-50 p-2 text-amber-700 hover:bg-amber-500 hover:text-white"><i class="fas fa-pen"></i></button>
+                            <button type="button" onclick="supprimerSite({{ $site['id'] }}, this)" title="Supprimer" class="rounded-lg bg-red-50 p-2 text-red-700 hover:bg-red-600 hover:text-white"><i class="fas fa-trash"></i></button>
+                        </td>
                     </tr>
                     @empty
-                    <tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">Aucun site enregistré.</td></tr>
+                    <tr><td colspan="5" class="px-6 py-8 text-center text-slate-500">Aucun site enregistré.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        <div id="siteToast" role="status" aria-live="polite" class="hidden fixed bottom-5 right-5 z-[100] rounded-xl bg-slate-900 px-5 py-4 text-sm font-semibold text-white shadow-2xl"></div>
+        <div id="siteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <form id="siteForm" class="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-2xl">
+                <div class="flex items-center justify-between"><h2 id="siteModalTitle" class="text-xl font-bold">Nouveau site</h2><button type="button" onclick="fermerFormulaireSite()" aria-label="Fermer">✕</button></div>
+                <input id="site_id" type="hidden">
+                <label class="block text-sm font-semibold">Code<input id="site_code" required maxlength="20" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+                <label class="block text-sm font-semibold">Nom du site<input id="site_nom" required maxlength="120" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+                <label class="block text-sm font-semibold">Ville<input id="site_ville" maxlength="80" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+                <label class="block text-sm font-semibold">Région<input id="site_region" maxlength="80" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+                <div class="flex justify-end gap-3"><button type="button" onclick="fermerFormulaireSite()" class="rounded-lg bg-slate-100 px-4 py-2">Annuler</button><button type="submit" class="rounded-lg bg-primary px-4 py-2 font-bold text-white">Enregistrer</button></div>
+            </form>
+        </div>
+        <script>
+            const sitesApi = '/api/localisation/sites';
+            function ouvrirFormulaireSite() { document.getElementById('siteForm').reset(); document.getElementById('site_id').value=''; document.getElementById('siteModalTitle').textContent='Nouveau site'; document.getElementById('siteModal').classList.remove('hidden'); }
+            function fermerFormulaireSite() { document.getElementById('siteModal').classList.add('hidden'); }
+            function modifierSite(site) { document.getElementById('site_id').value=site.id; document.getElementById('site_code').value=site.code; document.getElementById('site_nom').value=site.nom; document.getElementById('site_ville').value=site.ville || ''; document.getElementById('site_region').value=site.region || ''; document.getElementById('siteModalTitle').textContent='Modifier le site'; document.getElementById('siteModal').classList.remove('hidden'); }
+            async function envoyerSite(event) {
+                event.preventDefault();
+                const id=document.getElementById('site_id').value;
+                const form=event.currentTarget;
+                const button=form.querySelector('button[type="submit"]');
+                button.disabled=true;
+                const data={code:document.getElementById('site_code').value.trim(),nom:document.getElementById('site_nom').value.trim(),ville:document.getElementById('site_ville').value.trim() || null,region:document.getElementById('site_region').value.trim() || null};
+                try {
+                    const response=await fetch(id ? sitesApi+'/'+id : sitesApi,{method:id?'PUT':'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(data)});
+                    const result=await response.json().catch(()=>({}));
+                    if(!response.ok) throw new Error(result.message || 'Enregistrement du site impossible.');
+                    fermerFormulaireSite();
+                    window.location.href='/sites?fresh=1';
+                } catch(error) { alert(error.message || 'Erreur réseau lors de l’enregistrement.'); button.disabled=false; }
+            }
+            document.getElementById('siteForm').addEventListener('submit',envoyerSite);
+            async function supprimerSite(id,button) {
+                if(!confirm('Supprimer définitivement ce site ?')) return;
+                button.disabled=true;
+                try { const response=await fetch(sitesApi+'/'+id,{method:'DELETE',headers:{'Accept':'application/json'}}); if(!response.ok) throw new Error('Suppression du site impossible.'); window.location.href='/sites?fresh=1'; }
+                catch(error) { alert(error.message || 'Erreur réseau lors de la suppression.'); button.disabled=false; }
+            }
+        </script>
     </main>
 </body>
 </html>

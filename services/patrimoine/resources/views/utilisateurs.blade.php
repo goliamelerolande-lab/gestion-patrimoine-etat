@@ -25,7 +25,13 @@
 
     <!-- MAIN -->
     <main class="flex-1 p-10 overflow-y-auto bg-white/80">
-        <h1 class="text-3xl font-bold mb-8">Gestion des Utilisateurs</h1>
+                <div class="mb-8">
+            <h1 class="text-3xl font-bold">Espace utilisateurs</h1>
+            <p class="mt-1 text-slate-500">Consultez l’accès de démonstration actuellement configuré.</p>
+        </div>
+        <div role="status" class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            La création, la modification et la désactivation de comptes nécessitent une authentification administrateur, qui n’est pas encore activée dans l’application.
+        </div>
         <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
             <table class="w-full text-left">
                 <thead class="bg-slate-50 text-slate-500 text-sm uppercase tracking-wider">

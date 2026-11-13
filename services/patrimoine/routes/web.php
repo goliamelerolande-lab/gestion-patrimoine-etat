@@ -83,6 +83,10 @@ Route::get('/biens', function () {
 })->name('biens.index');
 
 Route::get('/sites', function () {
+    if (request()->boolean('fresh')) {
+        Cache::forget('localisation.sites');
+    }
+
     $sites = Cache::remember('localisation.sites', now()->addSeconds(30), function () {
         try {
             $response = Http::connectTimeout(1)
