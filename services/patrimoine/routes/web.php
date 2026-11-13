@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Bien;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -25,28 +26,29 @@ Route::get('/', function () {
         ->orderBy('etat')
         ->get();
 
-    $notifications = collect();
-    $recentCount = Bien::query()->where('created_at', '>=', now()->subDays(7))->count();
-    $reformCount = Bien::query()->where('etat', 'reforme')->count();
+    $notifications = Notification::query()
+        ->whereNull('read_at')
+        ->latest()
+        ->limit(5)
+        ->get(['id', 'type', 'title', 'message', 'created_at']);
+    $unreadCount = Notification::query()->whereNull('read_at')->count();
 
-    if ($recentCount > 0) {
-        $notifications->push([
-            'title' => $recentCount . ' bien(s) ajouté(s)',
-            'description' => 'Nouveaux enregistrements sur les 7 derniers jours.',
-            'type' => 'success',
-        ]);
-    }
-
-    if ($reformCount > 0) {
-        $notifications->push([
-            'title' => $reformCount . ' bien(s) réformé(s)',
-            'description' => 'À vérifier dans le registre du patrimoine.',
-            'type' => 'warning',
-        ]);
-    }
-
-    return view('dashboard', compact('stats', 'biens', 'byState', 'notifications'));
+    return view('dashboard', compact('stats', 'biens', 'byState', 'notifications', 'unreadCount'));
 })->name('dashboard');
+
+Route::get('/notifications', function () {
+    $notifications = Notification::query()
+        ->latest()
+        ->paginate(20, ['id', 'type', 'title', 'message', 'read_at', 'created_at']);
+
+    return view('notifications', compact('notifications'));
+})->name('notifications.index');
+
+Route::post('/notifications/mark-viewed', function () {
+    $marked = Notification::query()->whereNull('read_at')->update(['read_at' => now()]);
+
+    return response()->json(['marked' => $marked]);
+})->name('notifications.mark-viewed');
 
 Route::get('/rapports', function () {
     $stats = Bien::query()

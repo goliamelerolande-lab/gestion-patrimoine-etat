@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>GPE - Gestion du Patrimoine de l'État</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -53,6 +54,9 @@
             <a href="/rapports" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
                 <i class="fas fa-chart-line w-8 text-center mr-3 text-lg"></i>
                 <span class="font-medium text-lg">Rapports Globaux</span>
+            </a>            <a href="/notifications" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+                <i class="fas fa-bell w-8 text-center mr-3 text-lg"></i>
+                <span class="font-medium text-lg">Notifications</span>
             </a>        </nav>
 
         <div class="p-6 border-t border-slate-700/50 bg-dark/95 backdrop-blur-sm">
@@ -79,25 +83,26 @@
                 <div class="relative">
                     <button id="notificationButton" type="button" aria-expanded="false" aria-controls="notificationPanel" class="relative text-slate-500 hover:text-primary transition" title="Voir les notifications">
                         <i class="fas fa-bell text-2xl"></i>
-                        @if($notifications->isNotEmpty())
-                            <span class="absolute -top-2 -right-2 min-w-5 h-5 px-1 bg-red-500 rounded-full border-2 border-white text-white text-xs font-bold">{{ $notifications->count() }}</span>
+                        @if($unreadCount > 0)
+                            <span class="absolute -top-2 -right-2 min-w-5 h-5 px-1 bg-red-500 rounded-full border-2 border-white text-white text-xs font-bold notification-badge">{{ $unreadCount }}</span>
                         @endif
                     </button>
                     <section id="notificationPanel" class="hidden absolute right-0 top-full mt-3 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white shadow-2xl z-50" aria-label="Notifications">
                         <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                             <h2 class="font-bold text-slate-800">Notifications</h2>
-                            <span class="text-xs text-slate-500">{{ $notifications->count() }} alerte(s)</span>
+                            <span class="text-xs text-slate-500"><span id="notificationCount">{{ $unreadCount }} non lue(s)</span></span>
                         </div>
                         <div class="max-h-72 overflow-y-auto divide-y divide-slate-100">
                             @forelse($notifications as $notification)
-                                <a href="/rapports" class="block px-5 py-4 hover:bg-slate-50">
-                                    <p class="font-semibold text-sm text-slate-800">{{ $notification['title'] }}</p>
-                                    <p class="mt-1 text-xs text-slate-500">{{ $notification['description'] }}</p>
+                                <a href="/notifications" class="block px-5 py-4 hover:bg-slate-50">
+                                    <p class="font-semibold text-sm text-slate-800">{{ $notification->title }}</p>
+                                    <p class="mt-1 text-xs text-slate-500">{{ $notification->message }}</p>
                                 </a>
                             @empty
                                 <p class="px-5 py-6 text-sm text-slate-500">Aucune notification pour le moment.</p>
                             @endforelse
                         </div>
+                        <a href="/notifications" class="block border-t border-slate-100 px-5 py-3 text-center text-sm font-semibold text-primary hover:bg-slate-50">Consulter l’historique</a>
                     </section>
                 </div>
                 <div class="h-10 w-px bg-slate-200"></div>
@@ -406,10 +411,27 @@
 
         const notificationButton = document.getElementById('notificationButton');
         const notificationPanel = document.getElementById('notificationPanel');
-        notificationButton.addEventListener('click', () => {
+        notificationButton.addEventListener('click', async () => {
             const isOpening = notificationPanel.classList.contains('hidden');
             notificationPanel.classList.toggle('hidden', !isOpening);
             notificationButton.setAttribute('aria-expanded', String(isOpening));
+
+            if (isOpening && notificationButton.querySelector('.notification-badge')) {
+                try {
+                    const response = await fetch('/notifications/mark-viewed', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    });
+                    if (!response.ok) throw new Error('Lecture non enregistrée.');
+                    notificationButton.querySelector('.notification-badge')?.remove();
+                    document.getElementById('notificationCount').textContent = 'Lues — conservées dans l’historique';
+                } catch (error) {
+                    afficherToast('Impossible de mettre à jour la lecture. Réessayez.');
+                }
+            }
         });
         document.addEventListener('click', (event) => {
             if (!notificationPanel.contains(event.target) && !notificationButton.contains(event.target)) {

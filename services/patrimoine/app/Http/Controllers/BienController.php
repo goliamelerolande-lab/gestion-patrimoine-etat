@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bien;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -31,10 +32,19 @@ class BienController extends Controller
                 $code = sprintf('GPE-%06d', $id);
             } while (Bien::query()->where('code_inventaire', $code)->exists());
 
-            return Bien::forceCreate($validated + [
+            $bien = Bien::forceCreate($validated + [
                 'id' => $id,
                 'code_inventaire' => $code,
             ]);
+
+            Notification::create([
+                'bien_id' => $bien->id,
+                'type' => 'bien_created',
+                'title' => 'Nouveau bien enregistré',
+                'message' => 'Un nouveau bien a été ajouté au registre du patrimoine.',
+            ]);
+
+            return $bien;
         });
 
         return response()->json($bien, 201);
@@ -42,21 +52,33 @@ class BienController extends Controller
 
     public function show($id)
     {
-        $bien = Bien::findOrFail($id);
-
-        return response()->json($bien);
+        return response()->json(Bien::findOrFail($id));
     }
 
     public function update(Request $request, $id)
     {
         $bien = Bien::findOrFail($id);
+        $previousState = $bien->etat;
         $validated = $request->validate([
             'libelle' => 'sometimes|string|max:180',
             'etat' => 'sometimes|string|max:40',
             'valeur_acquisition' => 'sometimes|numeric|min:0',
         ]);
 
-        $bien->update($validated);
+        $bien = DB::transaction(function () use ($bien, $previousState, $validated) {
+            $bien->update($validated);
+
+            if ($previousState !== 'reforme' && $bien->etat === 'reforme') {
+                Notification::create([
+                    'bien_id' => $bien->id,
+                    'type' => 'bien_reformed',
+                    'title' => 'Bien passé à l’état réformé',
+                    'message' => 'Un bien a été marqué comme réformé dans le registre.',
+                ]);
+            }
+
+            return $bien->fresh();
+        });
 
         return response()->json($bien);
     }
@@ -64,7 +86,17 @@ class BienController extends Controller
     public function destroy($id)
     {
         $bien = Bien::findOrFail($id);
-        $bien->delete();
+
+        DB::transaction(function () use ($bien) {
+            Notification::create([
+                'bien_id' => $bien->id,
+                'type' => 'bien_deleted',
+                'title' => 'Bien supprimé du registre',
+                'message' => 'Un bien a été supprimé du registre du patrimoine.',
+            ]);
+
+            $bien->delete();
+        });
 
         return response()->json(null, 204);
     }

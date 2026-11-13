@@ -20,7 +20,7 @@
             <a href="/sites" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 rounded-xl"><i class="fas fa-map-marker-alt w-8 text-center"></i> Sites & Localisations</a>
             <a href="/rapports" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 rounded-xl"><i class="fas fa-chart-line w-8 text-center"></i> Rapports Globaux</a>
             <a href="/utilisateurs" class="flex items-center px-4 py-3.5 bg-blue-600/10 text-blue-400 rounded-xl border border-blue-500/20"><i class="fas fa-users w-8 text-center"></i> Utilisateurs</a>
-        </nav>
+            <a href="/notifications" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all"><i class="fas fa-bell w-8 text-center"></i> Notifications</a>        </nav>
     </aside>
 
     <!-- MAIN -->

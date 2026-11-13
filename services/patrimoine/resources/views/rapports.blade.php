@@ -46,7 +46,7 @@
                 <i class="fas fa-users w-8 text-center mr-3 text-lg"></i>
                 <span class="font-medium text-lg">Utilisateurs</span>
             </a>
-        </nav>
+            <a href="/notifications" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all"><i class="fas fa-bell w-8 text-center"></i> Notifications</a>        </nav>
 
         <div class="p-6 border-t border-slate-700/50 bg-dark">
             <div class="flex items-center">
