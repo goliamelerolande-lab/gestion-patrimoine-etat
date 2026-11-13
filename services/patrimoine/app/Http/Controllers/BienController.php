@@ -85,7 +85,13 @@ class BienController extends Controller
 
     public function destroy($id)
     {
-        $bien = Bien::findOrFail($id);
+        $bien = Bien::find($id);
+
+        // A DELETE request may be retried after a timeout or after the page
+        // has not yet refreshed. Treat an already-deleted asset as success.
+        if (!$bien) {
+            return response()->noContent();
+        }
 
         DB::transaction(function () use ($bien) {
             Notification::create([
