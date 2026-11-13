@@ -358,11 +358,20 @@
         </div>
     </div>
 
+    <div id="actionToast" role="status" aria-live="polite" class="hidden fixed bottom-5 right-5 z-[100] max-w-md rounded-xl bg-slate-900 px-5 py-4 text-sm font-semibold text-white shadow-2xl"></div>
     <!-- SCRIPTS JAVASCRIPT (CRUD COMPLET) -->
     <script>
+        function afficherToast(message) {
+            const toast = document.getElementById('actionToast');
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+        }
+
         // 1. CRÉATION (POST)
         document.getElementById('formNouveauBien').addEventListener('submit', async function(e) {
             e.preventDefault();
+            if (this.dataset.submitting === 'true') return;
+            this.dataset.submitting = 'true';
             const submitButton = this.querySelector('button[type="submit"]');
             const originalLabel = submitButton.innerText;
             submitButton.disabled = true;
@@ -383,9 +392,13 @@
                 });
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(result.message || 'La création du bien a échoué.');
-                window.location.reload();
+                this.reset();
+                document.getElementById('modalNouveauBien').classList.add('hidden');
+                afficherToast(`Bien enregistré sous le code ${result.code_inventaire}. Actualisation de la liste…`);
+                window.setTimeout(() => window.location.reload(), 800);
             } catch (error) {
                 alert(error.message || 'Erreur réseau lors de la création.');
+                this.dataset.submitting = 'false';
                 submitButton.disabled = false;
                 submitButton.innerText = originalLabel;
             }
