@@ -17,7 +17,7 @@
                     <h1 class="text-3xl font-bold leading-tight">Un accès sécurisé à votre espace.</h1>
                     <p class="mt-4 leading-7 text-slate-300">Connectez-vous avec un compte administrateur pour accéder à la gestion des utilisateurs.</p>
                 </div>
-                <p class="text-sm text-slate-400">Session sécurisée · Expiration après 8 heures</p>
+                <p class="text-sm text-slate-400">Jeton d’accès sécurisé · expiration après 8 heures</p>
             </div>
 
             <div class="p-8 md:p-12">

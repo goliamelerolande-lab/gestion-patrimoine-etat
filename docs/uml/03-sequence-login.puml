@@ -1,24 +1,41 @@
 @startuml
-title GPE — Séquence : Authentification
-actor Utilisateur
-participant "Frontend" as FE
-participant "API Gateway" as GW
-participant "auth-service" as AUTH
-database "PostgreSQL" as DB
+title GPE — Connexion administrateur et session serveur
+actor Administrateur
+participant Navigateur
+participant "Nginx Gateway" as GW
+participant "patrimoine-service\n(AuthSessionController)" as WEB
+participant "auth-service\n(AuthController)" as AUTH
+database "PostgreSQL\nauth.users / auth.api_tokens" as DB
 
-Utilisateur -> FE : Saisit identifiants
-FE -> GW : POST /api/auth/login
-GW -> AUTH : POST /login
-AUTH -> DB : SELECT user
-DB --> AUTH : User + Hash
-alt Mot de passe valide
-  AUTH -> DB : INSERT token
-  AUTH --> GW : 200 { token }
-  GW --> FE : 200 { token }
-  FE --> Utilisateur : Redirection Dashboard
-else Mot de passe invalide
-  AUTH --> GW : 401 Unauthorized
-  GW --> FE : 401
-  FE --> Utilisateur : Erreur
+Administrateur -> Navigateur : Ouvre /connexion
+Navigateur -> GW : GET /connexion
+GW -> WEB : Page de connexion
+WEB --> Navigateur : Formulaire + cookie de session
+Administrateur -> Navigateur : Saisit email et mot de passe
+Navigateur -> GW : POST /connexion + CSRF + cookie session
+GW -> WEB : Soumission du formulaire
+WEB -> AUTH : POST /api/login
+AUTH -> DB : Lire user par email
+DB --> AUTH : Hash, rôle, état actif
+alt Administrateur actif et mot de passe valide
+  AUTH -> DB : INSERT SHA-256(token), expiration + 8 h
+  DB --> AUTH : token_id
+  AUTH --> WEB : 200, token en clair + profil minimal
+  WEB -> WEB : Conserver token en session serveur
+  WEB --> Navigateur : 302 /utilisateurs + cookie de session
+  Navigateur -> GW : GET /utilisateurs + cookie
+  GW -> WEB : Page utilisateurs
+  WEB -> AUTH : GET /api/me avec Bearer token
+  AUTH -> DB : Vérifier hash, expiration, rôle et état actif
+  AUTH --> WEB : Profil autorisé
+  WEB --> Navigateur : Page utilisateurs
+else Identifiants invalides ou compte désactivé
+  AUTH --> WEB : 401, message générique
+  WEB --> Navigateur : Formulaire avec erreur
 end
+
+note over Navigateur,WEB
+Le jeton API n’est jamais remis au JavaScript navigateur.
+Le navigateur conserve seulement le cookie de session web.
+end note
 @enduml

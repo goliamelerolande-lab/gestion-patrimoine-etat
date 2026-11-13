@@ -1,26 +1,32 @@
 @startuml
-title GPE — Séquence : Création d'un bien
-actor Gestionnaire
-participant "Frontend" as FE
-participant "Gateway" as GW
-participant "patrimoine-service" as PATR
-participant "auth-service" as AUTH
-database "PostgreSQL" as DB
+title GPE — Création d’un bien et notification
+actor "Utilisateur de la démo" as USER
+participant Navigateur
+participant "Nginx Gateway" as GW
+participant "patrimoine-service\n(BienController)" as PATR
+database "PostgreSQL\npatrimoine" as DB
 
-Gestionnaire -> FE : Remplit formulaire
-FE -> GW : POST /api/patrimoine/biens (Token)
-GW -> PATR : POST /biens
-PATR -> AUTH : Vérifie Token
-AUTH --> PATR : Token Valide
+USER -> Navigateur : Ouvre /biens, remplit le formulaire
+Navigateur -> GW : POST /api/patrimoine/biens
+GW -> PATR : POST /api/biens
+PATR -> PATR : Valider libellé, catégorie, date, valeur et état
 alt Données invalides
-  PATR --> GW : 422 Erreur
-  GW --> FE : 422
-  FE --> Gestionnaire : Affiche erreurs
+  PATR --> GW : 422 validation
+  GW --> Navigateur : Afficher le message d’erreur
 else Données valides
-  PATR -> DB : INSERT INTO biens
-  DB --> PATR : OK
-  PATR --> GW : 201 Created
-  GW --> FE : 201
-  FE --> Gestionnaire : Succès
+  PATR -> DB : BEGIN
+  PATR -> DB : Obtenir prochain ID et générer GPE-xxxxxx
+  PATR -> DB : INSERT patrimoine.biens
+  PATR -> DB : INSERT patrimoine.notifications
+  PATR -> DB : COMMIT
+  DB --> PATR : Bien créé
+  PATR --> GW : 201 Created + bien
+  GW --> Navigateur : Succès, actualiser la liste
 end
+
+note over USER,PATR
+Dans le MVP, le formulaire sélectionne actuellement la catégorie
+d’identifiant 1 par défaut. Les API biens ne sont pas encore
+protégées par le middleware d’authentification.
+end note
 @enduml

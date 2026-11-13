@@ -1,71 +1,80 @@
 @startuml
 skinparam classAttributeIconSize 0
 hide circle
-title GPE — Diagramme de classes
+title GPE — Modèle de données implémenté et références inter-services
 
-package "Schéma auth" {
+package "auth" {
   class User {
-    - id : Long
-    - name : String
-    - email : String
-    - password : String
-    - role : Role
+    +id : bigint
+    +name : varchar(120)
+    +email : varchar(150)
+    -password : hash
+    +role : varchar(30)
+    +is_active : boolean
   }
-  enum Role {
-    ADMIN
-    GESTIONNAIRE
-    MAINTENANCE
-    INVENTAIRE
-    DIRECTION
-    AUDITEUR
+  class ApiToken {
+    +id : bigint
+    +user_id : bigint
+    -token_hash : char(64)
+    +expires_at : timestamptz
+    +last_used_at : timestamptz
   }
+  User "1" -- "0..*" ApiToken : possède
 }
 
-package "Schéma patrimoine" {
+package "patrimoine" {
   class Categorie {
-    - id : Long
-    - code : String
-    - libelle : String
+    +id : bigint
+    +code : varchar(20)
+    +libelle : varchar(120)
   }
   class Bien {
-    - id : Long
-    - codeInventaire : String
-    - libelle : String
-    - dateAcquisition : Date
-    - valeurAcquisition : BigDecimal
-    - dureeAmortissementMois : Integer
-    - etat : Etat
+    +id : bigint
+    +code_inventaire : varchar(40)
+    +libelle : varchar(180)
+    +category_id : bigint
+    +date_acquisition : date
+    +valeur_acquisition : numeric(15,2)
+    +duree_amortissement_mois : integer?
+    +etat : varchar(20)
   }
-  enum Etat {
-    NEUF
-    BON
-    USAGE
-    REFORME
+  class Notification {
+    +id : bigint
+    +bien_id : bigint?
+    +type : varchar(40)
+    +title : varchar(180)
+    +message : text
+    +read_at : timestamptz?
   }
+  Categorie "1" -- "0..*" Bien : FK category_id
+  Bien "0..1" -- "0..*" Notification : FK, ON DELETE SET NULL
 }
 
-package "Schéma localisation" {
+package "localisation" {
   class Site {
-    - id : Long
-    - nom : String
-    - ville : String
+    +id : bigint
+    +code : varchar(20)
+    +nom : varchar(120)
+    +ville : varchar(80)?
+    +region : varchar(80)?
   }
   class Affectation {
-    - id : Long
-    - dateDebut : Date
-    - dateFin : Date
-    - statut : String
+    +id : bigint
+    +bien_id : bigint
+    +site_id : bigint
+    +user_id : bigint
+    +date_debut : date
+    +date_fin : date?
   }
-  class Inventaire {
-    - id : Long
-    - dateInventaire : Date
-  }
+  Site "1" -- "0..*" Affectation : FK site_id
 }
 
-User --> Role
-Categorie "1" -- "0..*" Bien
-Bien "1" -- "0..*" Affectation : <<FK logique>>
-Site "1" -- "0..*" Affectation
-Site "1" -- "0..*" Inventaire
-User "1" -- "0..*" Affectation : <<FK logique>>
+Bien .. Affectation : bien_id logique
+User .. Affectation : user_id logique
+note bottom of Affectation
+Les identifiants bien_id et user_id sont des références
+logiques entre services, pas des FK inter-schémas.
+Les campagnes d’inventaire et journaux d’audit
+ne sont pas encore modélisés dans le MVP.
+end note
 @enduml

@@ -1,25 +1,37 @@
 @startuml
-title GPE — Déploiement Docker
-node "Navigateur" {
-  [Web App] as Browser
+title GPE — Déploiement local Docker Compose
+skinparam componentStyle rectangle
+
+node "Poste développeur" {
+  artifact "Navigateur\nhttp://localhost:8080" as BROWSER
+  node "Docker Engine · réseau patrinet" {
+    component "gateway\nNginx Alpine\nport 8080:80" as GW
+    component "patrimoine-service\nLaravel 13 / PHP 8.4\nBlade + API biens" as PATR
+    component "auth-service\nLaravel 13 / PHP 8.4\nAPI comptes et jetons" as AUTH
+    component "localisation-service\nLaravel 13 / PHP 8.4\nAPI sites et affectations" as LOC
+    database "postgres\nPostgreSQL 16\nvolume pgdata" as DB
+  }
 }
 
-node "Serveur Docker" {
-  [Nginx Gateway] as GW
-  [auth-service] as AUTH
-  [patrimoine-service] as PATR
-  [localisation-service] as LOC
-}
+BROWSER --> GW : HTTP en local
+GW --> PATR : pages + /api/patrimoine/*
+GW --> AUTH : /api/auth/*
+GW --> LOC : /api/localisation/*
+PATR --> AUTH : HTTP interne /api/login et /api/users
+PATR --> DB : schéma patrimoine
+AUTH --> DB : schéma auth
+LOC --> DB : schéma localisation
 
-node "Base de données" {
-  database "PostgreSQL 16" as DB
-}
+note right of GW
+En hébergement public, terminer TLS
+à la gateway ou devant celle-ci.
+Cette configuration Compose n’est pas
+un déploiement de production.
+end note
 
-Browser --> GW : HTTPS
-GW --> AUTH
-GW --> PATR
-GW --> LOC
-AUTH --> DB
-PATR --> DB
-LOC --> DB
+note bottom of DB
+Les schémas séparent logiquement les domaines.
+Les services utilisent le même serveur et les mêmes
+identifiants PostgreSQL dans la configuration actuelle.
+end note
 @enduml

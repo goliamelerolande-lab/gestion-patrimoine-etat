@@ -2,7 +2,24 @@
 
 **Auteur** : GOLI Amélé Rolande
 **Date** : Novembre 2026
-**Version** : 1.0
+**Version** : 1.1
+
+> **Lecture du document :** les sections suivantes décrivent le besoin cible du brief, pas l’état déjà livré. L’état réel du MVP au 13 novembre 2026 est distingué ici afin d’éviter de présenter une exigence prévue comme une fonction terminée.
+
+### État actuel du MVP
+
+| Domaine | Livré dans la démo | À développer / valider |
+|---|---|---|
+| Authentification | Connexion administrateur, session serveur, jetons API 8 h stockés sous forme hachée, déconnexion | Parcours de connexion et permissions dédiés aux agents ; politique complète des rôles |
+| Utilisateurs | Liste, création, modification, rôle `admin`/`agent`, activation et désactivation | Historique d’audit ; parcours agent |
+| Biens | Liste paginée et opérations CRUD ; code unique généré ; notifications sur certains événements | Sélection réelle de catégorie dans le formulaire, pièces jointes, amortissement, audit et autorisation sur toutes les routes métier |
+| Sites | Écrans et API CRUD | Affectation / transfert de bout en bout et vérification des relations inter-services |
+| Notifications | Stockage PostgreSQL, consultation et marquage lu | Notifications temps réel et préférences |
+| Reporting | KPIs agrégés et rapport imprimable | Exports CSV/PDF complets et filtres avancés |
+| Inventaire physique | Non livré | Campagnes, relevés, écarts et clôture |
+| Hébergement | Docker local | Déploiement public, TLS, sauvegarde et supervision |
+
+Les rôles gestionnaire, maintenance, inventaire, direction et auditeur du tableau ci-dessous représentent la cible fonctionnelle ; seuls les rôles `admin` et `agent` existent actuellement dans la gestion des comptes. Les objectifs de performance, disponibilité et couverture de tests sont des objectifs de conception non mesurés à ce stade.
 
 ---
 
@@ -175,8 +192,8 @@ Une solution microservices moderne, conteneurisée, accessible via navigateur, p
 |-----------|----------|-------|
 | **Performance** | Temps de réponse API | < 300 ms (P95) |
 | **Performance** | Chargement page | < 2 s |
-| **Sécurité** | Authentification | Token Bearer (Sanctum) |
-| **Sécurité** | Mots de passe | Bcrypt (cost 12) |
+| **Sécurité** | Authentification | Session web serveur + jeton opaque à durée limitée pour les opérations utilisateurs (pas Sanctum) |
+| **Sécurité** | Mots de passe | Hachage Laravel ; configuration de développement `BCRYPT_ROUNDS=12` |
 | **Sécurité** | Transmission | HTTPS en prod |
 | **Sécurité** | Traçabilité | Audit log des actions critiques |
 | **Disponibilité** | Taux de service | ≥ 99% (hors maintenance) |
@@ -188,7 +205,7 @@ Une solution microservices moderne, conteneurisée, accessible via navigateur, p
 
 ## 7. Périmètre
 
-### 7.1 Dans le périmètre (MVP — 5 jours)
+### 7.1 Périmètre cible du MVP prévu par le brief (40 heures)
 - Authentification + RBAC
 - CRUD Biens + Catégories
 - CRUD Sites
@@ -197,6 +214,8 @@ Une solution microservices moderne, conteneurisée, accessible via navigateur, p
 - API REST documentée
 - Docker + PostgreSQL
 - Déploiement sur hébergeur gratuit
+
+Ces éléments constituent le périmètre visé, et ne signifient pas qu’ils sont tous présents dans le code. Voir le tableau **État actuel du MVP** en tête de document pour le réalisé et le reste à faire.
 
 ### 7.2 Hors périmètre (v2+)
 - Notifications temps réel
@@ -215,7 +234,7 @@ Une solution microservices moderne, conteneurisée, accessible via navigateur, p
 
 | # | Contrainte |
 |---|------------|
-| CT1 | Stack imposée : Laravel 11 + PostgreSQL 16 |
+| CT1 | Stack du brief : Laravel + PostgreSQL 16 (implémentation actuelle en Laravel 13) |
 | CT2 | Conteneurisation obligatoire (Docker) |
 | CT3 | Architecture microservices |
 | CT4 | Conception UML |
@@ -228,22 +247,16 @@ Une solution microservices moderne, conteneurisée, accessible via navigateur, p
 
 ## 9. Critères de succès du projet
 
-✅ **Technique**
-- Les 3 microservices démarrent via `docker compose up`
-- Login fonctionnel via la gateway
-- CRUD complet sur les biens
-- Déploiement accessible publiquement
+### Critères de validation cible
 
-✅ **Documentation**
-- README avec normalisation BDD (1NF→3NF)
-- Guide utilisateur illustré
-- Diagrammes UML produits
-- Maquettes Figma disponibles
+Les critères suivants seront considérés atteints après vérification documentée. À ce jour, la démo locale et le CRUD utilisateur ont été ouverts et utilisés ; le déploiement public durable et le vrai fichier Figma ne sont pas encore validés.
 
-✅ **Soutenance**
-- Architecture défendable
-- Démonstration live
-- Réponses aux questions techniques
+- Démarrage local des services par Docker Compose.
+- Connexion administrateur et accès aux routes protégées.
+- CRUD biens et sites vérifié avec des jeux de données maîtrisés.
+- Déploiement public avec configuration, données et TLS vérifiés.
+- README, normalisation des données, guide, diagrammes UML et maquettes Figma finalisés.
+- Soutenance avec démonstration de ce qui est effectivement livré et présentation des limites.
 
 ---
 
