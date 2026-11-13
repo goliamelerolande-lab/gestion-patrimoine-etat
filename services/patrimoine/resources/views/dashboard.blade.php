@@ -246,10 +246,9 @@
             </div>
             <form id="formNouveauBien" class="p-6 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-1">Code inventaire</label>
-                        <input type="text" id="new_code" required maxlength="100" placeholder="Ex. GPE-001" class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    </div>
+
+                    <p class="col-span-2 text-sm text-slate-500">Le code d’inventaire est attribué automatiquement à l’enregistrement.</p>
+
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-1">Libellé</label>
                         <input type="text" id="new_libelle" required class="w-full border border-slate-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -342,7 +341,6 @@
         document.getElementById('formNouveauBien').addEventListener('submit', async function(e) {
             e.preventDefault(); 
             const formData = {
-                code_inventaire: document.getElementById('new_code').value.trim(),
                 libelle: document.getElementById('new_libelle').value.trim(),
                 category_id: 1,
                 date_acquisition: document.getElementById('new_date').value,
