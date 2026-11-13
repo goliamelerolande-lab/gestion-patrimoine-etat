@@ -24,6 +24,15 @@
             <div><h1 class="text-3xl font-bold">Historique des notifications</h1><p class="mt-1 text-slate-500">Les notifications consultées restent disponibles ici.</p></div>
             <a href="/" class="rounded-xl bg-primary px-5 py-3 font-bold text-white hover:bg-emerald-800"><i class="fas fa-arrow-left mr-2"></i>Retour au tableau de bord</a>
         </div>
+        @if($unreadCount > 0)
+            <form method="POST" action="{{ route('notifications.mark-viewed') }}" class="mb-5 flex justify-end">
+                @csrf
+                <button type="submit" class="rounded-xl bg-primary px-4 py-2 font-semibold text-white hover:bg-emerald-800">Marquer les {{ $unreadCount }} nouvelle(s) comme lues</button>
+            </form>
+        @endif
+        @if(session('status'))
+            <p role="status" class="mb-5 rounded-xl bg-emerald-50 p-4 text-emerald-800">{{ session('status') }}</p>
+        @endif
         <div class="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-lg divide-y divide-slate-100">
             @forelse($notifications as $notification)
                 <article class="flex items-start gap-4 p-5">

@@ -40,14 +40,19 @@ Route::get('/notifications', function () {
     $notifications = Notification::query()
         ->latest()
         ->paginate(20, ['id', 'type', 'title', 'message', 'read_at', 'created_at']);
+    $unreadCount = Notification::query()->whereNull('read_at')->count();
 
-    return view('notifications', compact('notifications'));
+    return view('notifications', compact('notifications', 'unreadCount'));
 })->name('notifications.index');
 
 Route::post('/notifications/mark-viewed', function () {
     $marked = Notification::query()->whereNull('read_at')->update(['read_at' => now()]);
 
-    return response()->json(['marked' => $marked]);
+    if (request()->expectsJson()) {
+        return response()->json(['marked' => $marked]);
+    }
+
+    return redirect()->route('notifications.index')->with('status', 'Notifications marquées comme lues.');
 })->name('notifications.mark-viewed');
 
 Route::get('/rapports', function () {
