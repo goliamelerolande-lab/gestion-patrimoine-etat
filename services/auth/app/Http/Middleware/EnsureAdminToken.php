@@ -25,7 +25,7 @@ class EnsureAdminToken
 
         $user = $token ? User::find($token->user_id) : null;
 
-        if (! $token || ! $user || $user->role !== 'admin') {
+        if (! $token || ! $user || $user->role !== 'admin' || ! $user->is_active) {
             return response()->json(['message' => 'Session invalide ou accès administrateur requis.'], 401);
         }
 

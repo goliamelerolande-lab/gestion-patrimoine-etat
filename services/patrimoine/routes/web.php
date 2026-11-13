@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthSessionController;
+use App\Http\Controllers\UserManagementController;
 use App\Http\Middleware\EnsureAdminSession;
 use App\Models\Bien;
 use App\Models\Notification;
@@ -129,3 +130,10 @@ Route::get('/utilisateurs', function () {
 
     return view('utilisateurs', compact('users'));
 })->middleware(EnsureAdminSession::class)->name('users.index');
+
+Route::middleware(EnsureAdminSession::class)->prefix('/gestion/utilisateurs')->name('users.')->group(function (): void {
+    Route::get('/', [UserManagementController::class, 'index'])->name('data');
+    Route::post('/', [UserManagementController::class, 'store'])->name('store');
+    Route::put('/{id}', [UserManagementController::class, 'update'])->whereNumber('id')->name('update');
+    Route::patch('/{id}/statut', [UserManagementController::class, 'setStatus'])->whereNumber('id')->name('status');
+});

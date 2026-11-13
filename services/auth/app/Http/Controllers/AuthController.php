@@ -19,7 +19,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $validated['email'])->first();
 
-        if (! $user || ! Hash::check($validated['password'], $user->password) || $user->role !== 'admin') {
+        if (! $user || ! Hash::check($validated['password'], $user->password) || $user->role !== 'admin' || ! $user->is_active) {
             return response()->json(['message' => 'Identifiants invalides'], 401);
         }
 

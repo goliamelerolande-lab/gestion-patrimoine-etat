@@ -10,6 +10,9 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,
 
 Route::middleware('admin.token')->group(function (): void {
     Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::patch('/users/{id}/status', [UserController::class, 'toggleStatus']);
 
     Route::get('/me', function (Request $request) {
         return response()->json($request->user()->only(['id', 'name', 'email', 'role']));
