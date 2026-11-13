@@ -25,12 +25,19 @@
 
     <!-- MAIN -->
     <main class="flex-1 p-10 overflow-y-auto bg-white/80">
-                <div class="mb-8">
-            <h1 class="text-3xl font-bold">Espace utilisateurs</h1>
-            <p class="mt-1 text-slate-500">Consultez l’accès de démonstration actuellement configuré.</p>
+        <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-bold">Espace utilisateurs</h1>
+                <p class="mt-1 text-slate-500">Comptes réellement enregistrés dans le service d’authentification.</p>
+                <p class="mt-2 text-sm text-slate-500">Connecté : <span class="font-semibold text-slate-700">{{ session('admin_user.name') }}</span> · {{ session('admin_user.email') }}</p>
+            </div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700">Se déconnecter</button>
+            </form>
         </div>
-        <div role="status" class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            La création, la modification et la désactivation de comptes nécessitent une authentification administrateur, qui n’est pas encore activée dans l’application.
+        <div role="status" class="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+            L’accès administrateur est protégé et les comptes ci-dessous viennent de PostgreSQL. Les actions de création, modification et désactivation seront ajoutées dans l’étape suivante.
         </div>
         <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
             <table class="w-full text-left">
@@ -42,13 +49,15 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @foreach($users as $user)
+                    @forelse($users as $user)
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4 font-bold text-slate-700">{{ $user['name'] }}</td>
                         <td class="px-6 py-4">{{ $user['email'] }}</td>
                         <td class="px-6 py-4"><span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold">{{ ucfirst($user['role']) }}</span></td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr><td colspan="3" class="px-6 py-8 text-center text-slate-500">Aucun compte enregistré.</td></tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

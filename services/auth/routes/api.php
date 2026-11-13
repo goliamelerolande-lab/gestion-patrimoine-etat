@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -8,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 Route::middleware('admin.token')->group(function (): void {
+    Route::get('/users', [UserController::class, 'index']);
+
     Route::get('/me', function (Request $request) {
         return response()->json($request->user()->only(['id', 'name', 'email', 'role']));
     });

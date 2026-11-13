@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AuthSessionController;
+use App\Http\Middleware\EnsureAdminSession;
 use App\Models\Bien;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Cache;
@@ -101,7 +103,7 @@ Route::get('/sites', function () {
                 ->get('http://localisation-service:80/api/sites');
 
             return $response->successful() ? ($response->json() ?? []) : [];
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return [];
         }
     });
@@ -109,10 +111,21 @@ Route::get('/sites', function () {
     return view('sites', compact('sites'));
 })->name('sites.index');
 
+Route::get('/connexion', [AuthSessionController::class, 'create'])->name('login');
+Route::post('/connexion', [AuthSessionController::class, 'store'])->name('login.store');
+Route::post('/deconnexion', [AuthSessionController::class, 'destroy'])->middleware(EnsureAdminSession::class)->name('logout');
+
 Route::get('/utilisateurs', function () {
-    $users = [
-        ['id' => 1, 'name' => 'Administrateur', 'email' => 'admin@etat.gouv', 'role' => 'admin'],
-    ];
+    $token = session('admin_token');
+    $response = Http::connectTimeout(1)
+        ->timeout(3)
+        ->withToken($token)
+        ->acceptJson()
+        ->get(rtrim(config('services.auth.url'), '/').'/api/users');
+
+    abort_unless($response->successful(), 503, 'Le registre des comptes est momentanément indisponible.');
+
+    $users = $response->json();
 
     return view('utilisateurs', compact('users'));
-})->name('users.index');
+})->middleware(EnsureAdminSession::class)->name('users.index');
