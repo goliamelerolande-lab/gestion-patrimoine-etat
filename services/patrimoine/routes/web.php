@@ -25,7 +25,27 @@ Route::get('/', function () {
         ->orderBy('etat')
         ->get();
 
-    return view('dashboard', compact('stats', 'biens', 'byState'));
+    $notifications = collect();
+    $recentCount = Bien::query()->where('created_at', '>=', now()->subDays(7))->count();
+    $reformCount = Bien::query()->where('etat', 'reforme')->count();
+
+    if ($recentCount > 0) {
+        $notifications->push([
+            'title' => $recentCount . ' bien(s) ajouté(s)',
+            'description' => 'Nouveaux enregistrements sur les 7 derniers jours.',
+            'type' => 'success',
+        ]);
+    }
+
+    if ($reformCount > 0) {
+        $notifications->push([
+            'title' => $reformCount . ' bien(s) réformé(s)',
+            'description' => 'À vérifier dans le registre du patrimoine.',
+            'type' => 'warning',
+        ]);
+    }
+
+    return view('dashboard', compact('stats', 'biens', 'byState', 'notifications'));
 })->name('dashboard');
 
 Route::get('/rapports', function () {
@@ -35,13 +55,21 @@ Route::get('/rapports', function () {
         ->selectRaw("COUNT(*) FILTER (WHERE etat = 'usage') as biens_usage")
         ->first();
 
+    $byState = Bien::query()
+        ->select('etat')
+        ->selectRaw('COUNT(*) as total')
+        ->selectRaw('COALESCE(SUM(valeur_acquisition), 0) as valeur_totale')
+        ->groupBy('etat')
+        ->orderBy('etat')
+        ->get();
+
     $biens = Bien::query()
         ->select(['id', 'code_inventaire', 'libelle', 'date_acquisition', 'valeur_acquisition', 'etat'])
         ->orderByDesc('id')
         ->limit(20)
         ->get();
 
-    return view('rapports', compact('stats', 'biens'));
+    return view('rapports', compact('stats', 'byState', 'biens'));
 })->name('reports');
 
 Route::get('/biens', function () {

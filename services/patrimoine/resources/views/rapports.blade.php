@@ -29,11 +29,11 @@
                 <i class="fas fa-chart-pie w-8 text-center mr-3 text-lg"></i>
                 <span class="font-medium text-lg">Tableau de bord</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+            <a href="/biens" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
                 <i class="fas fa-box w-8 text-center mr-3 text-lg"></i>
                 <span class="font-medium text-lg">Gestion des Biens</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+            <a href="/sites" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
                 <i class="fas fa-map-marker-alt w-8 text-center mr-3 text-lg"></i>
                 <span class="font-medium text-lg">Sites & Localisations</span>
             </a>
@@ -42,7 +42,7 @@
                 <i class="fas fa-chart-line w-8 text-center mr-3 text-lg"></i>
                 <span class="font-semibold text-lg">Rapports Globaux</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+            <a href="/utilisateurs" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
                 <i class="fas fa-users w-8 text-center mr-3 text-lg"></i>
                 <span class="font-medium text-lg">Utilisateurs</span>
             </a>
@@ -69,10 +69,10 @@
                 <p class="text-base text-slate-500 mt-1 font-medium">Analyse détaillée et exportation des données</p>
             </div>
             <div class="flex items-center space-x-4">
-                <button class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-xl font-bold transition flex items-center shadow-sm">
-                    <i class="fas fa-file-pdf text-red-500 mr-2"></i> Exporter PDF
+                <button type="button" onclick="window.print()" class="no-print bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-xl font-bold transition flex items-center shadow-sm">
+                    <i class="fas fa-file-pdf text-red-500 mr-2"></i> Imprimer / Enregistrer en PDF
                 </button>
-                <a href="/" class="bg-primary hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg shadow-blue-500/30 flex items-center">
+                <a href="/" class="no-print bg-primary hover:bg-blue-800 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg shadow-blue-500/30 flex items-center">
                     <i class="fas fa-arrow-left mr-2"></i> Retour
                 </a>
             </div>
@@ -116,6 +116,23 @@
                 </div>
             </div>
 
+            <section class="mb-10 rounded-2xl bg-white p-8 shadow-lg border border-slate-100">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-slate-800">Répartition globale par état</h2>
+                    <p class="mt-1 text-sm text-slate-500">Totaux calculés sur l’ensemble du registre.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    @forelse($byState as $state)
+                        <div class="rounded-xl border border-slate-100 bg-slate-50 p-5">
+                            <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">{{ ucfirst($state->etat) }}</p>
+                            <p class="mt-2 text-2xl font-extrabold text-slate-800">{{ number_format((int) $state->total, 0, ',', ' ') }} bien(s)</p>
+                            <p class="mt-1 text-sm font-semibold text-emerald-700">{{ number_format($state->valeur_totale, 0, ',', ' ') }} FCFA</p>
+                        </div>
+                    @empty
+                        <p class="text-slate-500">Aucune donnée de patrimoine à synthétiser.</p>
+                    @endforelse
+                </div>
+            </section>
             <!-- Tableau Détaillé -->
             <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden flex flex-col">
                 <div class="px-8 py-6 border-b border-slate-100">

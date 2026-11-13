@@ -81,7 +81,8 @@ main input:focus, main select:focus { outline: 2px solid rgb(23 107 91 / 22%); o
     *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 @media print {
-    aside, main > header, main button, main a.bg-primary { display: none !important; }
+    aside, .no-print, main button, main a.bg-primary { display: none !important; }
+    main.flex-1 > header { position: static !important; display: flex !important; box-shadow: none !important; border: 0 !important; background: #fff !important; }
     body, main.flex-1, main.flex-1 > div.flex-1.overflow-y-auto { height: auto; overflow: visible; background: #fff !important; }
     main table { min-width: 0; }
 }

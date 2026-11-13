@@ -38,19 +38,22 @@
                 <i class="fas fa-chart-pie w-8 text-center mr-3 text-lg"></i>
                 <span class="font-semibold text-lg">Tableau de bord</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+            <a href="/biens" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
                 <i class="fas fa-box w-8 text-center mr-3 text-lg"></i>
                 <span class="font-medium text-lg">Gestion des Biens</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+            <a href="/sites" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
                 <i class="fas fa-map-marker-alt w-8 text-center mr-3 text-lg"></i>
                 <span class="font-medium text-lg">Sites & Localisations</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+            <a href="/utilisateurs" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
                 <i class="fas fa-users w-8 text-center mr-3 text-lg"></i>
                 <span class="font-medium text-lg">Utilisateurs</span>
             </a>
-        </nav>
+            <a href="/rapports" class="flex items-center px-4 py-3.5 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+                <i class="fas fa-chart-line w-8 text-center mr-3 text-lg"></i>
+                <span class="font-medium text-lg">Rapports Globaux</span>
+            </a>        </nav>
 
         <div class="p-6 border-t border-slate-700/50 bg-dark/95 backdrop-blur-sm">
             <div class="flex items-center">
@@ -72,15 +75,35 @@
                 <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Vue d'ensemble</h1>
                 <p class="text-base text-slate-500 mt-1 font-medium">Bienvenue sur votre espace de gestion du patrimoine</p>
             </div>
-            <div class="flex items-center space-x-8">
-                <button class="relative text-slate-400 hover:text-slate-600 transition">
-                    <i class="fas fa-bell text-2xl"></i>
-                    <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
-                </button>
+            <div class="flex items-center space-x-6">
+                <div class="relative">
+                    <button id="notificationButton" type="button" aria-expanded="false" aria-controls="notificationPanel" class="relative text-slate-500 hover:text-primary transition" title="Voir les notifications">
+                        <i class="fas fa-bell text-2xl"></i>
+                        @if($notifications->isNotEmpty())
+                            <span class="absolute -top-2 -right-2 min-w-5 h-5 px-1 bg-red-500 rounded-full border-2 border-white text-white text-xs font-bold">{{ $notifications->count() }}</span>
+                        @endif
+                    </button>
+                    <section id="notificationPanel" class="hidden absolute right-0 top-full mt-3 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white shadow-2xl z-50" aria-label="Notifications">
+                        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                            <h2 class="font-bold text-slate-800">Notifications</h2>
+                            <span class="text-xs text-slate-500">{{ $notifications->count() }} alerte(s)</span>
+                        </div>
+                        <div class="max-h-72 overflow-y-auto divide-y divide-slate-100">
+                            @forelse($notifications as $notification)
+                                <a href="/rapports" class="block px-5 py-4 hover:bg-slate-50">
+                                    <p class="font-semibold text-sm text-slate-800">{{ $notification['title'] }}</p>
+                                    <p class="mt-1 text-xs text-slate-500">{{ $notification['description'] }}</p>
+                                </a>
+                            @empty
+                                <p class="px-5 py-6 text-sm text-slate-500">Aucune notification pour le moment.</p>
+                            @endforelse
+                        </div>
+                    </section>
+                </div>
                 <div class="h-10 w-px bg-slate-200"></div>
-                <button class="flex items-center text-base font-bold text-slate-600 hover:text-slate-900 transition">
-                    <i class="fas fa-sign-out-alt mr-2 text-lg"></i> Déconnexion
-                </button>
+                <a href="/utilisateurs" class="flex items-center text-sm font-bold text-slate-600 hover:text-primary transition">
+                    <i class="fas fa-user-cog mr-2 text-lg"></i> Compte administrateur
+                </a>
             </div>
         </header>
 
@@ -339,7 +362,11 @@
     <script>
         // 1. CRÉATION (POST)
         document.getElementById('formNouveauBien').addEventListener('submit', async function(e) {
-            e.preventDefault(); 
+            e.preventDefault();
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalLabel = submitButton.innerText;
+            submitButton.disabled = true;
+            submitButton.innerText = 'Enregistrement…';
             const formData = {
                 libelle: document.getElementById('new_libelle').value.trim(),
                 category_id: 1,
@@ -348,16 +375,41 @@
                 etat: document.getElementById('new_etat').value
             };
 
-            const response = await fetch('/api/patrimoine/biens', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) window.location.reload();
-            else alert("Erreur lors de la création.");
+            try {
+                const response = await fetch('/api/patrimoine/biens', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.message || 'La création du bien a échoué.');
+                window.location.reload();
+            } catch (error) {
+                alert(error.message || 'Erreur réseau lors de la création.');
+                submitButton.disabled = false;
+                submitButton.innerText = originalLabel;
+            }
         });
 
+        const notificationButton = document.getElementById('notificationButton');
+        const notificationPanel = document.getElementById('notificationPanel');
+        notificationButton.addEventListener('click', () => {
+            const isOpening = notificationPanel.classList.contains('hidden');
+            notificationPanel.classList.toggle('hidden', !isOpening);
+            notificationButton.setAttribute('aria-expanded', String(isOpening));
+        });
+        document.addEventListener('click', (event) => {
+            if (!notificationPanel.contains(event.target) && !notificationButton.contains(event.target)) {
+                notificationPanel.classList.add('hidden');
+                notificationButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                notificationPanel.classList.add('hidden');
+                notificationButton.setAttribute('aria-expanded', 'false');
+            }
+        });
         // 2. VOIR (Modal de lecture)
         function ouvrirModalVoir(bien) {
             document.getElementById('voir_code').innerText = bien.code_inventaire;
@@ -382,7 +434,6 @@
             e.preventDefault();
             const id = document.getElementById('edit_id').value;
             const formData = {
-                _method: 'PUT',
                 libelle: document.getElementById('edit_libelle').value,
                 etat: document.getElementById('edit_etat').value,
                 valeur_acquisition: parseFloat(document.getElementById('edit_valeur').value)
@@ -390,7 +441,7 @@
 
             try {
                 const response = await fetch(`/api/patrimoine/biens/${id}`, {
-                    method: 'POST', 
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                     body: JSON.stringify(formData)
                 });
@@ -411,12 +462,8 @@
             if (confirm("Êtes-vous sûr de vouloir supprimer définitivement ce bien ?")) {
                 try {
                     const response = await fetch(`/api/patrimoine/biens/${id}`, {
-                        method: 'POST', 
-                        headers: { 
-                            'Content-Type': 'application/json', 
-                            'Accept': 'application/json' 
-                        },
-                        body: JSON.stringify({ _method: 'DELETE' })
+                        method: 'DELETE',
+                        headers: { 'Accept': 'application/json' }
                     });
 
                     if (response.ok) {
