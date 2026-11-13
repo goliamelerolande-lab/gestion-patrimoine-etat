@@ -137,7 +137,15 @@
             <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden flex flex-col">
                 <div class="px-8 py-6 border-b border-slate-100">
                     <h2 class="text-xl font-bold text-slate-800">Derniers biens enregistrés</h2>
-                    <p class="text-base text-slate-500 mt-1">Les 20 biens les plus récents du registre</p>
+                    <p class="text-base text-slate-500 mt-1">
+                        @if ($biens->isEmpty())
+                            Aucun bien enregistré pour le moment.
+                        @elseif ($biens->count() === 1)
+                            Le bien le plus récent du registre
+                        @else
+                            Les {{ $biens->count() }} biens les plus récents du registre
+                        @endif
+                    </p>
                 </div>
                 <div class="overflow-x-auto flex-1">
                     <table class="w-full text-left border-collapse">
