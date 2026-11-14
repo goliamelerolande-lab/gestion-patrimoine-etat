@@ -63,7 +63,7 @@
             <form id="siteForm" class="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-2xl">
                 <div class="flex items-center justify-between"><h2 id="siteModalTitle" class="text-xl font-bold">Nouveau site</h2><button type="button" onclick="fermerFormulaireSite()" aria-label="Fermer">✕</button></div>
                 <input id="site_id" type="hidden">
-                <label class="block text-sm font-semibold">Code<input id="site_code" required maxlength="20" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+                <label class="block text-sm font-semibold">Code du site (automatique)<input id="site_code" readonly placeholder="Généré à l’enregistrement" class="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-slate-500"></label>
                 <label class="block text-sm font-semibold">Nom du site<input id="site_nom" required maxlength="120" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
                 <label class="block text-sm font-semibold">Ville<input id="site_ville" maxlength="80" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
                 <label class="block text-sm font-semibold">Région<input id="site_region" maxlength="80" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
@@ -72,7 +72,7 @@
         </div>
         <script>
             const sitesApi = '/api/localisation/sites';
-            function ouvrirFormulaireSite() { document.getElementById('siteForm').reset(); document.getElementById('site_id').value=''; document.getElementById('siteModalTitle').textContent='Nouveau site'; document.getElementById('siteModal').classList.remove('hidden'); }
+            function ouvrirFormulaireSite() { document.getElementById('siteForm').reset(); document.getElementById('site_id').value=''; document.getElementById('site_code').value=''; document.getElementById('siteModalTitle').textContent='Nouveau site'; document.getElementById('siteModal').classList.remove('hidden'); }
             function fermerFormulaireSite() { document.getElementById('siteModal').classList.add('hidden'); }
             function modifierSite(site) { document.getElementById('site_id').value=site.id; document.getElementById('site_code').value=site.code; document.getElementById('site_nom').value=site.nom; document.getElementById('site_ville').value=site.ville || ''; document.getElementById('site_region').value=site.region || ''; document.getElementById('siteModalTitle').textContent='Modifier le site'; document.getElementById('siteModal').classList.remove('hidden'); }
             async function envoyerSite(event) {
@@ -81,7 +81,7 @@
                 const form=event.currentTarget;
                 const button=form.querySelector('button[type="submit"]');
                 button.disabled=true;
-                const data={code:document.getElementById('site_code').value.trim(),nom:document.getElementById('site_nom').value.trim(),ville:document.getElementById('site_ville').value.trim() || null,region:document.getElementById('site_region').value.trim() || null};
+                const data={nom:document.getElementById('site_nom').value.trim(),ville:document.getElementById('site_ville').value.trim() || null,region:document.getElementById('site_region').value.trim() || null};
                 try {
                     const response=await fetch(id ? sitesApi+'/'+id : sitesApi,{method:id?'PUT':'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(data)});
                     const result=await response.json().catch(()=>({}));

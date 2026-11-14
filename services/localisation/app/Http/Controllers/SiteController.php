@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Site;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class SiteController extends Controller
 {
@@ -17,13 +16,26 @@ class SiteController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'code' => 'required|string|max:20|unique:localisation.sites,code',
             'nom' => 'required|string|max:120',
             'ville' => 'nullable|string|max:80',
             'region' => 'nullable|string|max:80',
         ]);
 
-        return response()->json(Site::create($validated), 201);
+        $site = DB::transaction(function () use ($validated): Site {
+            do {
+                $id = (int) DB::selectOne(
+                    "SELECT nextval(pg_get_serial_sequence('localisation.sites', 'id')) AS id"
+                )->id;
+                $code = sprintf('SITE-%02d', $id);
+            } while (Site::query()->where('code', $code)->exists());
+
+            return Site::forceCreate($validated + [
+                'id' => $id,
+                'code' => $code,
+            ]);
+        });
+
+        return response()->json($site, 201);
     }
 
     public function show($id)
@@ -35,7 +47,6 @@ class SiteController extends Controller
     {
         $site = Site::findOrFail($id);
         $validated = $request->validate([
-            'code' => ['sometimes', 'required', 'string', 'max:20', Rule::unique('localisation.sites', 'code')->ignore($site->id)],
             'nom' => 'sometimes|required|string|max:120',
             'ville' => 'nullable|string|max:80',
             'region' => 'nullable|string|max:80',

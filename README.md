@@ -23,7 +23,7 @@ Application web de démonstration pour enregistrer et consulter le patrimoine mo
 |---|---|
 | Tableau de bord | Indicateurs globaux, derniers biens, aperçu des notifications |
 | Biens | Liste paginée, création, consultation, modification, suppression et génération du code `GPE-xxxxxx` |
-| Sites | Écrans et API de gestion des sites |
+| Sites | Gestion des sites, codes SITE-XX générés automatiquement |
 | Utilisateurs | Connexion administrateur, liste, création, modification, rôle `admin`/`agent`, activation et désactivation |
 | Notifications | Enregistrement PostgreSQL lors de certains événements, consultation et marquage comme lu |
 | Rapports | Totaux agrégés et aperçu imprimable |

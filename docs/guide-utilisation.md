@@ -89,7 +89,7 @@ Une requête de suppression répétée sur un bien déjà supprimé renvoie un s
 Ouvrir **Sites & Localisations**.
 
 1. **Nouveau site** ouvre le formulaire.
-2. Renseigner le code unique et le nom ; la ville et la région sont facultatives.
+2. Le code du site est attribué automatiquement (SITE-02, SITE-03, etc.). Renseigner le nom ; la ville et la région sont facultatives.
 3. Enregistrer, puis utiliser les actions de ligne pour modifier ou supprimer un site.
 
 Les écrans de transfert et d’affectation complète d’un bien à un site ne font pas partie du parcours web livré.
