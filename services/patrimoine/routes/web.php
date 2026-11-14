@@ -99,8 +99,8 @@ Route::get('/sites', function () {
 
     $sites = Cache::remember('localisation.sites', now()->addSeconds(30), function () {
         try {
-            $response = Http::connectTimeout(1)
-                ->timeout(2)
+            $response = Http::connectTimeout(3)
+                ->timeout(15)
                 ->get('http://localisation-service:80/api/sites');
 
             return $response->successful() ? ($response->json() ?? []) : [];

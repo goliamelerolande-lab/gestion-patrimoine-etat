@@ -44,6 +44,7 @@ services:
     volumes:
       - ./services/localisation:/var/www
       - localisation_vendor:/var/www/vendor
+      - localisation_bootstrap_cache:/var/www/bootstrap/cache
     depends_on:
       - postgres
     networks:
@@ -72,3 +73,4 @@ volumes:
   auth_vendor:
   patrimoine_vendor:
   localisation_vendor:
+  localisation_bootstrap_cache:
