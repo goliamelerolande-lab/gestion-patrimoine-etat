@@ -1,0 +1,42 @@
+@startuml
+skinparam actorStyle awesome
+left to right direction
+title GPE — Cas d'utilisation
+
+actor "Administrateur" as ADMIN
+actor "Gestionnaire" as GEST
+actor "Agent maintenance" as MAINT
+actor "Agent inventaire" as INV
+actor "Direction" as DIR
+actor "Auditeur" as AUD
+
+rectangle "Système GPE" {
+  usecase "S'authentifier" as UC_AUTH
+  usecase "Gérer les utilisateurs" as UC_USERS
+  usecase "Consulter biens" as UC_VIEW
+  usecase "Créer / modifier bien" as UC_CRUD
+  usecase "Supprimer bien" as UC_DEL
+  usecase "Affecter / transférer bien" as UC_AFFECT
+  usecase "Suivre maintenance" as UC_MAINT
+  usecase "Réaliser inventaire" as UC_INV
+  usecase "Consulter tableau de bord" as UC_DASH
+}
+
+ADMIN --> UC_AUTH
+ADMIN --> UC_USERS
+ADMIN --> UC_CRUD
+ADMIN --> UC_DEL
+GEST --> UC_AUTH
+GEST --> UC_VIEW
+GEST --> UC_CRUD
+GEST --> UC_AFFECT
+MAINT --> UC_AUTH
+MAINT --> UC_VIEW
+MAINT --> UC_MAINT
+INV --> UC_AUTH
+INV --> UC_INV
+DIR --> UC_AUTH
+DIR --> UC_DASH
+AUD --> UC_AUTH
+AUD --> UC_VIEW
+@enduml
