@@ -6,6 +6,10 @@ return [
         'url' => env('AUTH_SERVICE_URL', 'http://auth-service:80'),
     ],
 
+    'localisation' => [
+        'url' => env('LOCALISATION_SERVICE_URL', 'http://localisation-service:80'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
