@@ -94,18 +94,26 @@ Ouvrir **Sites & Localisations**.
 
 Les écrans de transfert et d’affectation complète d’un bien à un site ne font pas partie du parcours web livré.
 
-## 7. Notifications
+## 7. Affecter un bien à un site
+
+Ouvrir **Affectations** depuis la page des biens ou des sites. Cette page demande une session administrateur.
+
+1. Choisir le bien, le site et la date de début. La date de fin est facultative.
+2. Cliquer sur **Enregistrer l'affectation**. Le compte administrateur connecté est enregistré comme responsable de l'opération.
+3. Consulter l'historique sur la mê\u0302me page. Lors d'un changement de site, l'affectation précédente se termine la veille de la nouvelle.
+
+## 8. Notifications
 
 - Les notifications sont conservées dans PostgreSQL et restent accessibles depuis **Notifications**.
 - Le tableau de bord montre un aperçu des nouvelles notifications.
 - **Marquer les nouvelles comme lues** enregistre leur état de lecture.
 - Certaines opérations sur les biens créent une notification : ajout, passage à l’état réformé et suppression.
 
-## 8. Rapports
+## 9. Rapports
 
 Ouvrir **Rapports globaux** pour consulter les totaux et répartitions disponibles. L’action d’impression du navigateur permet de produire une version papier ou PDF via la boîte de dialogue d’impression. Le MVP ne fournit pas de génération de fichier CSV.
 
-## 9. Dépannage
+## 10. Dépannage
 
 | Symptôme | Vérification / action |
 |---|---|
@@ -116,6 +124,6 @@ Ouvrir **Rapports globaux** pour consulter les totaux et répartitions disponibl
 | Session expirée | Se reconnecter ; le jeton API expire après huit heures |
 | Données locales indisponibles après arrêt | Utiliser `docker compose down` pour arrêter ; ne pas ajouter `-v`, qui effacerait le volume PostgreSQL |
 
-## 10. Limites d’utilisation
+## 11. Limites d’utilisation
 
 Cette version est destinée à une démonstration. Les routes métiers des biens et des sites doivent être protégées avant publication sur Internet. Éviter d’y inscrire des données sensibles ou réelles de l’État. Le stockage local ne remplace pas une politique de sauvegarde.

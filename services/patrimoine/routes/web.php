@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AffectationProxyController;
 use App\Http\Controllers\AuthSessionController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Middleware\EnsureAdminSession;
@@ -111,6 +112,60 @@ Route::get('/sites', function () {
 
     return view('sites', compact('sites'));
 })->name('sites.index');
+
+Route::get('/affectations', function () {
+    if (! session()->has('admin_user.id')) {
+        return redirect()->route('login')->withErrors([
+            'email' => 'Connectez-vous comme administrateur pour enregistrer une affectation.',
+        ]);
+    }
+
+    $biens = Bien::query()
+        ->select(['id', 'code_inventaire', 'libelle'])
+        ->orderBy('code_inventaire')
+        ->get();
+
+    try {
+        $sitesResponse = Http::connectTimeout(3)
+            ->timeout(15)
+            ->get(rtrim(config('services.localisation.url'), '/').'/api/sites');
+        $affectationsResponse = Http::connectTimeout(3)
+            ->timeout(15)
+            ->get(rtrim(config('services.localisation.url'), '/').'/api/affectations');
+    } catch (Throwable) {
+        abort(503, 'Le service Localisation est momentanement indisponible.');
+    }
+
+    abort_unless(
+        $sitesResponse->successful() && $affectationsResponse->successful(),
+        503,
+        'Impossible de charger les donnees de localisation.',
+    );
+
+    $sites = collect($sitesResponse->json() ?? [])->keyBy('id');
+    $biensById = $biens->keyBy('id');
+    $affectations = collect($affectationsResponse->json() ?? [])
+        ->map(function (array $affectation) use ($sites, $biensById): array {
+            $site = $sites->get($affectation['site_id']);
+            $bien = $biensById->get($affectation['bien_id']);
+            $affectation['site_code'] = $site['code'] ?? 'Site supprime';
+            $affectation['site_nom'] = $site['nom'] ?? 'Site supprime';
+            $affectation['bien_code'] = $bien?->code_inventaire ?? 'Bien supprime';
+            $affectation['bien_libelle'] = $bien?->libelle ?? 'Bien supprime';
+
+            return $affectation;
+        })
+        ->sortByDesc('date_debut')
+        ->values();
+
+    $currentUserId = (int) session('admin_user.id');
+    $selectedBienId = (int) request('bien_id');
+
+    return view('affectations', compact('biens', 'sites', 'affectations', 'currentUserId', 'selectedBienId'));
+})->middleware(EnsureAdminSession::class)->name('affectations.index');
+
+Route::middleware(EnsureAdminSession::class)->post('/gestion/affectations', [AffectationProxyController::class, 'store'])
+    ->name('affectations.store');
 
 Route::get('/connexion', [AuthSessionController::class, 'create'])->name('login');
 Route::post('/connexion', [AuthSessionController::class, 'store'])->name('login.store');

@@ -27,6 +27,7 @@
     <main class="flex-1 p-10 overflow-y-auto bg-white/80">
                 <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
             <div><h1 class="text-3xl font-bold">Sites & Localisations</h1><p class="mt-1 text-slate-500">Gérez les lieux d’affectation du patrimoine.</p></div>
+            <a href="/affectations" class="rounded-xl border border-slate-300 bg-white px-5 py-3 font-bold text-slate-700 hover:bg-slate-50">Affectations</a>
             <button type="button" onclick="ouvrirFormulaireSite()" class="rounded-xl bg-primary px-5 py-3 font-bold text-white shadow-lg hover:bg-emerald-800"><i class="fas fa-plus mr-2"></i>Nouveau site</button>
         </div>
         <div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">

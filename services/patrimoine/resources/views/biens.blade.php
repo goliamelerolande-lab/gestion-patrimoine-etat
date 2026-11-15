@@ -61,6 +61,7 @@
                                 <button type="button" onclick="ouvrirModalVoir({{ Js::from($bien) }})" title="Voir" class="rounded-lg bg-blue-50 p-2 text-blue-700 hover:bg-blue-600 hover:text-white"><i class="fas fa-eye"></i></button>
                                 <button type="button" onclick="ouvrirModalModifier({{ Js::from($bien) }})" title="Modifier" class="rounded-lg bg-amber-50 p-2 text-amber-700 hover:bg-amber-500 hover:text-white"><i class="fas fa-pen"></i></button>
                                 <button type="button" onclick="supprimerBien({{ $bien->id }}, this)" title="Supprimer" class="rounded-lg bg-red-50 p-2 text-red-700 hover:bg-red-600 hover:text-white"><i class="fas fa-trash"></i></button>
+                                <a href="/affectations?bien_id={{ $bien->id }}" title="Affecter a un site" class="rounded-lg bg-violet-50 p-2 text-violet-700 hover:bg-violet-600 hover:text-white"><i class="fas fa-location-dot"></i></a>
                             </div>
                         </td>
                     </tr>
