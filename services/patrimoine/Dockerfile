@@ -1,33 +1,35 @@
-# Étape 1 : Installation des dépendances
-FROM composer:2.8 AS vendor
-WORKDIR /app
-COPY composer.json composer.lock ./
-# On installe les dépendances de production
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-
-# Étape 2 : Image finale
 FROM php:8.4-apache
 
-# Extensions PHP nécessaires
+# Installation des extensions PHP nécessaires
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libonig-dev \
     unzip \
     && docker-php-ext-install pdo pdo_pgsql mbstring
 
-# Configuration Apache pour Laravel
+# Activation du module de réécriture d'Apache
 RUN a2enmod rewrite
+
+# Autoriser le .htaccess de Laravel
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+
+# Pointer Apache vers le dossier public de Laravel
 ENV APACHE_DOCUMENT_ROOT /var/www/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
+# Installer Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 WORKDIR /var/www
 
-# On copie le dossier vendor généré à l'étape 1
-COPY --from=vendor /app/vendor ./vendor
+# Copier d'abord les fichiers de dépendances
+COPY composer.json composer.lock ./
 
-# On copie tout le reste de l'application
+# Installer les dépendances (CRÉE LE DOSSIER VENDOR)
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+# Copier le reste du code
 COPY . .
 
 # Permissions
