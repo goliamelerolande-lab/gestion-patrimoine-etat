@@ -2,16 +2,11 @@
 
 namespace App\Http\Controllers;
 
-<<<<<<< HEAD
 use App\Models\Affectation;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
-=======
-use Illuminate\Http\Request;
-use App\Models\Affectation;
->>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
 
 class AffectationController extends Controller
 {
@@ -23,7 +18,6 @@ class AffectationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-<<<<<<< HEAD
             'bien_id' => 'required|integer|exists:patrimoine.biens,id',
             'site_id' => 'required|integer|exists:localisation.sites,id',
             'user_id' => 'required|integer|exists:auth.users,id',
@@ -61,16 +55,6 @@ class AffectationController extends Controller
             return Affectation::create($validated);
         });
 
-=======
-            'bien_id' => 'required|integer',
-            'site_id' => 'required|integer',
-            'user_id' => 'required|integer',
-            'date_debut' => 'required|date',
-            'date_fin' => 'nullable|date',
-        ]);
-
-        $affectation = Affectation::create($validated);
->>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
         return response()->json($affectation, 201);
     }
 }

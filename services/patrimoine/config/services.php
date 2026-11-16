@@ -2,7 +2,6 @@
 
 return [
 
-<<<<<<< HEAD
     'auth' => [
         'url' => env('AUTH_SERVICE_URL', 'http://auth-service:80'),
     ],
@@ -10,20 +9,6 @@ return [
     'localisation' => [
         'url' => env('LOCALISATION_SERVICE_URL', 'http://localisation-service:80'),
     ],
-
-=======
->>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Resend, Postmark, AWS, and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
 
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
@@ -46,8 +31,4 @@ return [
         ],
     ],
 
-<<<<<<< HEAD
 ];
-=======
-];
->>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
