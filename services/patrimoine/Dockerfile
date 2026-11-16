@@ -40,6 +40,12 @@ COPY . .
 # Copier le reste du code
 COPY . .
 
+# Forcer PostgreSQL et éviter le cache SQLite
+RUN echo "DB_CONNECTION=pgsql" >> .env
+RUN echo "SESSION_DRIVER=file" >> .env
+RUN echo "CACHE_STORE=file" >> .env
+RUN echo "APP_ENV=production" >> .env
+
 # NOUVEAU : Créer le fichier .env s'il n'existe pas et générer la clé
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
 RUN php artisan key:generate --force
