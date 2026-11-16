@@ -1,5 +1,6 @@
 <?php
 
+<<<<<<< HEAD
 use App\Http\Controllers\AuthSessionController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Middleware\EnsureAdminSession;
@@ -212,3 +213,10 @@ Route::middleware(EnsureAdminSession::class)->prefix('/gestion/utilisateurs')->n
     Route::put('/{id}', [UserManagementController::class, 'update'])->whereNumber('id')->name('update');
     Route::patch('/{id}/statut', [UserManagementController::class, 'setStatus'])->whereNumber('id')->name('status');
 });
+=======
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70

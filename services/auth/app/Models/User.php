@@ -6,7 +6,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    protected $table = 'auth.users'; // Très important pour PostgreSQL !
+    protected $table = 'auth.users';
 
     protected $fillable = [
         'name',

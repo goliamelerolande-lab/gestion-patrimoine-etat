@@ -2,6 +2,7 @@
 
 return [
 
+<<<<<<< HEAD
     'auth' => [
         'url' => env('AUTH_SERVICE_URL', 'http://auth-service:80'),
     ],
@@ -10,6 +11,8 @@ return [
         'url' => env('LOCALISATION_SERVICE_URL', 'http://localisation-service:80'),
     ],
 
+=======
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
@@ -43,4 +46,8 @@ return [
         ],
     ],
 
+<<<<<<< HEAD
 ];
+=======
+];
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70

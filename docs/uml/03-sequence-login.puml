@@ -1,4 +1,5 @@
 @startuml
+<<<<<<< HEAD
 title GPE — Connexion administrateur et session serveur
 actor Administrateur
 participant Navigateur
@@ -39,3 +40,28 @@ Le jeton API n’est jamais remis au JavaScript navigateur.
 Le navigateur conserve seulement le cookie de session web.
 end note
 @enduml
+=======
+title GPE — Séquence : Authentification
+actor Utilisateur
+participant "Frontend" as FE
+participant "API Gateway" as GW
+participant "auth-service" as AUTH
+database "PostgreSQL" as DB
+
+Utilisateur -> FE : Saisit identifiants
+FE -> GW : POST /api/auth/login
+GW -> AUTH : POST /login
+AUTH -> DB : SELECT user
+DB --> AUTH : User + Hash
+alt Mot de passe valide
+  AUTH -> DB : INSERT token
+  AUTH --> GW : 200 { token }
+  GW --> FE : 200 { token }
+  FE --> Utilisateur : Redirection Dashboard
+else Mot de passe invalide
+  AUTH --> GW : 401 Unauthorized
+  GW --> FE : 401
+  FE --> Utilisateur : Erreur
+end
+@enduml
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70

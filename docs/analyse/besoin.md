@@ -2,6 +2,7 @@
 
 **Auteur** : GOLI Amélé Rolande
 **Date** : Novembre 2026
+<<<<<<< HEAD
 **Version** : 1.1
 
 > **Lecture du document :** les sections suivantes décrivent le besoin cible du brief, pas l’état déjà livré. L’état réel du MVP au 13 novembre 2026 est distingué ici afin d’éviter de présenter une exigence prévue comme une fonction terminée.
@@ -20,6 +21,9 @@
 | Hébergement | Docker local | Déploiement public, TLS, sauvegarde et supervision |
 
 Les rôles gestionnaire, maintenance, inventaire, direction et auditeur du tableau ci-dessous représentent la cible fonctionnelle ; seuls les rôles `admin` et `agent` existent actuellement dans la gestion des comptes. Les objectifs de performance, disponibilité et couverture de tests sont des objectifs de conception non mesurés à ce stade.
+=======
+**Version** : 1.0
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
 
 ---
 
@@ -192,8 +196,13 @@ Une solution microservices moderne, conteneurisée, accessible via navigateur, p
 |-----------|----------|-------|
 | **Performance** | Temps de réponse API | < 300 ms (P95) |
 | **Performance** | Chargement page | < 2 s |
+<<<<<<< HEAD
 | **Sécurité** | Authentification | Session web serveur + jeton opaque à durée limitée pour les opérations utilisateurs (pas Sanctum) |
 | **Sécurité** | Mots de passe | Hachage Laravel ; configuration de développement `BCRYPT_ROUNDS=12` |
+=======
+| **Sécurité** | Authentification | Token Bearer (Sanctum) |
+| **Sécurité** | Mots de passe | Bcrypt (cost 12) |
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
 | **Sécurité** | Transmission | HTTPS en prod |
 | **Sécurité** | Traçabilité | Audit log des actions critiques |
 | **Disponibilité** | Taux de service | ≥ 99% (hors maintenance) |
@@ -205,7 +214,11 @@ Une solution microservices moderne, conteneurisée, accessible via navigateur, p
 
 ## 7. Périmètre
 
+<<<<<<< HEAD
 ### 7.1 Périmètre cible du MVP prévu par le brief (40 heures)
+=======
+### 7.1 Dans le périmètre (MVP — 5 jours)
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
 - Authentification + RBAC
 - CRUD Biens + Catégories
 - CRUD Sites
@@ -215,8 +228,11 @@ Une solution microservices moderne, conteneurisée, accessible via navigateur, p
 - Docker + PostgreSQL
 - Déploiement sur hébergeur gratuit
 
+<<<<<<< HEAD
 Ces éléments constituent le périmètre visé, et ne signifient pas qu’ils sont tous présents dans le code. Voir le tableau **État actuel du MVP** en tête de document pour le réalisé et le reste à faire.
 
+=======
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
 ### 7.2 Hors périmètre (v2+)
 - Notifications temps réel
 - Signature électronique de documents
@@ -234,7 +250,11 @@ Ces éléments constituent le périmètre visé, et ne signifient pas qu’ils s
 
 | # | Contrainte |
 |---|------------|
+<<<<<<< HEAD
 | CT1 | Stack du brief : Laravel + PostgreSQL 16 (implémentation actuelle en Laravel 13) |
+=======
+| CT1 | Stack imposée : Laravel 11 + PostgreSQL 16 |
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
 | CT2 | Conteneurisation obligatoire (Docker) |
 | CT3 | Architecture microservices |
 | CT4 | Conception UML |
@@ -247,6 +267,7 @@ Ces éléments constituent le périmètre visé, et ne signifient pas qu’ils s
 
 ## 9. Critères de succès du projet
 
+<<<<<<< HEAD
 ### Critères de validation cible
 
 Les critères suivants seront considérés atteints après vérification documentée. À ce jour, la démo locale et le CRUD utilisateur ont été ouverts et utilisés ; le déploiement public durable et le vrai fichier Figma ne sont pas encore validés.
@@ -257,9 +278,31 @@ Les critères suivants seront considérés atteints après vérification documen
 - Déploiement public avec configuration, données et TLS vérifiés.
 - README, normalisation des données, guide, diagrammes UML et maquettes Figma finalisés.
 - Soutenance avec démonstration de ce qui est effectivement livré et présentation des limites.
+=======
+✅ **Technique**
+- Les 3 microservices démarrent via `docker compose up`
+- Login fonctionnel via la gateway
+- CRUD complet sur les biens
+- Déploiement accessible publiquement
+
+✅ **Documentation**
+- README avec normalisation BDD (1NF→3NF)
+- Guide utilisateur illustré
+- Diagrammes UML produits
+- Maquettes Figma disponibles
+
+✅ **Soutenance**
+- Architecture défendable
+- Démonstration live
+- Réponses aux questions techniques
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
 
 ---
 
 ## 10. Conclusion
 
+<<<<<<< HEAD
 Le projet GPE répond à un besoin réel de centralisation et de traçabilité du patrimoine de l'État. La solution microservices proposée est adaptée à la contrainte de temps (MVP en 5 jours), tout en posant les bases d'une plateforme scalable et maintenable. Le choix de **3 microservices** (auth, patrimoine, localisation) plutôt que 8+ services permet de **démontrer la maîtrise de l'architecture** sans sacrifier la qualité ni les délais.
+=======
+Le projet GPE répond à un besoin réel de centralisation et de traçabilité du patrimoine de l'État. La solution microservices proposée est adaptée à la contrainte de temps (MVP en 5 jours), tout en posant les bases d'une plateforme scalable et maintenable. Le choix de **3 microservices** (auth, patrimoine, localisation) plutôt que 8+ services permet de **démontrer la maîtrise de l'architecture** sans sacrifier la qualité ni les délais.
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70

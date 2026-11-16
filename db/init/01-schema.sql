@@ -31,6 +31,7 @@ CREATE TABLE patrimoine.biens (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+<<<<<<< HEAD
 CREATE TABLE IF NOT EXISTS patrimoine.notifications (
   id BIGSERIAL PRIMARY KEY,
   bien_id BIGINT NULL REFERENCES patrimoine.biens(id) ON DELETE SET NULL,
@@ -45,6 +46,8 @@ CREATE TABLE IF NOT EXISTS patrimoine.notifications (
 CREATE INDEX IF NOT EXISTS notifications_unread_created_idx
   ON patrimoine.notifications (read_at, created_at DESC);
 
+=======
+>>>>>>> 32310393ff8aa66dd7db79c6f3ddf821bba07b70
 CREATE TABLE localisation.sites (
   id BIGSERIAL PRIMARY KEY,
   code VARCHAR(20) UNIQUE NOT NULL,
