@@ -35,5 +35,20 @@ RUN test -f /var/www/vendor/autoload.php || (echo "ERREUR FATALE: vendor/autoloa
 # 9. Copier le reste du code de l'application
 COPY . .
 
+# ... (tes lignes précédentes)
+
+# Copier le reste du code
+COPY . .
+
+# NOUVEAU : Créer le fichier .env s'il n'existe pas et générer la clé
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+RUN php artisan key:generate --force
+
+# NOUVEAU : Mettre en cache la configuration (maintenant que tout est là)
+RUN php artisan config:cache
+
+# Permissions
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
 # 10. Permissions pour Laravel
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
