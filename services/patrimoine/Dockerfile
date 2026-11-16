@@ -1,19 +1,19 @@
 FROM php:8.4-apache
 
-# Installation des extensions PHP nécessaires
+# Installation des extensions PHP
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libonig-dev \
     unzip \
     && docker-php-ext-install pdo pdo_pgsql mbstring
 
-# Activation du module de réécriture d'Apache
+# Activation du module de réécriture
 RUN a2enmod rewrite
 
-# Autoriser le .htaccess de Laravel
+# Autoriser le .htaccess
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
-# Pointer Apache vers le dossier public de Laravel
+# Pointer Apache vers le dossier public
 ENV APACHE_DOCUMENT_ROOT /var/www/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
@@ -28,6 +28,9 @@ COPY composer.json composer.lock ./
 
 # Installer les dépendances (CRÉE LE DOSSIER VENDOR)
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+# VÉRIFICATION : Si le vendor n'existe pas, le build échoue ici (plus facile à débugger)
+RUN test -f /var/www/vendor/autoload.php || (echo "ERREUR: composer install a échoué" && exit 1)
 
 # Copier le reste du code
 COPY . .
