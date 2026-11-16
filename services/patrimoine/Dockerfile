@@ -1,39 +1,39 @@
 FROM php:8.4-apache
 
-# Installation des extensions PHP
+# 1. Installation des extensions PHP nécessaires (PostgreSQL + mbstring)
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libonig-dev \
     unzip \
     && docker-php-ext-install pdo pdo_pgsql mbstring
 
-# Activation du module de réécriture
+# 2. Activation du module de réécriture d'Apache
 RUN a2enmod rewrite
 
-# Autoriser le .htaccess
+# 3. Autoriser le .htaccess de Laravel (indispensable pour les routes)
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
-# Pointer Apache vers le dossier public
+# 4. Pointer Apache vers le dossier public de Laravel
 ENV APACHE_DOCUMENT_ROOT /var/www/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Installer Composer
+# 5. Installer Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# Copier d'abord les fichiers de dépendances
+# 6. Copier les fichiers de dépendances EN PREMIER (pour le cache Docker)
 COPY composer.json composer.lock ./
 
-# Installer les dépendances (CRÉE LE DOSSIER VENDOR)
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+# 7. Installer les dépendances (c'est ICI que le dossier vendor est créé)
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
-# VÉRIFICATION : Si le vendor n'existe pas, le build échoue ici (plus facile à débugger)
-RUN test -f /var/www/vendor/autoload.php || (echo "ERREUR: composer install a échoué" && exit 1)
+# 8. VÉRIFICATION CRUCIALE : Si vendor/autoload.php n'existe pas, le build échoue immédiatement
+RUN test -f /var/www/vendor/autoload.php || (echo "ERREUR FATALE: vendor/autoload.php n'a pas été généré par composer install" && exit 1)
 
-# Copier le reste du code
+# 9. Copier le reste du code de l'application
 COPY . .
 
-# Permissions
+# 10. Permissions pour Laravel
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
