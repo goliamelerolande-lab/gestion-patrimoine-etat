@@ -1,5 +1,5 @@
 # Étape 1 : Installation des dépendances
-FROM composer:2 AS vendor
+FROM composer:2.8 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
 # On installe les dépendances de production
