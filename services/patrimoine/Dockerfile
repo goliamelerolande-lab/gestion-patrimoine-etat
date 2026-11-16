@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 # 2. Activation du module de réécriture d'Apache
 RUN a2enmod rewrite
 
-# 3. Autoriser le .htaccess de Laravel (indispensable pour les routes)
+# 3. Autoriser le .htaccess de Laravel
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # 4. Pointer Apache vers le dossier public de Laravel
@@ -23,38 +23,30 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# 6. Copier les fichiers de dépendances EN PREMIER (pour le cache Docker)
+# 6. Copier les fichiers de dépendances
 COPY composer.json composer.lock ./
 
-# 7. Installer les dépendances (c'est ICI que le dossier vendor est créé)
+# 7. Installer les dépendances
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
-# 8. VÉRIFICATION CRUCIALE : Si vendor/autoload.php n'existe pas, le build échoue immédiatement
-RUN test -f /var/www/vendor/autoload.php || (echo "ERREUR FATALE: vendor/autoload.php n'a pas été généré par composer install" && exit 1)
+# 8. Vérification : le vendor doit exister
+RUN test -f /var/www/vendor/autoload.php || (echo "ERREUR FATALE: vendor/autoload.php manquant" && exit 1)
 
-# 9. Copier le reste du code de l'application
+# 9. Copier le reste du code
 COPY . .
 
-# ... (tes lignes précédentes)
-
-# Copier le reste du code
-COPY . .
-
-# Forcer PostgreSQL et éviter le cache SQLite
+# 10. Créer le fichier .env s'il n'existe pas et forcer la configuration PostgreSQL
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+RUN rm -f bootstrap/cache/config.php
 RUN echo "DB_CONNECTION=pgsql" >> .env
+RUN echo "APP_ENV=production" >> .env
+RUN echo "APP_DEBUG=false" >> .env
 RUN echo "SESSION_DRIVER=file" >> .env
 RUN echo "CACHE_STORE=file" >> .env
-RUN echo "APP_ENV=production" >> .env
 
-# NOUVEAU : Créer le fichier .env s'il n'existe pas et générer la clé
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
+# 11. Générer la clé APP_KEY et mettre en cache la configuration
 RUN php artisan key:generate --force
-
-# NOUVEAU : Mettre en cache la configuration (maintenant que tout est là)
 RUN php artisan config:cache
 
-# Permissions
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-
-# 10. Permissions pour Laravel
+# 12. Permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
