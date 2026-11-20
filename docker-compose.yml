@@ -1,0 +1,160 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # 1. BASE DE DONNÉES CENTRALE POSTGRESQL (Multi-bases)
+  # =========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: gpe_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret_gpe_2026}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    networks:
+      - gest_patrimoine_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # =========================================================================
+  # 2. MICROSERVICE AUTH (Port 8001)
+  # =========================================================================
+  auth-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.service
+    container_name: gpe_auth_service
+    restart: unless-stopped
+    working_dir: /var/www/html/auth-service
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_NAME: GPE_Auth_Service
+      APP_ENV: local
+      APP_PORT: 8001
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: auth_db
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-secret_gpe_2026}
+    ports:
+      - "8001:8001"
+    command: php -S 0.0.0.0:8001 -t public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - gest_patrimoine_net
+
+  # =========================================================================
+  # 3. MICROSERVICE PATRIMOINE (Port 8002)
+  # =========================================================================
+  patrimoine-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.service
+    container_name: gpe_patrimoine_service
+    restart: unless-stopped
+    working_dir: /var/www/html/patrimoine-service
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_NAME: GPE_Patrimoine_Service
+      APP_ENV: local
+      APP_PORT: 8002
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: patrimoine_db
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-secret_gpe_2026}
+    ports:
+      - "8002:8002"
+    command: php -S 0.0.0.0:8002 -t public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - gest_patrimoine_net
+
+  # =========================================================================
+  # 4. MICROSERVICE AFFECTATIONS & MAINTENANCE (Port 8003)
+  # =========================================================================
+  affectation-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.service
+    container_name: gpe_affectation_service
+    restart: unless-stopped
+    working_dir: /var/www/html/affectation-service
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_NAME: GPE_Affectation_Service
+      APP_ENV: local
+      APP_PORT: 8003
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: affectation_db
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-secret_gpe_2026}
+    ports:
+      - "8003:8003"
+    command: php -S 0.0.0.0:8003 -t public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - gest_patrimoine_net
+
+  # =========================================================================
+  # 5. API GATEWAY & FRONTEND DASHBOARD (Port 8080)
+  # =========================================================================
+  gateway-frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.service
+    container_name: gpe_gateway_frontend
+    restart: unless-stopped
+    working_dir: /var/www/html/gateway-frontend
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_NAME: GEST_PATRIMOINE_GATEWAY
+      APP_ENV: local
+      APP_PORT: 8080
+      AUTH_SERVICE_URL: http://auth-service:8001
+      PATRIMOINE_SERVICE_URL: http://patrimoine-service:8002
+      AFFECTATION_SERVICE_URL: http://affectation-service:8003
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-secret_gpe_2026}
+    ports:
+      - "8080:8080"
+    command: php -S 0.0.0.0:8080 -t public
+    depends_on:
+      - auth-service
+      - patrimoine-service
+      - affectation-service
+    networks:
+      - gest_patrimoine_net
+
+# =========================================================================
+# RÉSEAUX ET VOLUMES
+# =========================================================================
+networks:
+  gest_patrimoine_net:
+    driver: bridge
+    name: gest_patrimoine_net
+
+volumes:
+  postgres_data:
+    name: gpe_postgres_data
