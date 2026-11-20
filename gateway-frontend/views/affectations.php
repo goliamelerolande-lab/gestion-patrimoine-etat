@@ -190,61 +190,408 @@ ob_start();
 </div>
 
 <!-- ========================================================================= -->
-<!-- 1. MODALE VOIR L'AFFECTATION                                               -->
+<!-- 1. MODALE VOIR LA DÉCHARGE OFFICIELLE (CERTIFICAT D'AFFECTATION TOGO)     -->
 <!-- ========================================================================= -->
 <div class="modal-overlay" id="viewAffectationModal">
-    <div class="modal-box" style="max-width: 650px;">
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-file-contract" style="color: var(--color-primary-light);"></i> Fiche d'Affectation : <span id="va_code" style="color: var(--color-accent);"></span></h3>
+    <div class="modal-box" style="max-width: 820px; padding: 26px;">
+        <div class="modal-header no-print" style="margin-bottom: 16px;">
+            <h3><i class="fa-solid fa-file-signature" style="color: #059669;"></i> Bon Officiel de Décharge : <span id="va_code_title" style="color: var(--color-accent);"></span></h3>
             <button class="modal-close" onclick="document.getElementById('viewAffectationModal').classList.remove('active');">&times;</button>
         </div>
-        <div class="modal-body">
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <div class="detail-label">Code Inventaire du Bien</div>
-                    <div class="detail-value" id="va_code_badge"></div>
+
+        <div class="modal-body" style="padding: 0;">
+            <!-- DOCUMENT IMPRIMABLE A4 DU BON DE DÉCHARGE OFFICIEL (TOGO) -->
+            <div id="printableDechargeSheet" class="official-decharge-sheet">
+                <!-- En-tête Institutionnel Officiel de la République Togolaise -->
+                <div class="decharge-top-header">
+                    <div class="rep-header-left">
+                        <div class="rep-title">RÉPUBLIQUE TOGOLAISE</div>
+                        <div class="rep-devise">Travail - Liberté - Patrie</div>
+                        <div class="rep-sep"></div>
+                        <div class="rep-min" id="vd_ministere_header">MINISTÈRE DE L'ÉCONOMIE NUMÉRIQUE</div>
+                        <div class="rep-dgpe">Direction Générale du Patrimoine de l'État (DGPE)</div>
+                    </div>
+                    <div class="rep-header-right">
+                        <div style="font-size: 1.8rem; color: #0D3B66; margin-bottom: 4px;">
+                            <i class="fa-solid fa-landmark"></i>
+                        </div>
+                        <div class="decharge-ref-box">
+                            <div><strong>Lieu & Date :</strong> Lomé, le <span id="vd_date_doc"><?= date('d/m/Y') ?></span></div>
+                            <div><strong>Réf. Acte :</strong> <span id="vd_ref_badge">TG-DGPE/DECH-2026</span></div>
+                            <div><strong>Statut :</strong> <span id="vd_statut_badge" style="color: #059669; font-weight: 700;">● CONFORME</span></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">Statut du Mouvement</div>
-                    <div class="detail-value" id="va_statut"></div>
+
+                <!-- Bannière du Titre Officiel -->
+                <div class="decharge-banner-title">
+                    <h2>BON DE DÉCHARGE ET ATTRIBUTION DE MATÉRIEL PUBLIC</h2>
+                    <p>Certificat Administratif de Prise en Charge Individuelle et de Dotation d'Usage</p>
                 </div>
-                <div class="detail-item" style="grid-column: span 2;">
-                    <div class="detail-label">Agent Bénéficiaire / Détenteur (Togo)</div>
-                    <div class="detail-value" id="va_beneficiaire" style="font-size: 1.05rem; color: var(--color-primary);"></div>
+
+                <!-- I. Cadre Bénéficiaire -->
+                <div class="decharge-block">
+                    <div class="decharge-block-title"><i class="fa-solid fa-user-shield"></i> I. CADRE ADMINISTRATIF DU BÉNÉFICIAIRE</div>
+                    <table class="decharge-data-table">
+                        <tr>
+                            <th>Nom & Prénoms de l'Agent :</th>
+                            <td><strong id="vd_beneficiaire_nom" style="color: #0D3B66; font-size: 0.95rem;">Afiwa MENSAH</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Matricule Fonctionnaire :</th>
+                            <td><span id="vd_beneficiaire_mat" class="code-badge" style="font-size: 0.82rem;">MAT-TG-003</span></td>
+                        </tr>
+                        <tr>
+                            <th>Direction / Service de Rattachement :</th>
+                            <td><span id="vd_beneficiaire_serv">Direction de la Transformation Digitale</span></td>
+                        </tr>
+                    </table>
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">Matricule Fonctionnaire</div>
-                    <div class="detail-value" id="va_matricule"></div>
+
+                <!-- II. Signalétique de l'Équipement -->
+                <div class="decharge-block">
+                    <div class="decharge-block-title"><i class="fa-solid fa-boxes-stacked"></i> II. SIGNALÉTIQUE DU BIEN CONFIÉ</div>
+                    <table class="decharge-data-table">
+                        <tr>
+                            <th>Code Inventaire National :</th>
+                            <td><strong id="vd_bien_code" class="code-badge" style="font-size: 0.85rem; background: #0D3B66; color: #FFF;">GPE-000015</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Désignation & Caractéristiques :</th>
+                            <td><strong id="vd_bien_libelle" style="color: #059669;">Serveur Rack Dell PowerEdge R750 64GB</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Date de Dotation & Remise :</th>
+                            <td><span id="vd_bien_date">25/02/2026</span></td>
+                        </tr>
+                        <tr>
+                            <th>Motif Administratif :</th>
+                            <td><span id="vd_bien_motif">Hébergement applicatif ministériel national</span></td>
+                        </tr>
+                        <tr>
+                            <th>État d'Usage Constaté :</th>
+                            <td><span id="vd_bien_etat" style="color: #059669; font-weight: 700;">● Bon état (Opérationnel et conforme)</span></td>
+                        </tr>
+                        <tr>
+                            <th>Observations & Remarques :</th>
+                            <td><em id="vd_bien_remarques">Matériel neuf certifié conforme avec tous ses accessoires d'origine.</em></td>
+                        </tr>
+                    </table>
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">Direction / Service de rattachement</div>
-                    <div class="detail-value" id="va_service"></div>
+
+                <!-- III. Engagement Déontologique du Fonctionnaire -->
+                <div class="decharge-legal-text">
+                    <strong>Engagement déontologique du fonctionnaire détenteur :</strong> L'agent bénéficiaire soussigné atteste avoir pris possession du matériel ci-dessus inventorié en parfait état de fonctionnement. Il s'engage formellement à veiller à sa garde diligente, à son entretien régulier et à son affectation exclusive à l'exercice des missions de service public de l'État Togolais. En cas de mutation, congé ou fin de fonction, le bien doit être immédiatement restitué avec visa officiel.
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">Date de Mise à Disposition</div>
-                    <div class="detail-value" id="va_date_aff"></div>
+
+                <!-- IV. Double Visa, Cachet Officiel et Signature -->
+                <div class="decharge-signatures-grid">
+                    <!-- Signature Agent -->
+                    <div class="sig-box-card">
+                        <div class="sig-box-title">Pour le Bénéficiaire (L'Agent) :</div>
+                        <div class="sig-box-sub">Mention manuscrite : <em>« Reçu conforme »</em></div>
+                        <div class="sig-box-name" id="vd_sig_agent_name">Mme Afiwa MENSAH</div>
+                        <div class="sig-drawing-box">
+                            <span class="sig-cursive" id="vd_sig_agent_draw">Afiwa Mensah</span>
+                        </div>
+                    </div>
+
+                    <!-- Signature Administration + Sceau Officiel de l'État -->
+                    <div class="sig-box-card" style="position: relative; overflow: visible;">
+                        <div class="sig-box-title">Pour l'Administration (DGPE Togo) :</div>
+                        <div class="sig-box-sub"><?= htmlspecialchars($signataireSettings['formule'] ?? 'Pour le Ministre et par ordre,') ?></div>
+                        <div class="sig-box-name"><?= htmlspecialchars($signataireSettings['nom'] ?? 'Amele Rolande GOLI') ?></div>
+                        <div style="font-size: 0.73rem; color: #64748B;"><?= htmlspecialchars($signataireSettings['titre'] ?? 'Le Directeur Général du Patrimoine') ?></div>
+                        
+                        <div class="sig-drawing-box" style="justify-content: space-between; align-items: center; position: relative;">
+                            <!-- Signature manuscrite scannée -->
+                            <div style="z-index: 1;">
+                                <?php if (!empty($signatureInfo['url'])): ?>
+                                    <img src="<?= htmlspecialchars($signatureInfo['url']) ?>" alt="Signature DGPE" style="max-height: 52px; max-width: 150px; object-fit: contain; transform: rotate(-3deg);">
+                                <?php else: ?>
+                                    <span class="sig-cursive" style="font-size: 1.8rem;"><?= htmlspecialchars($signataireSettings['nom'] ?? 'Amele Rolande GOLI') ?></span>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- Cachet / Sceau Officiel Superposé -->
+                            <div class="decharge-stamp-overlay">
+                                <img src="<?= htmlspecialchars($activeCachetUrl ?? '/uploads/cachet_default.svg') ?>" alt="Cachet Officiel" class="decharge-stamp-img">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">Date de Restitution Effective</div>
-                    <div class="detail-value" id="va_date_rest"></div>
-                </div>
-                <div class="detail-item" style="grid-column: span 2;">
-                    <div class="detail-label">Motif Administratif de l'Affectation</div>
-                    <div class="detail-value" id="va_motif"></div>
-                </div>
-                <div class="detail-item" style="grid-column: span 2;">
-                    <div class="detail-label">Observations & Remarques Administratives</div>
-                    <div class="detail-value" id="va_remarques" style="font-style: italic;"></div>
+
+                <!-- Bas de page certifié -->
+                <div class="decharge-footer-note">
+                    GEST-PATRIMOINE TOGO &bull; Récépissé certifié sous l'autorité du Ministère de l'Économie et des Finances &bull; Direction Générale du Patrimoine de l'État
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
-                <button type="button" class="btn btn-outline" onclick="window.print();"><i class="fa-solid fa-print"></i> Imprimer le Bon de Décharge</button>
-                <button type="button" class="btn btn-primary" onclick="document.getElementById('viewAffectationModal').classList.remove('active');">Fermer</button>
+            <!-- Barre d'actions (masquée à l'impression) -->
+            <div class="no-print" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--color-border);">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('viewAffectationModal').classList.remove('active');">
+                    <i class="fa-solid fa-xmark"></i> Fermer
+                </button>
+                <button type="button" class="btn btn-primary" onclick="window.print();" style="background-color: #059669; border-color: #059669;">
+                    <i class="fa-solid fa-print"></i> <strong>Imprimer le Bon de Décharge (A4 / PDF)</strong>
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+/* ========================================================================= */
+/* CSS OFFICIEL DU BON DE DÉCHARGE (AFFICHAGE ÉCRAN & IMPRESSION PURE A4)     */
+/* ========================================================================= */
+.official-decharge-sheet {
+    background: #FFFFFF;
+    color: #1E293B;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    border: 2px solid #0D3B66;
+    border-radius: 8px;
+    padding: 24px 28px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+.decharge-top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid #0D3B66;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+.rep-header-left {
+    text-align: left;
+}
+.rep-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #0D3B66;
+    letter-spacing: 0.5px;
+}
+.rep-devise {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #059669;
+    margin-top: 2px;
+}
+.rep-sep {
+    width: 65px;
+    height: 3px;
+    background: linear-gradient(90deg, #059669, #D97706, #DC2626);
+    margin: 5px 0;
+}
+.rep-min {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #334155;
+    text-transform: uppercase;
+}
+.rep-dgpe {
+    font-size: 0.73rem;
+    font-weight: 600;
+    color: #64748B;
+}
+.rep-header-right {
+    text-align: right;
+    font-size: 0.8rem;
+}
+.decharge-ref-box {
+    background: #F8FAFC;
+    border: 1px dashed #CBD5E1;
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-top: 4px;
+    font-size: 0.76rem;
+    text-align: right;
+}
+.decharge-banner-title {
+    text-align: center;
+    background: linear-gradient(135deg, #0D3B66 0%, #1E3A8A 100%);
+    color: #FFFFFF;
+    padding: 10px 16px;
+    border-radius: 6px;
+    margin-bottom: 18px;
+}
+.decharge-banner-title h2 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin: 0;
+    color: #FFFFFF;
+    text-transform: uppercase;
+}
+.decharge-banner-title p {
+    font-size: 0.74rem;
+    opacity: 0.9;
+    margin: 2px 0 0 0;
+}
+.decharge-block {
+    margin-bottom: 14px;
+}
+.decharge-block-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #0D3B66;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-left: 4px solid #059669;
+    padding-left: 8px;
+    margin-bottom: 8px;
+}
+.decharge-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+.decharge-data-table th, .decharge-data-table td {
+    border: 1px solid #E2E8F0;
+    padding: 6px 10px;
+    text-align: left;
+}
+.decharge-data-table th {
+    background-color: #F8FAFC;
+    color: #475569;
+    font-weight: 700;
+    width: 34%;
+}
+.decharge-data-table td {
+    background-color: #FFFFFF;
+    color: #0F172A;
+}
+.decharge-legal-text {
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    color: #166534;
+    line-height: 1.45;
+    margin: 14px 0;
+}
+.decharge-signatures-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 18px;
+    border-top: 1px dashed #CBD5E1;
+    padding-top: 14px;
+}
+.sig-box-card {
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    background: #FAFAFA;
+    position: relative;
+    min-height: 145px;
+}
+.sig-box-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #0D3B66;
+    text-transform: uppercase;
+}
+.sig-box-sub {
+    font-size: 0.72rem;
+    color: #64748B;
+    margin-top: 1px;
+}
+.sig-box-name {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #0D3B66;
+    margin-top: 6px;
+}
+.sig-drawing-box {
+    margin-top: 8px;
+    position: relative;
+    height: 60px;
+    display: flex;
+    align-items: center;
+}
+.sig-cursive {
+    font-family: 'Brush Script MT', cursive, sans-serif;
+    font-size: 1.8rem;
+    color: #1E3A8A;
+    transform: rotate(-3deg);
+}
+.decharge-stamp-overlay {
+    position: absolute;
+    right: 4px;
+    bottom: -15px;
+    z-index: 2;
+    pointer-events: none;
+}
+.decharge-stamp-img {
+    width: 105px;
+    height: 105px;
+    object-fit: contain;
+    transform: rotate(-6deg);
+    opacity: 0.95;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.08));
+}
+.decharge-footer-note {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #94A3B8;
+    margin-top: 14px;
+    border-top: 1px solid #F1F5F9;
+    padding-top: 6px;
+}
+
+/* RÈGLES D'IMPRESSION A4 PARFAITES (@media print) */
+@media print {
+    body {
+        background: #FFFFFF !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .app-wrapper, .app-sidebar, .app-topbar, .no-print, .modal-header, .alert-notification, .card-header-bar, .card-filters-bar, .table-responsive {
+        display: none !important;
+    }
+    .modal-overlay {
+        position: static !important;
+        background: transparent !important;
+        padding: 0 !important;
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    .modal-box {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+    .modal-body {
+        padding: 0 !important;
+    }
+    #printableDechargeSheet {
+        display: block !important;
+        visibility: visible !important;
+        border: 2px solid #000000 !important;
+        box-shadow: none !important;
+        margin: 0 auto !important;
+        padding: 14mm 16mm !important;
+        page-break-after: avoid !important;
+        max-width: 100% !important;
+    }
+    .decharge-banner-title {
+        background: #0D3B66 !important;
+        color: #FFFFFF !important;
+    }
+    .decharge-data-table th {
+        background-color: #F1F5F9 !important;
+    }
+}
+</style>
 
 <!-- ========================================================================= -->
 <!-- 2. MODALE MODIFIER L'AFFECTATION                                           -->
@@ -377,16 +724,61 @@ document.getElementById('bienSelect')?.addEventListener('change', function() {
 });
 
 function openViewAffectationModal(aff) {
-    document.getElementById('va_code').innerText = aff.code_inventaire || '';
-    document.getElementById('va_code_badge').innerHTML = '<span class="code-badge">' + (aff.code_inventaire || '') + '</span>';
-    document.getElementById('va_statut').innerText = aff.statut || 'En cours';
-    document.getElementById('va_beneficiaire').innerText = aff.beneficiaire_nom || '';
-    document.getElementById('va_matricule').innerText = aff.beneficiaire_matricule || 'N/A';
-    document.getElementById('va_service').innerText = aff.service_nom || 'Direction Générale';
-    document.getElementById('va_date_aff').innerText = aff.date_affectation ? aff.date_affectation.split('-').reverse().join('/') : 'N/A';
-    document.getElementById('va_date_rest').innerText = aff.date_restitution ? aff.date_restitution.split('-').reverse().join('/') : 'Matériel toujours en détention active';
-    document.getElementById('va_motif').innerText = aff.motif || 'Affectation de service';
-    document.getElementById('va_remarques').innerText = aff.remarques || 'Aucune observation enregistrée.';
+    const code = aff.code_inventaire || 'GPE-000015';
+    const nom = aff.beneficiaire_nom || 'Afiwa MENSAH';
+    const mat = aff.beneficiaire_matricule || 'MAT-TG-003';
+    const serv = aff.service_nom || 'Direction de la Transformation Digitale';
+    const dateAff = aff.date_affectation ? aff.date_affectation.split('-').reverse().join('/') : '25/02/2026';
+    const motif = aff.motif || 'Affectation administrative de dotation individuelle';
+    const remarques = aff.remarques || 'Matériel certifié conforme, en parfait état d\'usage et de marche.';
+
+    // Titres et badges
+    const titleEl = document.getElementById('va_code_title');
+    if (titleEl) titleEl.innerText = code;
+    const refBadge = document.getElementById('vd_ref_badge');
+    if (refBadge) refBadge.innerText = 'TG-DGPE/' + code + '/2026';
+    const statutBadge = document.getElementById('vd_statut_badge');
+    if (statutBadge) statutBadge.innerText = '● ' + (aff.statut || 'CONFORME').toUpperCase();
+
+    // Bénéficiaire
+    const benNom = document.getElementById('vd_beneficiaire_nom');
+    if (benNom) benNom.innerText = nom;
+    const benMat = document.getElementById('vd_beneficiaire_mat');
+    if (benMat) benMat.innerText = mat;
+    const benServ = document.getElementById('vd_beneficiaire_serv');
+    if (benServ) benServ.innerText = serv;
+
+    // Matériel
+    const bienCode = document.getElementById('vd_bien_code');
+    if (bienCode) bienCode.innerText = code;
+    const bienDate = document.getElementById('vd_bien_date');
+    if (bienDate) bienDate.innerText = dateAff;
+    const bienMotif = document.getElementById('vd_bien_motif');
+    if (bienMotif) bienMotif.innerText = motif;
+    const bienRem = document.getElementById('vd_bien_remarques');
+    if (bienRem) bienRem.innerText = remarques;
+
+    // Libellé adapté
+    const bienLib = document.getElementById('vd_bien_libelle');
+    if (bienLib) {
+        if (code === 'GPE-000015') {
+            bienLib.innerText = 'Serveur Rack Dell PowerEdge R750 64GB';
+        } else if (code === 'GPE-000014') {
+            bienLib.innerText = 'Toyota Hilux Double Cabine 4x4 2.8 D-4D';
+        } else if (code === 'GPE-000016') {
+            bienLib.innerText = 'Immeuble Administratif R+5 Cité OUA';
+        } else if (code === 'GPE-000017') {
+            bienLib.innerText = 'Photocopieur Industriel HP LaserJet Enterprise Flow';
+        } else {
+            bienLib.innerText = aff.libelle || 'Matériel de l\'État Togolais';
+        }
+    }
+
+    // Signatures
+    const sigAgentName = document.getElementById('vd_sig_agent_name');
+    if (sigAgentName) sigAgentName.innerText = 'M./Mme ' + nom;
+    const sigAgentDraw = document.getElementById('vd_sig_agent_draw');
+    if (sigAgentDraw) sigAgentDraw.innerText = nom;
 
     document.getElementById('viewAffectationModal').classList.add('active');
 }

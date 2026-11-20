@@ -139,6 +139,11 @@ if ($uri === '/biens/delete' && $method === 'POST') {
 if ($uri === '/affectations') {
     $affectations = $client->getAffectations($_GET);
     $biens = $client->getBiens();
+    $cachetInfo = getActiveCachetInfo();
+    $activeCachetUrl = $cachetInfo['url'];
+    $hasCustomCachet = $cachetInfo['is_custom'];
+    $signataireSettings = getSignataireSettings();
+    $signatureInfo = getActiveSignatureInfo();
     require __DIR__ . '/../views/affectations.php';
     exit;
 }
@@ -185,6 +190,10 @@ if ($uri === '/maintenances') {
 
 if ($uri === '/maintenances/create' && $method === 'POST') {
     $client->createMaintenance($_POST);
+    $bienId = (int)($_POST['bien_id'] ?? 0);
+    if ($bienId > 0) {
+        $client->updateBien($bienId, ['etat' => 'En panne']);
+    }
     header('Location: /maintenances?success=1');
     exit;
 }
@@ -193,6 +202,10 @@ if ($uri === '/maintenances/update' && $method === 'POST') {
     $id = (int)($_POST['id'] ?? 0);
     if ($id > 0) {
         $client->updateMaintenance($id, $_POST);
+        $bienId = (int)($_POST['bien_id'] ?? 0);
+        if (($dataStatut = ($_POST['statut'] ?? '')) === 'Réparé' && $bienId > 0) {
+            $client->updateBien($bienId, ['etat' => 'Bon état']);
+        }
     }
     header('Location: /maintenances?updated=1');
     exit;

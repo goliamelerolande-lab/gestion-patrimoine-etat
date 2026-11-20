@@ -314,13 +314,14 @@ ob_start();
                 <label>Sélectionner le Bien Défectueux *</label>
                 <select name="bien_id" class="form-control" required id="bienMaintenanceSelect">
                     <?php 
-                        $modalBiens = $biens;
+                        $modalBiens = $biens ?? [];
                         if ($roleKey === 'agent') {
-                            $modalBiens = array_filter($biens, function($b) {
+                            $modalBiens = array_filter($modalBiens, function($b) {
                                 return ($b['code_inventaire'] ?? '') === 'GPE-000015' || stripos($b['ministere'] ?? '', 'Numérique') !== false;
                             });
-                            if (empty($modalBiens)) $modalBiens = [reset($biens)];
+                            if (empty($modalBiens) && !empty($biens)) $modalBiens = [reset($biens)];
                         }
+                        $modalBiens = array_values($modalBiens);
                     ?>
                     <?php foreach ($modalBiens as $bien): ?>
                         <option value="<?= $bien['id'] ?>" data-code="<?= htmlspecialchars($bien['code_inventaire']) ?>" data-libelle="<?= htmlspecialchars($bien['libelle']) ?>">
@@ -329,8 +330,8 @@ ob_start();
                     <?php endforeach; ?>
                 </select>
             </div>
-            <input type="hidden" name="code_inventaire" id="codeMaintenanceHidden" value="<?= htmlspecialchars($modalBiens[0]['code_inventaire'] ?? '') ?>">
-            <input type="hidden" name="libelle_bien" id="libelleMaintenanceHidden" value="<?= htmlspecialchars($modalBiens[0]['libelle'] ?? '') ?>">
+            <input type="hidden" name="code_inventaire" id="codeMaintenanceHidden" value="<?= htmlspecialchars($modalBiens[0]['code_inventaire'] ?? 'GPE-000015') ?>">
+            <input type="hidden" name="libelle_bien" id="libelleMaintenanceHidden" value="<?= htmlspecialchars($modalBiens[0]['libelle'] ?? 'Équipement') ?>">
 
             <div class="form-group">
                 <label>Description du Dysfonctionnement / Problème Constaté *</label>
@@ -368,22 +369,30 @@ ob_start();
                     <i class="fa-solid fa-circle-info"></i> Votre demande sera immédiatement notifiée au Gestionnaire de Parc pour mandat d'un prestataire agréé de l'État.
                 </div>
             <?php endif; ?>
-            </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--color-border);">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('newMaintenanceModal').classList.remove('active');">Annuler</button>
-                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Enregistrer le Signalement</button>
+                <button type="submit" class="btn btn-primary" style="<?= $roleKey === 'agent' ? 'background-color: #DC2626; border-color: #DC2626;' : '' ?>">
+                    <i class="fa-solid fa-paper-plane"></i> Enregistrer le Signalement
+                </button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-document.getElementById('bienMaintenanceSelect')?.addEventListener('change', function() {
-    const selected = this.options[this.selectedIndex];
-    document.getElementById('codeMaintenanceHidden').value = selected.getAttribute('data-code');
-    document.getElementById('libelleMaintenanceHidden').value = selected.getAttribute('data-libelle');
-});
+function updateSelectedMaintenanceBien() {
+    const sel = document.getElementById('bienMaintenanceSelect');
+    if (sel && sel.options[sel.selectedIndex]) {
+        const opt = sel.options[sel.selectedIndex];
+        const codeInput = document.getElementById('codeMaintenanceHidden');
+        const libelleInput = document.getElementById('libelleMaintenanceHidden');
+        if (codeInput) codeInput.value = opt.getAttribute('data-code') || '';
+        if (libelleInput) libelleInput.value = opt.getAttribute('data-libelle') || '';
+    }
+}
+document.getElementById('bienMaintenanceSelect')?.addEventListener('change', updateSelectedMaintenanceBien);
+document.addEventListener('DOMContentLoaded', updateSelectedMaintenanceBien);
 
 function formatFCFA(val) {
     return new Intl.NumberFormat('fr-FR').format(val) + ' FCFA';
