@@ -18,3 +18,7 @@ docker/postgres_data/
 ehthumbs.db
 [Dd]esktop.ini
 $RECYCLE.BIN/
+
+*/storage/
+*.sqlite
+
