@@ -1,0 +1,13 @@
+{
+    "name": "gest-patrimoine/patrimoine-service",
+    "description": "Microservice de Gestion des Biens et Inventaire - GEST-PATRIMOINE",
+    "type": "project",
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "PatrimoineService\\": "src/"
+        }
+    }
+}
