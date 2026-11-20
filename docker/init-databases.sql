@@ -35,20 +35,22 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insertion des ministères initiaux
+-- Insertion des ministères initiaux (Togo)
 INSERT INTO ministeres (code, nom, sigle) VALUES
-('MEF', 'Ministère de l''Économie et des Finances', 'MEF'),
-('MBPE', 'Ministère du Budget et du Portefeuille de l''État', 'MBPE'),
-('MENA', 'Ministère de l''Éducation Nationale et de l''Alphabétisation', 'MENA'),
-('MSHP', 'Ministère de la Santé, de l''Hygiène Publique et de la CMU', 'MSHP')
+('MEF', 'Ministère de l''Économie et des Finances (Togo)', 'MEF'),
+('MENTD', 'Ministère de l''Économie Numérique et de la Transformation Digitale', 'MENTD'),
+('MTPI', 'Ministère des Travaux Publics et des Infrastructures', 'MTPI'),
+('MEPST', 'Ministère des Enseignements Primaire, Secondaire et Technique', 'MEPST'),
+('MSHPAUS', 'Ministère de la Santé, de l''Hygiène Publique et de l''Accès Universel aux Soins', 'MSHPAUS')
 ON CONFLICT DO NOTHING;
 
 -- Insertion des utilisateurs de démonstration (Mot de passe : 'password123' ou 'secret')
 -- Hash bcrypt pour 'password123' : $2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi
 INSERT INTO users (name, email, password, role, matricule, telephone, ministere_id, service) VALUES
-('Amele Rolande GOLI', 'admin@patrimoine.gouv', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'superadmin', 'MAT-001', '+225 0700000001', 1, 'Direction Générale du Patrimoine de l''État'),
-('Kouamé Jean-Marc', 'gestionnaire@patrimoine.gouv', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'gestionnaire', 'MAT-002', '+225 0700000002', 1, 'Service Logistique & Matériel'),
-('Amadou Koné', 'agent@patrimoine.gouv', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'agent', 'MAT-003', '+225 0700000003', 2, 'Direction du Budget')
+('Amele Rolande GOLI', 'admin@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'superadmin', 'MAT-TG-001', '+228 90 00 00 01', 1, 'Direction Générale du Patrimoine de l''État (DGPE Togo)'),
+('Koffi AGBEKO', 'gestionnaire@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'gestionnaire', 'MAT-TG-002', '+228 91 00 00 02', 1, 'Direction du Matériel & de la Logistique'),
+('Afiwa MENSAH', 'agent@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'agent', 'MAT-TG-003', '+228 92 00 00 03', 2, 'Direction de la Transformation Digitale'),
+('Komi AMEGAN', 'auditeur@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'agent', 'MAT-TG-004', '+228 93 00 00 04', 1, 'Inspection Générale des Finances - Lomé')
 ON CONFLICT DO NOTHING;
 
 -- ====================================================================
@@ -92,13 +94,13 @@ INSERT INTO categories (code, libelle, duree_amortissement_ans) VALUES
 ('DIV', 'Équipements & Matériels Divers', 5)
 ON CONFLICT DO NOTHING;
 
--- Insertion des biens d'exemple (avec le bien officiel GPE-000013)
+-- Insertion des biens d'exemple (Togo)
 INSERT INTO biens (code_inventaire, libelle, categorie_id, date_acquisition, valeur_acquisition_fcfa, valeur_actuelle_fcfa, etat, statut, ministere, localisation, fournisseur) VALUES
-('GPE-000013', 'ROB (Matériel & Robinetterie)', 5, '2026-11-13', 120000, 120000, 'Neuf', 'Disponible', 'Ministère de l''Économie et des Finances', 'Magasin Central - Bâtiment C', 'Comptoir Général de Fourniture'),
-('GPE-000014', 'Toyota Hilux Double Cabine 4x4 2.8 D-4D', 1, '2026-01-15', 26500000, 24000000, 'Bon état', 'Affecté', 'Ministère de l''Économie et des Finances', 'Garage Central - Véhicule Service', 'CFAO Motors Côte d''Ivoire'),
-('GPE-000015', 'Serveur Rack Dell PowerEdge R750 64GB', 3, '2026-02-20', 8900000, 7800000, 'Bon état', 'Affecté', 'Ministère du Budget et du Portefeuille de l''État', 'Datacenter DSI - Salle Serveurs', 'Dell Technologies Partner'),
-('GPE-000016', 'Immeuble Administratif R+4 Plateau', 2, '2015-05-10', 850000000, 790000000, 'Bon état', 'Affecté', 'Ministère de l''Économie et des Finances', 'Abidjan Plateau, Rue du Commerce', 'Société Ivoirienne de Construction'),
-('GPE-000017', 'Photocopieur Industriel HP LaserJet Enterprise Flow', 3, '2025-08-12', 3200000, 2100000, 'En panne', 'En réparation', 'Ministère de l''Éducation Nationale', 'Bureau 302 - Secrétariat Général', 'Bureau Vallée')
+('GPE-000013', 'Lot Sanitaire & Robinetterie Institutionnelle', 5, '2026-11-13', 120000, 120000, 'Neuf', 'Disponible', 'Ministère de l''Économie et des Finances', 'Magasin Central - Lomé Bâtiment C', 'Comptoir Togolais de Fourniture'),
+('GPE-000014', 'Toyota Hilux Double Cabine 4x4 2.8 D-4D', 1, '2026-01-15', 26500000, 24000000, 'Bon état', 'Affecté', 'Ministère de l''Économie et des Finances', 'Garage Central Administratif - Lomé', 'CFAO Motors Togo'),
+('GPE-000015', 'Serveur Rack Dell PowerEdge R750 64GB', 3, '2026-02-20', 8900000, 7800000, 'Bon état', 'Affecté', 'Ministère de l''Économie Numérique et de la Transformation Digitale', 'Lomé Data Centre - Salle Serveurs', 'Dell Technologies Togo Partner'),
+('GPE-000016', 'Immeuble Administratif R+5 Cité OUA', 2, '2015-05-10', 850000000, 790000000, 'Bon état', 'Affecté', 'Ministère de l''Économie et des Finances', 'Lomé Cité OUA, Avenue de la Libération', 'Société Togolaise de Bâtiment et Travaux Publics (STBTP Lomé)'),
+('GPE-000017', 'Photocopieur Industriel HP LaserJet Enterprise Flow', 3, '2025-08-12', 3200000, 2100000, 'En panne', 'En réparation', 'Ministère des Enseignements Primaire, Secondaire et Technique', 'Secrétariat Général - Lomé Tokoin', 'BuroTop Togo')
 ON CONFLICT DO NOTHING;
 
 -- ====================================================================
@@ -138,17 +140,13 @@ CREATE TABLE IF NOT EXISTS maintenances (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Données initiales d'affectations
+-- Données initiales d'affectations (Togo)
 INSERT INTO affectations (bien_id, code_inventaire, beneficiaire_nom, beneficiaire_matricule, service_nom, date_affectation, motif, statut) VALUES
-(2, 'GPE-000014', 'Amadou Koné', 'MAT-003', 'Direction Générale du Trésor', '2026-01-20', 'Mise à disposition pour mission d''audit', 'En cours'),
-(3, 'GPE-000015', 'Kouamé Jean-Marc', 'MAT-002', 'Direction des Systèmes d''Information', '2026-02-25', 'Hébergement applicatif ministériel', 'En cours')
-ON CONFLICT DO NOTHING;
-
--- Données initiales de maintenance
-INSERT INTO affectations (bien_id, code_inventaire, beneficiaire_nom, beneficiaire_matricule, service_nom, date_affectation, motif, statut) VALUES
-(5, 'GPE-000017', 'Secrétariat Général', 'SERV-01', 'Bureau Central', '2025-08-15', 'Équipement d''impression bureautique', 'En cours')
+(2, 'GPE-000014', 'Kodjo AGBEKO', 'MAT-TG-002', 'Direction Générale du Trésor et de la Comptabilité Publique - Lomé', '2026-01-20', 'Mise à disposition pour mission d''audit régionale', 'En cours'),
+(3, 'GPE-000015', 'Afiwa MENSAH', 'MAT-TG-003', 'Direction de la Transformation Digitale - MENTD', '2026-02-25', 'Hébergement applicatif ministériel national', 'En cours'),
+(5, 'GPE-000017', 'Komi AMEGAN', 'MAT-TG-004', 'Secrétariat Général MEPST Lomé Tokoin', '2025-08-15', 'Équipement d''impression bureautique', 'En cours')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO maintenances (bien_id, code_inventaire, libelle_bien, description_panne, priorite, statut, prestataire, cout_reparation_fcfa, date_signalement) VALUES
-(5, 'GPE-000017', 'Photocopieur Industriel HP LaserJet Enterprise Flow', 'Bourrage papier systématique dans le module d''alimentation et tambour usé.', 'Haute', 'En cours', 'Maintenance Informatique Pro CI', 185000, '2026-11-10')
+(5, 'GPE-000017', 'Photocopieur Industriel HP LaserJet Enterprise Flow', 'Bourrage papier systématique dans le module d''alimentation et tambour usé.', 'Haute', 'En cours', 'Lomé Maintenance IT Togo', 185000, '2026-11-10')
 ON CONFLICT DO NOTHING;

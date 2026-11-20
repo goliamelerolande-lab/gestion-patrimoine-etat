@@ -23,14 +23,17 @@ class AuthController
             return ['status' => 400, 'data' => ['error' => 'Email et mot de passe requis.']];
         }
 
+        $baseEmail = str_replace('@patrimoine.gouv.tg', '@patrimoine.gouv', $email);
+        $tgEmail = str_replace('@patrimoine.gouv', '@patrimoine.gouv.tg', $baseEmail);
+
         $stmt = $this->db->prepare("
             SELECT u.*, m.nom as ministere_nom, m.sigle as ministere_sigle
             FROM users u
             LEFT JOIN ministeres m ON u.ministere_id = m.id
-            WHERE u.email = :email
+            WHERE u.email = :email OR u.email = :baseEmail OR u.email = :tgEmail
             LIMIT 1
         ");
-        $stmt->execute([':email' => $email]);
+        $stmt->execute([':email' => $email, ':baseEmail' => $baseEmail, ':tgEmail' => $tgEmail]);
         $user = $stmt->fetch();
 
         if (!$user) {

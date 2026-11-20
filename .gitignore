@@ -19,6 +19,12 @@ ehthumbs.db
 [Dd]esktop.ini
 $RECYCLE.BIN/
 
+# Local databases
 */storage/
 *.sqlite
 
+# Uploads dynamiques (on conserve les fichiers officiels initiaux)
+gateway-frontend/public/uploads/cachet_custom.*
+gateway-frontend/public/uploads/signature_custom.*
+!gateway-frontend/public/uploads/cachet_default.svg
+!gateway-frontend/public/uploads/signataire_settings.json

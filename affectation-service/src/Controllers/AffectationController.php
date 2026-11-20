@@ -25,8 +25,21 @@ class AffectationController
         }
 
         if (!empty($params['q'])) {
-            $sql .= " AND (LOWER(beneficiaire_nom) LIKE :q OR LOWER(code_inventaire) LIKE :q OR LOWER(service_nom) LIKE :q)";
-            $binds[':q'] = '%' . strtolower(trim($params['q'])) . '%';
+            $sql .= " AND (
+                LOWER(beneficiaire_nom) LIKE :q1 
+                OR LOWER(code_inventaire) LIKE :q2 
+                OR LOWER(service_nom) LIKE :q3 
+                OR LOWER(beneficiaire_matricule) LIKE :q4 
+                OR LOWER(motif) LIKE :q5 
+                OR LOWER(statut) LIKE :q6
+            )";
+            $term = '%' . strtolower(trim($params['q'])) . '%';
+            $binds[':q1'] = $term;
+            $binds[':q2'] = $term;
+            $binds[':q3'] = $term;
+            $binds[':q4'] = $term;
+            $binds[':q5'] = $term;
+            $binds[':q6'] = $term;
         }
 
         $sql .= " ORDER BY id DESC";
@@ -96,9 +109,62 @@ class AffectationController
         return ['status' => 200, 'data' => ['message' => 'Restitution validée avec succès.']];
     }
 
-    public function getMaintenances(): array
+    public function updateAffectation(int $id, array $data): array
     {
-        $stmt = $this->db->query("SELECT * FROM maintenances ORDER BY id DESC");
+        $fields = [];
+        $binds = [':id' => $id];
+
+        $allowed = ['beneficiaire_nom', 'beneficiaire_matricule', 'service_nom', 'date_affectation', 'motif', 'statut', 'remarques'];
+        foreach ($allowed as $f) {
+            if (isset($data[$f])) {
+                $fields[] = "{$f} = :{$f}";
+                $binds[":{$f}"] = trim($data[$f]);
+            }
+        }
+
+        if (empty($fields)) {
+            return ['status' => 400, 'data' => ['error' => 'Aucune donnée à modifier.']];
+        }
+
+        $fields[] = "updated_at = CURRENT_TIMESTAMP";
+        $sql = "UPDATE affectations SET " . implode(', ', $fields) . " WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($binds);
+
+        return ['status' => 200, 'data' => ['message' => 'Affectation mise à jour avec succès.']];
+    }
+
+    public function deleteAffectation(int $id): array
+    {
+        $stmt = $this->db->prepare("DELETE FROM affectations WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        return ['status' => 200, 'data' => ['message' => 'Affectation supprimée avec succès.']];
+    }
+
+    public function getMaintenances(array $params = []): array
+    {
+        $sql = "SELECT * FROM maintenances WHERE 1=1";
+        $binds = [];
+        if (!empty($params['q'])) {
+            $sql .= " AND (
+                LOWER(code_inventaire) LIKE :q1 
+                OR LOWER(libelle_bien) LIKE :q2 
+                OR LOWER(description_panne) LIKE :q3 
+                OR LOWER(COALESCE(prestataire, '')) LIKE :q4 
+                OR LOWER(statut) LIKE :q5 
+                OR LOWER(priorite) LIKE :q6
+            )";
+            $term = '%' . strtolower(trim($params['q'])) . '%';
+            $binds[':q1'] = $term;
+            $binds[':q2'] = $term;
+            $binds[':q3'] = $term;
+            $binds[':q4'] = $term;
+            $binds[':q5'] = $term;
+            $binds[':q6'] = $term;
+        }
+        $sql .= " ORDER BY id DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($binds);
         return ['status' => 200, 'data' => $stmt->fetchAll()];
     }
 
@@ -152,6 +218,16 @@ class AffectationController
         $fields = [];
         $binds = [':id' => $id];
 
+        if (isset($data['description_panne'])) {
+            $fields[] = "description_panne = :description_panne";
+            $binds[':description_panne'] = trim($data['description_panne']);
+        }
+
+        if (isset($data['priorite'])) {
+            $fields[] = "priorite = :priorite";
+            $binds[':priorite'] = trim($data['priorite']);
+        }
+
         if (isset($data['statut'])) {
             $fields[] = "statut = :statut";
             $binds[':statut'] = $data['statut'];
@@ -180,5 +256,12 @@ class AffectationController
         $stmt->execute($binds);
 
         return ['status' => 200, 'data' => ['message' => 'Ticket de maintenance actualisé.']];
+    }
+
+    public function deleteMaintenance(int $id): array
+    {
+        $stmt = $this->db->prepare("DELETE FROM maintenances WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        return ['status' => 200, 'data' => ['message' => 'Ticket de maintenance supprimé avec succès.']];
     }
 }

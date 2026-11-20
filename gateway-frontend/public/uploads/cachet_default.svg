@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="180" height="180">
+  <!-- Sceau Officiel République Togolaise - Direction Générale du Patrimoine -->
+  <defs>
+    <!-- Chemins circulaires pour le texte courbé -->
+    <path id="circleTop" d="M 40,150 A 110,110 0 1,1 260,150" fill="none" />
+    <path id="circleBottom" d="M 260,150 A 110,110 0 0,1 40,150" fill="none" />
+    <path id="circleInnerTop" d="M 65,150 A 85,85 0 1,1 235,150" fill="none" />
+    <path id="circleInnerBottom" d="M 235,150 A 85,85 0 0,1 65,150" fill="none" />
+  </defs>
+
+  <g transform="rotate(-6 150 150)" opacity="0.88">
+    <!-- Cercles extérieurs concentriques dentelés style tampon encreur -->
+    <circle cx="150" cy="150" r="140" fill="none" stroke="#1E3A8A" stroke-width="4" stroke-dasharray="8 2" />
+    <circle cx="150" cy="150" r="134" fill="none" stroke="#1E3A8A" stroke-width="2" />
+    
+    <!-- Cercle intermédiaire -->
+    <circle cx="150" cy="150" r="95" fill="none" stroke="#1E3A8A" stroke-width="2" />
+    <circle cx="150" cy="150" r="91" fill="none" stroke="#1E3A8A" stroke-width="1" />
+
+    <!-- Texte externe : RÉPUBLIQUE TOGOLAISE • TRAVAIL - LIBERTÉ - PATRIE -->
+    <text fill="#1E3A8A" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="13" font-weight="800" letter-spacing="2">
+      <textPath href="#circleTop" startOffset="50%" text-anchor="middle">
+        ★ RÉPUBLIQUE TOGOLAISE ★
+      </textPath>
+    </text>
+
+    <text fill="#1E3A8A" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="10.5" font-weight="700" letter-spacing="1.5">
+      <textPath href="#circleBottom" startOffset="50%" text-anchor="middle">
+        • TRAVAIL - LIBERTÉ - PATRIE •
+      </textPath>
+    </text>
+
+    <!-- Texte intérieur : DIRECTION DU PATRIMOINE -->
+    <text fill="#1E3A8A" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="10.5" font-weight="700" letter-spacing="1">
+      <textPath href="#circleInnerTop" startOffset="50%" text-anchor="middle">
+        DIRECTION DU PATRIMOINE
+      </textPath>
+    </text>
+
+    <text fill="#1E3A8A" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="9" font-weight="600" letter-spacing="1">
+      <textPath href="#circleInnerBottom" startOffset="50%" text-anchor="middle">
+        MINISTÈRE ÉCONOMIE &amp; FINANCES
+      </textPath>
+    </text>
+
+    <!-- Centre du cachet : Étoile et Titre Directeur -->
+    <!-- Étoile à 5 branches du Togo -->
+    <polygon points="150,105 153,115 163,115 155,121 158,131 150,125 142,131 145,121 137,115 147,115" fill="#1E3A8A" />
+    
+    <text x="150" y="146" text-anchor="middle" fill="#1E3A8A" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="12" font-weight="800" letter-spacing="1">
+      LE DIRECTEUR
+    </text>
+    <text x="150" y="162" text-anchor="middle" fill="#1E3A8A" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="11" font-weight="800" letter-spacing="1">
+      GÉNÉRAL
+    </text>
+    
+    <line x1="110" y1="168" x2="190" y2="168" stroke="#1E3A8A" stroke-width="1.5" />
+    
+    <text x="150" y="180" text-anchor="middle" fill="#1E3A8A" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-size="9.5" font-weight="700">
+      LOMÉ (TOGO)
+    </text>
+  </g>
+</svg>

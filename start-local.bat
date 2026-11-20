@@ -15,7 +15,7 @@ start http://localhost:8080
 echo.
 echo ====================================================================
 echo   Plateforme operationnelle sur : http://localhost:8080
-echo   Identifiants Demo : admin@patrimoine.gouv / password123
+echo   Identifiants Demo : admin@patrimoine.gouv.tg / password123
 echo   Pour arreter le serveur, fermez la fenetre de commande correspondante.
 echo ====================================================================
 pause

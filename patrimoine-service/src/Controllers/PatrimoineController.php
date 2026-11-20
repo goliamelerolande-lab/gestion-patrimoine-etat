@@ -25,8 +25,25 @@ class PatrimoineController
         $binds = [];
 
         if (!empty($params['q'])) {
-            $sql .= " AND (LOWER(b.libelle) LIKE :q OR LOWER(b.code_inventaire) LIKE :q OR LOWER(b.localisation) LIKE :q)";
-            $binds[':q'] = '%' . strtolower(trim($params['q'])) . '%';
+            $sql .= " AND (
+                LOWER(b.libelle) LIKE :q1 
+                OR LOWER(b.code_inventaire) LIKE :q2 
+                OR LOWER(b.localisation) LIKE :q3 
+                OR LOWER(b.ministere) LIKE :q4 
+                OR LOWER(COALESCE(b.fournisseur, '')) LIKE :q5 
+                OR LOWER(b.etat) LIKE :q6 
+                OR LOWER(b.statut) LIKE :q7 
+                OR LOWER(COALESCE(c.libelle, '')) LIKE :q8
+            )";
+            $term = '%' . strtolower(trim($params['q'])) . '%';
+            $binds[':q1'] = $term;
+            $binds[':q2'] = $term;
+            $binds[':q3'] = $term;
+            $binds[':q4'] = $term;
+            $binds[':q5'] = $term;
+            $binds[':q6'] = $term;
+            $binds[':q7'] = $term;
+            $binds[':q8'] = $term;
         }
 
         if (!empty($params['categorie_id'])) {
@@ -139,21 +156,21 @@ class PatrimoineController
         $fields = [];
         $binds = [':id' => $id];
 
-        if (isset($data['etat'])) {
-            $fields[] = "etat = :etat";
-            $binds[':etat'] = $data['etat'];
-        }
-        if (isset($data['statut'])) {
-            $fields[] = "statut = :statut";
-            $binds[':statut'] = $data['statut'];
-        }
-        if (isset($data['localisation'])) {
-            $fields[] = "localisation = :localisation";
-            $binds[':localisation'] = $data['localisation'];
-        }
-        if (isset($data['valeur_actuelle_fcfa'])) {
-            $fields[] = "valeur_actuelle_fcfa = :valeur_actuelle_fcfa";
-            $binds[':valeur_actuelle_fcfa'] = (int)$data['valeur_actuelle_fcfa'];
+        $allowed = [
+            'libelle', 'categorie_id', 'date_acquisition', 'valeur_acquisition_fcfa',
+            'valeur_actuelle_fcfa', 'etat', 'statut', 'ministere', 'localisation',
+            'fournisseur', 'numero_serie', 'description'
+        ];
+
+        foreach ($allowed as $field) {
+            if (isset($data[$field])) {
+                $fields[] = "{$field} = :{$field}";
+                if (in_array($field, ['categorie_id', 'valeur_acquisition_fcfa', 'valeur_actuelle_fcfa'])) {
+                    $binds[":{$field}"] = (int)$data[$field];
+                } else {
+                    $binds[":{$field}"] = trim($data[$field]);
+                }
+            }
         }
 
         if (empty($fields)) {
@@ -166,16 +183,15 @@ class PatrimoineController
         $stmt = $this->db->prepare($sql);
         $stmt->execute($binds);
 
-        return ['status' => 200, 'data' => ['message' => 'Mise à jour effectuée.']];
+        return ['status' => 200, 'data' => ['message' => 'Mise à jour effectuée avec succès.']];
     }
 
     public function deleteBien(int $id): array
     {
-        // Sortie d'inventaire / Réforme
-        $stmt = $this->db->prepare("UPDATE biens SET etat = 'Réformé', statut = 'Sorti' WHERE id = :id");
+        $stmt = $this->db->prepare("DELETE FROM biens WHERE id = :id");
         $stmt->execute([':id' => $id]);
 
-        return ['status' => 200, 'data' => ['message' => "Bien réformé et sorti de l'inventaire actif."]];
+        return ['status' => 200, 'data' => ['message' => "Bien supprimé définitivement du registre."]];
     }
 
     public function getCategories(): array

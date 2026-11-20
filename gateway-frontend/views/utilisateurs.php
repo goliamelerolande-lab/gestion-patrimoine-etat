@@ -1,13 +1,13 @@
 <?php
-$pageTitle = 'Annuaire des Agents & Ministères';
-$pageSubtitle = 'Gestion des comptes administratifs, privilèges et rattachements ministériels';
+$pageTitle = 'Annuaire des Agents & Ministères (Togo)';
+$pageSubtitle = 'Gestion des comptes administratifs, privilèges et rattachements ministériels de l\'État Togolais';
 $currentPage = 'utilisateurs';
 ob_start();
 ?>
 
 <div class="data-card">
     <div class="card-header-bar">
-        <h3 class="card-header-title">Utilisateurs et Agents Habilités (<?= count($users) ?>)</h3>
+        <h3 class="card-header-title">Utilisateurs et Agents Habilités - Togo (<?= count($users) ?>)</h3>
     </div>
     <div class="table-responsive">
         <table class="app-table">
@@ -51,7 +51,7 @@ ob_start();
 
 <div class="data-card">
     <div class="card-header-bar">
-        <h3 class="card-header-title">Référentiel des Ministères Enregistrés (<?= count($ministeres) ?>)</h3>
+        <h3 class="card-header-title">Référentiel des Ministères de la République Togolaise (<?= count($ministeres) ?>)</h3>
     </div>
     <div class="table-responsive">
         <table class="app-table">

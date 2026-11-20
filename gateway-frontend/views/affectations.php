@@ -1,23 +1,70 @@
 <?php
-$pageTitle = 'Traçabilité des Affectations & Mouvements';
-$pageSubtitle = 'Suivi des fonctionnaires détenteurs, décharges de matériel et mutations administratives';
+$pageTitle = 'Traçabilité des Affectations & Mouvements (Togo)';
+$pageSubtitle = 'Suivi des fonctionnaires détenteurs, décharges de matériel et mutations administratives au Togo';
 $currentPage = 'affectations';
 ob_start();
 ?>
 
 <?php if (!empty($_GET['success'])): ?>
-    <div style="background-color: var(--color-success-bg); color: var(--color-success); padding: 14px 20px; border-radius: var(--radius-md); margin-bottom: 20px; font-weight: 600;">
-        <i class="fa-solid fa-circle-check"></i> Affectation enregistrée avec succès dans le registre !
+    <div class="alert-notification alert-success alert-auto-dismiss">
+        <div class="alert-icon-text">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Opération d'affectation enregistrée avec succès !</span>
+        </div>
+        <button type="button" class="alert-close-btn" onclick="this.closest('.alert-notification').remove()">&times;</button>
+        <div class="alert-timer-bar"></div>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($_GET['updated'])): ?>
+    <div class="alert-notification alert-warning alert-auto-dismiss">
+        <div class="alert-icon-text">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>Affectation modifiée avec succès !</span>
+        </div>
+        <button type="button" class="alert-close-btn" onclick="this.closest('.alert-notification').remove()">&times;</button>
+        <div class="alert-timer-bar"></div>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($_GET['deleted'])): ?>
+    <div class="alert-notification alert-danger alert-auto-dismiss">
+        <div class="alert-icon-text">
+            <i class="fa-solid fa-trash-can"></i>
+            <span>Affectation supprimée avec succès du registre.</span>
+        </div>
+        <button type="button" class="alert-close-btn" onclick="this.closest('.alert-notification').remove()">&times;</button>
+        <div class="alert-timer-bar"></div>
     </div>
 <?php endif; ?>
 
 <div class="data-card">
     <div class="card-header-bar">
-        <h3 class="card-header-title">Registre des Affectations Actives (<?= count($affectations) ?>)</h3>
-        <button class="btn btn-primary" onclick="document.getElementById('newAffectationModal').classList.add('active');">
-            <i class="fa-solid fa-plus"></i>
-            <span>Nouvelle Affectation</span>
-        </button>
+        <div>
+            <h3 class="card-header-title">Registre des Affectations du Patrimoine Public (<?= count($affectations) ?>)</h3>
+        </div>
+        <div class="card-filters-bar">
+            <form method="GET" action="/affectations" class="search-form-bar" id="searchFormAff" style="display: flex; align-items: center; gap: 8px;">
+                <div class="search-input-group" style="position: relative;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted);"></i>
+                    <input type="text" name="q" id="affSearchInput" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" placeholder="Rechercher agent, matricule, code..." autocomplete="off" style="padding-right: 32px;">
+                    <button type="button" id="clearAffSearch" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 1.1rem; line-height: 1; <?= empty($_GET['q']) ? 'display: none;' : '' ?>" title="Effacer">&times;</button>
+                </div>
+                <button type="submit" class="btn btn-outline" style="padding: 8px 14px; font-size: 0.82rem;">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Rechercher</span>
+                </button>
+                <?php if (!empty($_GET['q'])): ?>
+                    <a href="/affectations" class="btn btn-outline" style="padding: 8px 12px; font-size: 0.82rem;" title="Réinitialiser la recherche">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                <?php endif; ?>
+            </form>
+            <button class="btn btn-primary" onclick="document.getElementById('newAffectationModal').classList.add('active');">
+                <i class="fa-solid fa-plus"></i>
+                <span>Nouvelle Affectation</span>
+            </button>
+        </div>
     </div>
 
     <div class="table-responsive">
@@ -25,19 +72,19 @@ ob_start();
             <thead>
                 <tr>
                     <th>Code Inventaire</th>
-                    <th>Agent / Bénéficiaire</th>
+                    <th>Agent / Bénéficiaire (Togo)</th>
                     <th>Matricule & Service</th>
                     <th>Date d'Affectation</th>
                     <th>Motif</th>
                     <th>Statut</th>
-                    <th>Actions</th>
+                    <th style="min-width: 280px; text-align: center;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($affectations)): ?>
                     <tr>
                         <td colspan="7" style="text-align: center; padding: 40px; color: var(--color-text-muted);">
-                            <p>Aucune affectation active pour le moment.</p>
+                            <p>Aucune affectation active pour le moment dans les administrations togolaises.</p>
                         </td>
                     </tr>
                 <?php else: ?>
@@ -56,17 +103,36 @@ ob_start();
                         <td>
                             <span class="status-pill status-bon">● <?= htmlspecialchars($aff['statut']) ?></span>
                         </td>
-                        <td>
-                            <?php if ($aff['statut'] === 'En cours'): ?>
-                                <form method="POST" action="/affectations/restituer" style="display:inline;">
+                        <td style="text-align: center;">
+                            <div class="table-actions">
+                                <!-- BOUTON VOIR -->
+                                <button type="button" class="btn btn-info btn-sm" onclick='openViewAffectationModal(<?= json_encode($aff, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Voir la fiche d'affectation">
+                                    <i class="fa-regular fa-eye"></i>
+                                    <span>Voir</span>
+                                </button>
+                                <!-- BOUTON MODIFIER -->
+                                <button type="button" class="btn btn-warning btn-sm" onclick='openEditAffectationModal(<?= json_encode($aff, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Modifier les données d'affectation">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    <span>Modifier</span>
+                                </button>
+                                <!-- BOUTON RESTITUER -->
+                                <?php if ($aff['statut'] === 'En cours'): ?>
+                                    <form method="POST" action="/affectations/restituer" style="display:inline;">
+                                        <input type="hidden" name="id" value="<?= $aff['id'] ?>">
+                                        <button type="submit" class="btn btn-outline btn-sm" onclick="return confirm('Confirmer la restitution du matériel par l\'agent ?');" title="Clôturer l'affectation">
+                                            <i class="fa-solid fa-rotate-left"></i> Restituer
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                                <!-- BOUTON SUPPRIMER -->
+                                <form method="POST" action="/affectations/delete" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de cette affectation pour <?= addslashes($aff['beneficiaire_nom']) ?> ?');">
                                     <input type="hidden" name="id" value="<?= $aff['id'] ?>">
-                                    <button type="submit" class="btn btn-outline btn-sm" onclick="return confirm('Confirmer la restitution du matériel par l\'agent ?');">
-                                        <i class="fa-solid fa-rotate-left"></i> Restituer
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Supprimer cette affectation">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                        <span>Supprimer</span>
                                     </button>
                                 </form>
-                            <?php else: ?>
-                                <span style="font-size: 0.8rem; color: var(--color-text-muted);">Clôturé le <?= $aff['date_restitution'] ?? '' ?></span>
-                            <?php endif; ?>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -76,11 +142,132 @@ ob_start();
     </div>
 </div>
 
-<!-- Modal Nouvelle Affectation -->
-<div class="modal-overlay" id="newAffectationModal">
-    <div class="modal-box">
+<!-- ========================================================================= -->
+<!-- 1. MODALE VOIR L'AFFECTATION                                               -->
+<!-- ========================================================================= -->
+<div class="modal-overlay" id="viewAffectationModal">
+    <div class="modal-box" style="max-width: 650px;">
         <div class="modal-header">
-            <h3>Attribuer un Bien à un Agent ou Service</h3>
+            <h3><i class="fa-solid fa-file-contract" style="color: var(--color-primary-light);"></i> Fiche d'Affectation : <span id="va_code" style="color: var(--color-accent);"></span></h3>
+            <button class="modal-close" onclick="document.getElementById('viewAffectationModal').classList.remove('active');">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Code Inventaire du Bien</div>
+                    <div class="detail-value" id="va_code_badge"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Statut du Mouvement</div>
+                    <div class="detail-value" id="va_statut"></div>
+                </div>
+                <div class="detail-item" style="grid-column: span 2;">
+                    <div class="detail-label">Agent Bénéficiaire / Détenteur (Togo)</div>
+                    <div class="detail-value" id="va_beneficiaire" style="font-size: 1.05rem; color: var(--color-primary);"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Matricule Fonctionnaire</div>
+                    <div class="detail-value" id="va_matricule"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Direction / Service de rattachement</div>
+                    <div class="detail-value" id="va_service"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Date de Mise à Disposition</div>
+                    <div class="detail-value" id="va_date_aff"></div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Date de Restitution Effective</div>
+                    <div class="detail-value" id="va_date_rest"></div>
+                </div>
+                <div class="detail-item" style="grid-column: span 2;">
+                    <div class="detail-label">Motif Administratif de l'Affectation</div>
+                    <div class="detail-value" id="va_motif"></div>
+                </div>
+                <div class="detail-item" style="grid-column: span 2;">
+                    <div class="detail-label">Observations & Remarques Administratives</div>
+                    <div class="detail-value" id="va_remarques" style="font-style: italic;"></div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                <button type="button" class="btn btn-outline" onclick="window.print();"><i class="fa-solid fa-print"></i> Imprimer le Bon de Décharge</button>
+                <button type="button" class="btn btn-primary" onclick="document.getElementById('viewAffectationModal').classList.remove('active');">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 2. MODALE MODIFIER L'AFFECTATION                                           -->
+<!-- ========================================================================= -->
+<div class="modal-overlay" id="editAffectationModal">
+    <div class="modal-box" style="max-width: 650px;">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-pen-to-square" style="color: var(--color-warning);"></i> Modifier l'Affectation : <span id="ea_code_title"></span></h3>
+            <button class="modal-close" onclick="document.getElementById('editAffectationModal').classList.remove('active');">&times;</button>
+        </div>
+        <form method="POST" action="/affectations/update" class="modal-body">
+            <input type="hidden" name="id" id="ea_id">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nom & Prénoms de l'Agent (Togo) *</label>
+                    <input type="text" name="beneficiaire_nom" id="ea_beneficiaire_nom" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Matricule Fonctionnaire *</label>
+                    <input type="text" name="beneficiaire_matricule" id="ea_beneficiaire_matricule" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Direction ou Service de rattachement *</label>
+                    <input type="text" name="service_nom" id="ea_service_nom" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Date d'Affectation *</label>
+                    <input type="date" name="date_affectation" id="ea_date_affectation" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Motif de l'Affectation *</label>
+                    <input type="text" name="motif" id="ea_motif" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Statut *</label>
+                    <select name="statut" id="ea_statut" class="form-control">
+                        <option value="En cours">En cours</option>
+                        <option value="Restitué">Restitué</option>
+                        <option value="Transféré">Transféré</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Observations / Décharge</label>
+                <textarea name="remarques" id="ea_remarques" class="form-control" rows="2"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('editAffectationModal').classList.remove('active');">Annuler</button>
+                <button type="submit" class="btn btn-warning"><i class="fa-solid fa-save"></i> Enregistrer les Modifications</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 3. MODALE NOUVELLE AFFECTATION (TOGO)                                      -->
+<!-- ========================================================================= -->
+<div class="modal-overlay" id="newAffectationModal">
+    <div class="modal-box" style="max-width: 650px;">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-user-plus" style="color: var(--color-primary);"></i> Attribuer un Bien à un Agent ou Service (Togo)</h3>
             <button class="modal-close" onclick="document.getElementById('newAffectationModal').classList.remove('active');">&times;</button>
         </div>
         <form method="POST" action="/affectations/create" class="modal-body">
@@ -99,18 +286,18 @@ ob_start();
             <div class="form-row">
                 <div class="form-group">
                     <label>Nom & Prénoms de l'Agent *</label>
-                    <input type="text" name="beneficiaire_nom" class="form-control" placeholder="Ex: M. Amadou Koné" required>
+                    <input type="text" name="beneficiaire_nom" class="form-control" placeholder="Ex: M. Kodjo AGBEKO ou Mme Afiwa MENSAH" required>
                 </div>
                 <div class="form-group">
-                    <label>Matricule Fonctionnaire *</label>
-                    <input type="text" name="beneficiaire_matricule" class="form-control" placeholder="Ex: MAT-84920" required>
+                    <label>Matricule Fonctionnaire (Togo) *</label>
+                    <input type="text" name="beneficiaire_matricule" class="form-control" placeholder="Ex: MAT-TG-84920" required>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label>Direction ou Service de rattachement *</label>
-                    <input type="text" name="service_nom" class="form-control" placeholder="Ex: Direction Générale du Trésor" required>
+                    <input type="text" name="service_nom" class="form-control" placeholder="Ex: Direction Générale du Trésor - Lomé" required>
                 </div>
                 <div class="form-group">
                     <label>Date de Mise à Disposition</label>
@@ -120,7 +307,12 @@ ob_start();
 
             <div class="form-group">
                 <label>Motif de l'Affectation *</label>
-                <input type="text" name="motif" class="form-control" placeholder="Ex: Véhicule de fonction ou dotation informatique de bureau" required>
+                <input type="text" name="motif" class="form-control" placeholder="Ex: Véhicule de fonction ou dotation informatique de service" required>
+            </div>
+
+            <div class="form-group">
+                <label>Remarques / Référence Décharge</label>
+                <input type="text" name="remarques" class="form-control" placeholder="Ex: Décharge signée n° 2026/DGPE/04">
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
@@ -136,6 +328,108 @@ document.getElementById('bienSelect')?.addEventListener('change', function() {
     const selected = this.options[this.selectedIndex];
     document.getElementById('codeInventaireHidden').value = selected.getAttribute('data-code');
 });
+
+function openViewAffectationModal(aff) {
+    document.getElementById('va_code').innerText = aff.code_inventaire || '';
+    document.getElementById('va_code_badge').innerHTML = '<span class="code-badge">' + (aff.code_inventaire || '') + '</span>';
+    document.getElementById('va_statut').innerText = aff.statut || 'En cours';
+    document.getElementById('va_beneficiaire').innerText = aff.beneficiaire_nom || '';
+    document.getElementById('va_matricule').innerText = aff.beneficiaire_matricule || 'N/A';
+    document.getElementById('va_service').innerText = aff.service_nom || 'Direction Générale';
+    document.getElementById('va_date_aff').innerText = aff.date_affectation ? aff.date_affectation.split('-').reverse().join('/') : 'N/A';
+    document.getElementById('va_date_rest').innerText = aff.date_restitution ? aff.date_restitution.split('-').reverse().join('/') : 'Matériel toujours en détention active';
+    document.getElementById('va_motif').innerText = aff.motif || 'Affectation de service';
+    document.getElementById('va_remarques').innerText = aff.remarques || 'Aucune observation enregistrée.';
+
+    document.getElementById('viewAffectationModal').classList.add('active');
+}
+
+function openEditAffectationModal(aff) {
+    document.getElementById('ea_code_title').innerText = aff.code_inventaire || '';
+    document.getElementById('ea_id').value = aff.id || '';
+    document.getElementById('ea_beneficiaire_nom').value = aff.beneficiaire_nom || '';
+    document.getElementById('ea_beneficiaire_matricule').value = aff.beneficiaire_matricule || '';
+    document.getElementById('ea_service_nom').value = aff.service_nom || '';
+    document.getElementById('ea_date_affectation').value = aff.date_affectation || '';
+    document.getElementById('ea_motif').value = aff.motif || '';
+    document.getElementById('ea_statut').value = aff.statut || 'En cours';
+    document.getElementById('ea_remarques').value = aff.remarques || '';
+
+    document.getElementById('editAffectationModal').classList.add('active');
+}
+
+// --- FILTRAGE EN TEMPS RÉEL (Live Search Affectations) ---
+const affSearch = document.getElementById('affSearchInput');
+const clearAffBtn = document.getElementById('clearAffSearch');
+const affTitle = document.querySelector('.card-header-title');
+const originalAffTitle = affTitle ? affTitle.innerText : '';
+
+function filterAffTable(query) {
+    query = query.toLowerCase().trim();
+    if (clearAffBtn) {
+        clearAffBtn.style.display = query.length > 0 ? 'block' : 'none';
+    }
+
+    const rows = document.querySelectorAll('.app-table tbody tr');
+    let visibleCount = 0;
+    let noResultRow = document.getElementById('dynamicNoResultAffRow');
+
+    rows.forEach(row => {
+        if (row.id === 'dynamicNoResultAffRow') return;
+
+        if (row.cells.length === 1 && row.cells[0].colSpan > 1) {
+            row.style.display = query === '' ? '' : 'none';
+            return;
+        }
+
+        const text = row.innerText.toLowerCase();
+        if (query === '' || text.includes(query)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    if (visibleCount === 0 && query !== '') {
+        if (!noResultRow) {
+            noResultRow = document.createElement('tr');
+            noResultRow.id = 'dynamicNoResultAffRow';
+            noResultRow.innerHTML = '<td colspan="7" style="text-align: center; padding: 40px; color: var(--color-text-muted);"><i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; margin-bottom: 10px; display:block;"></i><strong>Aucune affectation trouvée pour "' + query.replace(/</g, '&lt;') + '"</strong></td>';
+            document.querySelector('.app-table tbody').appendChild(noResultRow);
+        } else {
+            noResultRow.style.display = '';
+            noResultRow.querySelector('strong').innerText = 'Aucune affectation trouvée pour "' + query + '"';
+        }
+    } else if (noResultRow) {
+        noResultRow.style.display = 'none';
+    }
+
+    if (affTitle) {
+        if (query === '') {
+            affTitle.innerText = originalAffTitle;
+        } else {
+            affTitle.innerText = 'Registre des Affectations du Patrimoine Public (' + visibleCount + ' résultat' + (visibleCount > 1 ? 's' : '') + ')';
+        }
+    }
+}
+
+if (affSearch) {
+    affSearch.addEventListener('input', function() {
+        filterAffTable(this.value);
+    });
+
+    if (clearAffBtn) {
+        clearAffBtn.addEventListener('click', function() {
+            affSearch.value = '';
+            filterAffTable('');
+            affSearch.focus();
+            if (window.location.search.includes('q=')) {
+                window.location.href = '/affectations';
+            }
+        });
+    }
+}
 </script>
 
 <?php

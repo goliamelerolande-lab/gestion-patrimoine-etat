@@ -1,6 +1,6 @@
 <?php
-$pageTitle = 'Tableau de Bord Exécutif';
-$pageSubtitle = 'Aperçu synthétique et valorisation du parc mobilier et immobilier de l\'État';
+$pageTitle = 'Tableau de Bord Exécutif (Togo)';
+$pageSubtitle = 'Aperçu synthétique et valorisation du parc mobilier et immobilier de l\'État Togolais';
 $currentPage = 'dashboard';
 ob_start();
 ?>
@@ -82,7 +82,7 @@ ob_start();
 <!-- 3. Derniers Biens Enregistrés -->
 <div class="data-card">
     <div class="card-header-bar">
-        <h3 class="card-header-title">Derniers Biens Enregistrés au Registre National</h3>
+        <h3 class="card-header-title">Derniers Biens Enregistrés au Registre National (Togo)</h3>
         <a href="/biens" class="btn btn-outline btn-sm">
             <span>Voir tout l'inventaire</span>
             <i class="fa-solid fa-arrow-right"></i>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion Sécurisée | GEST-PATRIMOINE - République de Côte d'Ivoire</title>
+    <title>Connexion Sécurisée | GEST-PATRIMOINE - République Togolaise</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -78,8 +78,9 @@
         <div class="login-brand-icon">
             <i class="fa-solid fa-landmark"></i>
         </div>
-        <h2>GEST-PATRIMOINE</h2>
-        <p>Gestion du Patrimoine de l'État</p>
+        <h2>GEST-PATRIMOINE TOGO</h2>
+        <p>Patrimoine de l'État • République Togolaise</p>
+        <div style="font-size: 0.76rem; color: #059669; font-weight: 700; margin-top: 5px; letter-spacing: 0.5px;">Travail - Liberté - Patrie</div>
     </div>
 
     <?php if (!empty($error)): ?>
@@ -91,7 +92,7 @@
     <form method="POST" action="/login">
         <div class="form-group">
             <label>Identifiant / Email Institutionnel</label>
-            <input type="email" name="email" id="loginEmail" class="form-control" value="admin@patrimoine.gouv" required>
+            <input type="email" name="email" id="loginEmail" class="form-control" value="admin@patrimoine.gouv.tg" required>
         </div>
 
         <div class="form-group">
@@ -111,13 +112,13 @@
         </div>
         <p style="color: var(--color-text-muted); font-size: 0.75rem;">Cliquez sur un profil pour remplir automatiquement les identifiants :</p>
         <div class="demo-btn-row">
-            <button type="button" class="btn btn-outline btn-sm" onclick="setDemo('admin@patrimoine.gouv', 'password123');" style="flex:1;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="setDemo('admin@patrimoine.gouv.tg', 'password123');" style="flex:1;">
                 Super-Admin
             </button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="setDemo('gestionnaire@patrimoine.gouv', 'password123');" style="flex:1;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="setDemo('gestionnaire@patrimoine.gouv.tg', 'password123');" style="flex:1;">
                 Gestionnaire
             </button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="setDemo('agent@patrimoine.gouv', 'password123');" style="flex:1;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="setDemo('agent@patrimoine.gouv.tg', 'password123');" style="flex:1;">
                 Agent
             </button>
         </div>

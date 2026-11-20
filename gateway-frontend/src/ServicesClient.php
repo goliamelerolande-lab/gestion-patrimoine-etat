@@ -7,21 +7,29 @@ class ServicesClient
     private string $authUrl;
     private string $patrimoineUrl;
     private string $affectationUrl;
+    private bool $isStandalone;
 
     public function __construct()
     {
-        $this->authUrl        = getenv('AUTH_SERVICE_URL') ?: 'http://auth-service:8001';
-        $this->patrimoineUrl   = getenv('PATRIMOINE_SERVICE_URL') ?: 'http://patrimoine-service:8002';
-        $this->affectationUrl = getenv('AFFECTATION_SERVICE_URL') ?: 'http://affectation-service:8003';
+        $this->isStandalone   = empty(getenv('AUTH_SERVICE_URL')) && !file_exists('/.dockerenv');
+        $this->authUrl        = getenv('AUTH_SERVICE_URL') ?: 'http://127.0.0.1:8001';
+        $this->patrimoineUrl   = getenv('PATRIMOINE_SERVICE_URL') ?: 'http://127.0.0.1:8002';
+        $this->affectationUrl = getenv('AFFECTATION_SERVICE_URL') ?: 'http://127.0.0.1:8003';
     }
 
     private function request(string $url, string $method = 'GET', array $data = []): array
     {
+        if ($this->isStandalone) {
+            return [];
+        }
+
         $ch = curl_init();
         $opts = [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 2, // 2s timeout
+            CURLOPT_CONNECTTIMEOUT_MS => 200,
+            CURLOPT_TIMEOUT_MS => 600,
+            CURLOPT_NOSIGNAL => 1,
             CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'Accept: application/json']
         ];
 
@@ -97,6 +105,22 @@ class ServicesClient
         return $this->getFallbackPatrimoineController()->createBien($data);
     }
 
+    public function updateBien(int $id, array $data): array
+    {
+        $res = $this->request("{$this->patrimoineUrl}/api/biens/{$id}", 'PUT', $data);
+        if (!empty($res)) return $res;
+
+        return $this->getFallbackPatrimoineController()->updateBien($id, $data);
+    }
+
+    public function deleteBien(int $id): array
+    {
+        $res = $this->request("{$this->patrimoineUrl}/api/biens/{$id}", 'DELETE');
+        if (!empty($res)) return $res;
+
+        return $this->getFallbackPatrimoineController()->deleteBien($id);
+    }
+
     public function getStats(): array
     {
         $res = $this->request("{$this->patrimoineUrl}/api/stats");
@@ -143,12 +167,13 @@ class ServicesClient
     // =========================================================================
     // API AFFECTATIONS & MAINTENANCE
     // =========================================================================
-    public function getAffectations(): array
+    public function getAffectations(array $params = []): array
     {
-        $res = $this->request("{$this->affectationUrl}/api/affectations");
+        $queryString = http_build_query($params);
+        $res = $this->request("{$this->affectationUrl}/api/affectations?{$queryString}");
         if (!empty($res)) return $res;
 
-        return $this->getFallbackAffectationController()->getAffectations()['data'] ?? [];
+        return $this->getFallbackAffectationController()->getAffectations($params)['data'] ?? [];
     }
 
     public function createAffectation(array $data): array
@@ -159,12 +184,29 @@ class ServicesClient
         return $this->getFallbackAffectationController()->createAffectation($data);
     }
 
-    public function getMaintenances(): array
+    public function updateAffectation(int $id, array $data): array
     {
-        $res = $this->request("{$this->affectationUrl}/api/maintenances");
+        $res = $this->request("{$this->affectationUrl}/api/affectations/{$id}", 'PUT', $data);
         if (!empty($res)) return $res;
 
-        return $this->getFallbackAffectationController()->getMaintenances()['data'] ?? [];
+        return $this->getFallbackAffectationController()->updateAffectation($id, $data);
+    }
+
+    public function deleteAffectation(int $id): array
+    {
+        $res = $this->request("{$this->affectationUrl}/api/affectations/{$id}", 'DELETE');
+        if (!empty($res)) return $res;
+
+        return $this->getFallbackAffectationController()->deleteAffectation($id);
+    }
+
+    public function getMaintenances(array $params = []): array
+    {
+        $queryString = http_build_query($params);
+        $res = $this->request("{$this->affectationUrl}/api/maintenances?{$queryString}");
+        if (!empty($res)) return $res;
+
+        return $this->getFallbackAffectationController()->getMaintenances($params)['data'] ?? [];
     }
 
     public function createMaintenance(array $data): array
@@ -173,5 +215,21 @@ class ServicesClient
         if (!empty($res)) return $res;
 
         return $this->getFallbackAffectationController()->createMaintenance($data);
+    }
+
+    public function updateMaintenance(int $id, array $data): array
+    {
+        $res = $this->request("{$this->affectationUrl}/api/maintenances/{$id}", 'PUT', $data);
+        if (!empty($res)) return $res;
+
+        return $this->getFallbackAffectationController()->updateMaintenance($id, $data);
+    }
+
+    public function deleteMaintenance(int $id): array
+    {
+        $res = $this->request("{$this->affectationUrl}/api/maintenances/{$id}", 'DELETE');
+        if (!empty($res)) return $res;
+
+        return $this->getFallbackAffectationController()->deleteMaintenance($id);
     }
 }
