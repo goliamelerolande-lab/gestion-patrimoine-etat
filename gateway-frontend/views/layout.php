@@ -70,15 +70,15 @@
         </nav>
 
         <div class="sidebar-footer">
-            <div class="user-mini-card">
+            <a href="/utilisateurs?modal=profile" class="user-mini-card" style="text-decoration: none; color: inherit; flex: 1; cursor: pointer;" title="Modifier mon nom d'utilisateur et mon mot de passe">
                 <div class="user-avatar-circle">
                     <?= substr($_SESSION['user']['name'] ?? 'Amele GOLI', 0, 2) ?>
                 </div>
                 <div>
                     <div class="user-name-small"><?= htmlspecialchars($_SESSION['user']['name'] ?? 'Amele Rolande GOLI') ?></div>
-                    <div class="user-role-badge"><?= htmlspecialchars($_SESSION['user']['role'] ?? 'Super-Admin') ?></div>
+                    <div class="user-role-badge"><i class="fa-solid fa-pen-to-square" style="font-size: 0.65rem; margin-right: 3px;"></i> <?= htmlspecialchars($_SESSION['user']['role'] ?? 'Super-Admin') ?></div>
                 </div>
-            </div>
+            </a>
             <a href="/logout" class="logout-btn" title="Déconnexion">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i>
             </a>
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Nettoyer immédiatement l'URL pour ne pas réafficher l'alerte au prochain rafraîchissement
         const url = new URL(window.location.href);
-        const paramsToClean = ['success', 'updated', 'deleted', 'cachet_saved', 'cachet_reset', 'error_cachet', 'settings_saved', 'sig_saved', 'sig_reset', 'error_sig'];
+        const paramsToClean = ['success', 'updated', 'deleted', 'cachet_saved', 'cachet_reset', 'error_cachet', 'settings_saved', 'sig_saved', 'sig_reset', 'error_sig', 'profile_updated'];
         let hasParam = false;
         paramsToClean.forEach(function(param) {
             if (url.searchParams.has(param)) {

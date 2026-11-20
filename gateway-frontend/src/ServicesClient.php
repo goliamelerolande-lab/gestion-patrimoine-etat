@@ -167,6 +167,14 @@ class ServicesClient
         return $this->getFallbackAuthController()->getUsers()['data'] ?? [];
     }
 
+    public function updateUser(int $id, array $data): array
+    {
+        $res = $this->request("{$this->authUrl}/api/users/{$id}", 'PUT', $data);
+        if (!empty($res)) return $res;
+
+        return $this->getFallbackAuthController()->updateUser($id, $data);
+    }
+
     public function getMinisteres(): array
     {
         $res = $this->request("{$this->authUrl}/api/ministeres");

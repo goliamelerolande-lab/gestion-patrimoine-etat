@@ -361,6 +361,33 @@ if ($uri === '/utilisateurs') {
     exit;
 }
 
+// 8.1 MODIFICATION DU PROFIL UTILISATEUR & MOT DE PASSE ADMIN
+if (($uri === '/profil/update' || $uri === '/utilisateurs/update') && $method === 'POST') {
+    $id = (int)($_POST['id'] ?? ($_SESSION['user']['id'] ?? 1));
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+    $telephone = trim($_POST['telephone'] ?? '');
+
+    $client->updateUser($id, [
+        'name' => $name,
+        'email' => $email,
+        'password' => $password,
+        'telephone' => $telephone
+    ]);
+
+    // Mettre à jour la session active pour refléter immédiatement le nouveau nom/email
+    if ($id === (int)($_SESSION['user']['id'] ?? 1) || empty($_POST['id'])) {
+        if (!empty($name)) $_SESSION['user']['name'] = $name;
+        if (!empty($email)) $_SESSION['user']['email'] = $email;
+        if (!empty($telephone)) $_SESSION['user']['telephone'] = $telephone;
+    }
+
+    $redirectTo = $_POST['redirect_to'] ?? '/utilisateurs';
+    header('Location: ' . $redirectTo . '?profile_updated=1');
+    exit;
+}
+
 // Fichiers statiques ou 404
 header('Location: /');
 exit;

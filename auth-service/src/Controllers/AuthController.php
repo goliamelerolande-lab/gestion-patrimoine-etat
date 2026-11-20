@@ -164,4 +164,50 @@ class AuthController
             return ['status' => 500, 'data' => ['error' => 'Erreur création : ' . $e->getMessage()]];
         }
     }
+
+    public function updateUser(int $id, array $data): array
+    {
+        $name = trim($data['name'] ?? '');
+        $email = trim($data['email'] ?? '');
+        $password = trim($data['password'] ?? '');
+        $telephone = trim($data['telephone'] ?? '');
+
+        if (empty($name) || empty($email)) {
+            return ['status' => 400, 'data' => ['error' => 'Le nom et l\'email sont requis.']];
+        }
+
+        try {
+            if (!empty($password)) {
+                $hash = password_hash($password, PASSWORD_BCRYPT);
+                $stmt = $this->db->prepare("
+                    UPDATE users 
+                    SET name = :name, email = :email, password = :password, telephone = :telephone, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = :id
+                ");
+                $stmt->execute([
+                    ':name' => $name,
+                    ':email' => $email,
+                    ':password' => $hash,
+                    ':telephone' => $telephone,
+                    ':id' => $id
+                ]);
+            } else {
+                $stmt = $this->db->prepare("
+                    UPDATE users 
+                    SET name = :name, email = :email, telephone = :telephone, updated_at = CURRENT_TIMESTAMP
+                    WHERE id = :id
+                ");
+                $stmt->execute([
+                    ':name' => $name,
+                    ':email' => $email,
+                    ':telephone' => $telephone,
+                    ':id' => $id
+                ]);
+            }
+
+            return ['status' => 200, 'data' => ['message' => 'Profil mis à jour avec succès.']];
+        } catch (\Exception $e) {
+            return ['status' => 500, 'data' => ['error' => 'Erreur mise à jour : ' . $e->getMessage()]];
+        }
+    }
 }
