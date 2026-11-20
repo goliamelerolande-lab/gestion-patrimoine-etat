@@ -16,8 +16,53 @@ if (!isset($_SESSION['user']) && $uri !== '/login') {
         'id' => 1,
         'name' => 'Amele Rolande GOLI',
         'email' => 'admin@patrimoine.gouv.tg',
-        'role' => 'Super-Administrateur'
+        'role' => 'superadmin',
+        'telephone' => '+228 90 00 00 01'
     ];
+}
+
+$currentUser = $_SESSION['user'] ?? [];
+$rawRole = strtolower($currentUser['role'] ?? 'superadmin');
+$roleKey = 'superadmin';
+if (strpos($rawRole, 'gest') !== false) {
+    $roleKey = 'gestionnaire';
+} elseif (strpos($rawRole, 'agent') !== false || (strpos($rawRole, 'admin') === false && strpos($rawRole, 'super') === false)) {
+    $roleKey = 'agent';
+}
+
+// CONTRÔLE D'ACCÈS RBAC (Role-Based Access Control)
+if ($uri !== '/login' && $uri !== '/logout' && $uri !== '/profil/update') {
+    // 1. RÈGLES AGENT
+    if ($roleKey === 'agent') {
+        // Interdiction des modules réservés à la DGPE & Gestionnaires
+        if (in_array($uri, ['/rapports', '/cachet', '/parametres', '/signature', '/utilisateurs'])) {
+            header('Location: /?unauthorized=1');
+            exit;
+        }
+        // Interdiction des actions de création/modification/suppression de biens et affectations globales
+        if (in_array($uri, [
+            '/biens/create', '/biens/update', '/biens/delete',
+            '/affectations/create', '/affectations/update', '/affectations/delete', '/affectations/restituer',
+            '/maintenances/update', '/maintenances/delete'
+        ]) && $method === 'POST') {
+            header('Location: /?unauthorized=1');
+            exit;
+        }
+    }
+
+    // 2. RÈGLES GESTIONNAIRE
+    if ($roleKey === 'gestionnaire') {
+        // Interdiction du Sceau d'État officiel, Signature DGPE et Annuaire de gestion des comptes
+        if (in_array($uri, ['/cachet', '/parametres', '/signature', '/utilisateurs'])) {
+            header('Location: /?unauthorized=1');
+            exit;
+        }
+        // Interdiction de suppression définitive (réservée au Super-Admin)
+        if (in_array($uri, ['/biens/delete', '/affectations/delete', '/maintenances/delete']) && $method === 'POST') {
+            header('Location: /?unauthorized=1');
+            exit;
+        }
+    }
 }
 
 // 1. ROUTE : LOGIN
@@ -383,7 +428,8 @@ if (($uri === '/profil/update' || $uri === '/utilisateurs/update') && $method ==
         if (!empty($telephone)) $_SESSION['user']['telephone'] = $telephone;
     }
 
-    $redirectTo = $_POST['redirect_to'] ?? '/utilisateurs';
+    $defaultRedirect = ($roleKey === 'superadmin') ? '/utilisateurs' : '/';
+    $redirectTo = !empty($_POST['redirect_to']) ? $_POST['redirect_to'] : $defaultRedirect;
     header('Location: ' . $redirectTo . '?profile_updated=1');
     exit;
 }

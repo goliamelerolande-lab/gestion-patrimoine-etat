@@ -1,6 +1,30 @@
 <?php
-$pageTitle = 'Gestion de la Maintenance & Suivi des Pannes (Togo)';
-$pageSubtitle = 'Signalement d\'incidents, interventions techniques et maîtrise des coûts de réparation au Togo';
+$currentUser = $_SESSION['user'] ?? [];
+$rawRole = strtolower($currentUser['role'] ?? 'superadmin');
+$roleKey = 'superadmin';
+if (strpos($rawRole, 'gest') !== false) {
+    $roleKey = 'gestionnaire';
+} elseif (strpos($rawRole, 'agent') !== false || (strpos($rawRole, 'admin') === false && strpos($rawRole, 'super') === false)) {
+    $roleKey = 'agent';
+}
+
+if ($roleKey === 'agent') {
+    $pageTitle = 'Assistance & Signalement de Pannes (Togo)';
+    $pageSubtitle = 'Déclaration rapide d\'incident sur vos matériels de fonction pour prise en charge';
+    $agentMaints = array_filter($maintenances ?? [], function($m) {
+        return ($m['code_inventaire'] ?? '') === 'GPE-000015' 
+            || stripos($m['libelle_bien'] ?? '', 'Serveur') !== false;
+    });
+    $displayMaintenances = array_values($agentMaints);
+} elseif ($roleKey === 'gestionnaire') {
+    $pageTitle = 'Gestion de la Maintenance & Suivi des Pannes (Togo)';
+    $pageSubtitle = 'Signalement d\'incidents, gestion des prestataires et validation des devis de réparation';
+    $displayMaintenances = $maintenances ?? [];
+} else {
+    $pageTitle = 'Gestion de la Maintenance & Suivi des Pannes (Togo)';
+    $pageSubtitle = 'Signalement d\'incidents, interventions techniques et maîtrise des coûts de réparation au Togo';
+    $displayMaintenances = $maintenances ?? [];
+}
 $currentPage = 'maintenances';
 ob_start();
 ?>
@@ -41,28 +65,36 @@ ob_start();
 <div class="data-card">
     <div class="card-header-bar">
         <div>
-            <h3 class="card-header-title">Tickets d'Intervention & Pannes du Patrimoine Public (<?= count($maintenances) ?>)</h3>
+            <h3 class="card-header-title">
+                <?php if ($roleKey === 'agent'): ?>
+                    <i class="fa-solid fa-screwdriver-wrench" style="color: #DC2626; margin-right: 6px;"></i> Mes Signalements d'Incidents Techniques (<?= count($displayMaintenances) ?>)
+                <?php else: ?>
+                    Tickets d'Intervention & Pannes du Patrimoine Public (<?= count($displayMaintenances) ?>)
+                <?php endif; ?>
+            </h3>
         </div>
         <div class="card-filters-bar">
-            <form method="GET" action="/maintenances" class="search-form-bar" id="searchFormMaint" style="display: flex; align-items: center; gap: 8px;">
-                <div class="search-input-group" style="position: relative;">
-                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted);"></i>
-                    <input type="text" name="q" id="maintSearchInput" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" placeholder="Rechercher panne, matériel, prestataire..." autocomplete="off" style="padding-right: 32px;">
-                    <button type="button" id="clearMaintSearch" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 1.1rem; line-height: 1; <?= empty($_GET['q']) ? 'display: none;' : '' ?>" title="Effacer">&times;</button>
-                </div>
-                <button type="submit" class="btn btn-outline" style="padding: 8px 14px; font-size: 0.82rem;">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <span>Rechercher</span>
-                </button>
-                <?php if (!empty($_GET['q'])): ?>
-                    <a href="/maintenances" class="btn btn-outline" style="padding: 8px 12px; font-size: 0.82rem;" title="Réinitialiser la recherche">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </a>
-                <?php endif; ?>
-            </form>
-            <button class="btn btn-primary" onclick="document.getElementById('newMaintenanceModal').classList.add('active');">
+            <?php if ($roleKey !== 'agent'): ?>
+                <form method="GET" action="/maintenances" class="search-form-bar" id="searchFormMaint" style="display: flex; align-items: center; gap: 8px;">
+                    <div class="search-input-group" style="position: relative;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted);"></i>
+                        <input type="text" name="q" id="maintSearchInput" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" placeholder="Rechercher panne, matériel, prestataire..." autocomplete="off" style="padding-right: 32px;">
+                        <button type="button" id="clearMaintSearch" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 1.1rem; line-height: 1; <?= empty($_GET['q']) ? 'display: none;' : '' ?>" title="Effacer">&times;</button>
+                    </div>
+                    <button type="submit" class="btn btn-outline" style="padding: 8px 14px; font-size: 0.82rem;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Rechercher</span>
+                    </button>
+                    <?php if (!empty($_GET['q'])): ?>
+                        <a href="/maintenances" class="btn btn-outline" style="padding: 8px 12px; font-size: 0.82rem;" title="Réinitialiser la recherche">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </a>
+                    <?php endif; ?>
+                </form>
+            <?php endif; ?>
+            <button class="btn btn-primary" onclick="document.getElementById('newMaintenanceModal').classList.add('active');" style="<?= $roleKey === 'agent' ? 'background-color: #DC2626; border-color: #DC2626;' : '' ?>">
                 <i class="fa-solid fa-triangle-exclamation"></i>
-                <span>Signaler une Panne</span>
+                <span><?= $roleKey === 'agent' ? 'Signaler une Panne sur mon Matériel' : 'Signaler une Panne' ?></span>
             </button>
         </div>
     </div>
@@ -75,21 +107,24 @@ ob_start();
                     <th>Équipement & Panne</th>
                     <th>Priorité</th>
                     <th>Statut</th>
-                    <th>Prestataire Agréé (Togo)</th>
-                    <th>Coût Réparation</th>
+                    <?php if ($roleKey !== 'agent'): ?>
+                        <th>Prestataire Agréé (Togo)</th>
+                        <th>Coût Réparation</th>
+                    <?php endif; ?>
                     <th>Date Signalée</th>
-                    <th style="min-width: 250px; text-align: center;">Actions</th>
+                    <th style="min-width: <?= $roleKey === 'agent' ? '120px' : '250px' ?>; text-align: center;">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($maintenances)): ?>
+                <?php if (empty($displayMaintenances)): ?>
                     <tr>
-                        <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-muted);">
-                            <p>Aucun incident ou panne en cours d'intervention.</p>
+                        <td colspan="<?= $roleKey === 'agent' ? 6 : 8 ?>" style="text-align: center; padding: 40px; color: var(--color-text-muted);">
+                            <i class="fa-solid fa-circle-check" style="font-size: 2rem; color: #059669; margin-bottom: 10px;"></i>
+                            <p>Aucun incident ou panne déclaré pour le moment. Votre matériel est 100% opérationnel !</p>
                         </td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($maintenances as $m): ?>
+                    <?php foreach ($displayMaintenances as $m): ?>
                     <tr>
                         <td><span class="code-badge"><?= htmlspecialchars($m['code_inventaire']) ?></span></td>
                         <td>
@@ -110,29 +145,37 @@ ob_start();
                         <td>
                             <span class="status-pill status-panne">● <?= htmlspecialchars($m['statut']) ?></span>
                         </td>
-                        <td><?= htmlspecialchars($m['prestataire'] ?? 'Régie Directe Lomé') ?></td>
-                        <td class="price-tag"><?= number_format($m['cout_reparation_fcfa'] ?? 0, 0, ',', ' ') ?> FCFA</td>
+                        <?php if ($roleKey !== 'agent'): ?>
+                            <td><?= htmlspecialchars($m['prestataire'] ?? 'Régie Directe Lomé') ?></td>
+                            <td class="price-tag"><?= number_format($m['cout_reparation_fcfa'] ?? 0, 0, ',', ' ') ?> FCFA</td>
+                        <?php endif; ?>
                         <td><?= date('d/m/Y', strtotime($m['date_signalement'])) ?></td>
                         <td style="text-align: center;">
                             <div class="table-actions">
-                                <!-- BOUTON VOIR -->
+                                <!-- BOUTON VOIR (TOUS LES RÔLES) -->
                                 <button type="button" class="btn btn-info btn-sm" onclick='openViewMaintenanceModal(<?= json_encode($m, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Voir le ticket">
                                     <i class="fa-regular fa-eye"></i>
                                     <span>Voir</span>
                                 </button>
-                                <!-- BOUTON MODIFIER -->
-                                <button type="button" class="btn btn-warning btn-sm" onclick='openEditMaintenanceModal(<?= json_encode($m, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Modifier le ticket / devis">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                    <span>Modifier</span>
-                                </button>
-                                <!-- BOUTON SUPPRIMER -->
-                                <form method="POST" action="/maintenances/delete" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de ce ticket pour <?= addslashes($m['code_inventaire']) ?> ?');">
-                                    <input type="hidden" name="id" value="<?= $m['id'] ?>">
-                                    <button type="submit" class="btn btn-danger btn-sm" title="Supprimer ce ticket">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                        <span>Supprimer</span>
+
+                                <?php if ($roleKey !== 'agent'): ?>
+                                    <!-- BOUTON MODIFIER (SUPER-ADMIN & GESTIONNAIRE) -->
+                                    <button type="button" class="btn btn-warning btn-sm" onclick='openEditMaintenanceModal(<?= json_encode($m, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Modifier le ticket / devis">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        <span>Modifier</span>
                                     </button>
-                                </form>
+
+                                    <!-- BOUTON SUPPRIMER (SUPER-ADMIN UNIQUEMENT) -->
+                                    <?php if ($roleKey === 'superadmin'): ?>
+                                        <form method="POST" action="/maintenances/delete" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de ce ticket pour <?= addslashes($m['code_inventaire']) ?> ?');">
+                                            <input type="hidden" name="id" value="<?= $m['id'] ?>">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Supprimer ce ticket">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                                <span>Supprimer</span>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
@@ -270,40 +313,61 @@ ob_start();
             <div class="form-group">
                 <label>Sélectionner le Bien Défectueux *</label>
                 <select name="bien_id" class="form-control" required id="bienMaintenanceSelect">
-                    <?php foreach ($biens as $bien): ?>
+                    <?php 
+                        $modalBiens = $biens;
+                        if ($roleKey === 'agent') {
+                            $modalBiens = array_filter($biens, function($b) {
+                                return ($b['code_inventaire'] ?? '') === 'GPE-000015' || stripos($b['ministere'] ?? '', 'Numérique') !== false;
+                            });
+                            if (empty($modalBiens)) $modalBiens = [reset($biens)];
+                        }
+                    ?>
+                    <?php foreach ($modalBiens as $bien): ?>
                         <option value="<?= $bien['id'] ?>" data-code="<?= htmlspecialchars($bien['code_inventaire']) ?>" data-libelle="<?= htmlspecialchars($bien['libelle']) ?>">
                             <?= htmlspecialchars($bien['code_inventaire']) ?> — <?= htmlspecialchars($bien['libelle']) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <input type="hidden" name="code_inventaire" id="codeMaintenanceHidden" value="<?= htmlspecialchars($biens[0]['code_inventaire'] ?? '') ?>">
-            <input type="hidden" name="libelle_bien" id="libelleMaintenanceHidden" value="<?= htmlspecialchars($biens[0]['libelle'] ?? '') ?>">
+            <input type="hidden" name="code_inventaire" id="codeMaintenanceHidden" value="<?= htmlspecialchars($modalBiens[0]['code_inventaire'] ?? '') ?>">
+            <input type="hidden" name="libelle_bien" id="libelleMaintenanceHidden" value="<?= htmlspecialchars($modalBiens[0]['libelle'] ?? '') ?>">
 
             <div class="form-group">
-                <label>Description du Dysfonctionnement / Problème *</label>
-                <textarea name="description_panne" class="form-control" rows="3" placeholder="Précisez la panne (ex: Fuite d'huile moteur, surchauffe carte mère, bourrage tambour...)" required></textarea>
+                <label>Description du Dysfonctionnement / Problème Constaté *</label>
+                <textarea name="description_panne" class="form-control" rows="3" placeholder="Précisez la panne (ex: écran noir, dysfonctionnement alimentation, alarme voyant rouge...)" required></textarea>
             </div>
 
             <div class="form-row">
-                <div class="form-group">
+                <div class="form-group" style="<?= $roleKey === 'agent' ? 'grid-column: span 2;' : '' ?>">
                     <label>Degré d'Urgence / Priorité *</label>
                     <select name="priorite" class="form-control">
-                        <option value="Moyenne">Moyenne</option>
-                        <option value="Haute">Haute</option>
-                        <option value="Critique">Critique (Blocage de service)</option>
-                        <option value="Basse">Basse</option>
+                        <option value="Moyenne">Moyenne (Ralentissement de travail)</option>
+                        <option value="Haute">Haute (Incident majeur)</option>
+                        <option value="Critique">Critique (Blocage total du service)</option>
+                        <option value="Basse">Basse (Simple anomalie)</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Coût Estimatif de Réparation (FCFA)</label>
-                    <input type="number" name="cout_reparation_fcfa" class="form-control" placeholder="0">
-                </div>
+                <?php if ($roleKey !== 'agent'): ?>
+                    <div class="form-group">
+                        <label>Coût Estimatif de Réparation (FCFA)</label>
+                        <input type="number" name="cout_reparation_fcfa" class="form-control" placeholder="0">
+                    </div>
+                <?php else: ?>
+                    <input type="hidden" name="cout_reparation_fcfa" value="0">
+                <?php endif; ?>
             </div>
 
-            <div class="form-group">
-                <label>Prestataire Technique en Charge (Togo)</label>
-                <input type="text" name="prestataire" class="form-control" placeholder="Ex: CFAO Motors Togo, Lomé Maintenance IT, STBTP Lomé">
+            <?php if ($roleKey !== 'agent'): ?>
+                <div class="form-group">
+                    <label>Prestataire Technique en Charge (Togo)</label>
+                    <input type="text" name="prestataire" class="form-control" placeholder="Ex: CFAO Motors Togo, Lomé Maintenance IT, STBTP Lomé">
+                </div>
+            <?php else: ?>
+                <input type="hidden" name="prestataire" value="Prise en charge interne MENTD">
+                <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; padding: 12px; border-radius: var(--radius-md); font-size: 0.82rem; margin-top: 10px;">
+                    <i class="fa-solid fa-circle-info"></i> Votre demande sera immédiatement notifiée au Gestionnaire de Parc pour mandat d'un prestataire agréé de l'État.
+                </div>
+            <?php endif; ?>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">

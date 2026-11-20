@@ -1,6 +1,33 @@
 <?php
-$pageTitle = 'Registre National des Biens de l\'État (Togo)';
-$pageSubtitle = 'Recensement, inventaire permanent et suivi signalétique du patrimoine public togolais';
+$currentUser = $_SESSION['user'] ?? [];
+$rawRole = strtolower($currentUser['role'] ?? 'superadmin');
+$roleKey = 'superadmin';
+if (strpos($rawRole, 'gest') !== false) {
+    $roleKey = 'gestionnaire';
+} elseif (strpos($rawRole, 'agent') !== false || (strpos($rawRole, 'admin') === false && strpos($rawRole, 'super') === false)) {
+    $roleKey = 'agent';
+}
+
+if ($roleKey === 'agent') {
+    $pageTitle = 'Mes Équipements Professionnels Confiés (Togo)';
+    $pageSubtitle = 'Consultation du matériel de l\'État Togolais mis à votre disposition pour vos fonctions';
+    $agentBiens = array_filter($biens ?? [], function($b) {
+        return ($b['code_inventaire'] ?? '') === 'GPE-000015' 
+            || stripos($b['ministere'] ?? '', 'Numérique') !== false;
+    });
+    if (empty($agentBiens) && !empty($biens)) {
+        $agentBiens = [reset($biens)];
+    }
+    $displayBiens = array_values($agentBiens);
+} elseif ($roleKey === 'gestionnaire') {
+    $pageTitle = 'Registre du Patrimoine Public (MEF - Togo)';
+    $pageSubtitle = 'Gestion technique, inventaire permanent et suivi signalétique du parc togolais';
+    $displayBiens = $biens ?? [];
+} else {
+    $pageTitle = 'Registre National des Biens de l\'État (Togo)';
+    $pageSubtitle = 'Recensement, inventaire permanent et contrôle de l\'ensemble du patrimoine togolais';
+    $displayBiens = $biens ?? [];
+}
 $currentPage = 'biens';
 ob_start();
 ?>
@@ -41,29 +68,41 @@ ob_start();
 <div class="data-card">
     <div class="card-header-bar">
         <div>
-            <h3 class="card-header-title">Inventaire du Patrimoine de l'État Togolais (<?= count($biens) ?>)</h3>
+            <h3 class="card-header-title">
+                <?php if ($roleKey === 'agent'): ?>
+                    <i class="fa-solid fa-laptop-file" style="color: #059669; margin-right: 6px;"></i> Mes Équipements Professionnels Confiés (<?= count($displayBiens) ?>)
+                <?php else: ?>
+                    Inventaire du Patrimoine de l'État Togolais (<?= count($displayBiens) ?>)
+                <?php endif; ?>
+            </h3>
         </div>
         <div class="card-filters-bar">
-            <form method="GET" action="/biens" class="search-form-bar" id="searchFormBiens" style="display: flex; align-items: center; gap: 8px;">
-                <div class="search-input-group" style="position: relative;">
-                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted);"></i>
-                    <input type="text" name="q" id="biensSearchInput" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" placeholder="Rechercher code, libellé, Lomé, Kara..." autocomplete="off" style="padding-right: 32px;">
-                    <button type="button" id="clearBiensSearch" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 1.1rem; line-height: 1; <?= empty($_GET['q']) ? 'display: none;' : '' ?>" title="Effacer">&times;</button>
-                </div>
-                <button type="submit" class="btn btn-outline" style="padding: 8px 14px; font-size: 0.82rem;">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <span>Rechercher</span>
+            <?php if ($roleKey !== 'agent'): ?>
+                <form method="GET" action="/biens" class="search-form-bar" id="searchFormBiens" style="display: flex; align-items: center; gap: 8px;">
+                    <div class="search-input-group" style="position: relative;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted);"></i>
+                        <input type="text" name="q" id="biensSearchInput" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" placeholder="Rechercher code, libellé, Lomé, Kara..." autocomplete="off" style="padding-right: 32px;">
+                        <button type="button" id="clearBiensSearch" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 1.1rem; line-height: 1; <?= empty($_GET['q']) ? 'display: none;' : '' ?>" title="Effacer">&times;</button>
+                    </div>
+                    <button type="submit" class="btn btn-outline" style="padding: 8px 14px; font-size: 0.82rem;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Rechercher</span>
+                    </button>
+                    <?php if (!empty($_GET['q'])): ?>
+                        <a href="/biens" class="btn btn-outline" style="padding: 8px 12px; font-size: 0.82rem;" title="Réinitialiser la recherche">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </a>
+                    <?php endif; ?>
+                </form>
+                <button class="btn btn-primary" onclick="document.getElementById('newBienModal').classList.add('active');">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Nouveau Bien</span>
                 </button>
-                <?php if (!empty($_GET['q'])): ?>
-                    <a href="/biens" class="btn btn-outline" style="padding: 8px 12px; font-size: 0.82rem;" title="Réinitialiser la recherche">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </a>
-                <?php endif; ?>
-            </form>
-            <button class="btn btn-primary" onclick="document.getElementById('newBienModal').classList.add('active');">
-                <i class="fa-solid fa-plus"></i>
-                <span>Nouveau Bien</span>
-            </button>
+            <?php else: ?>
+                <div style="font-size: 0.82rem; color: #059669; font-weight: 700; background-color: #ECFDF5; border: 1px solid #A7F3D0; padding: 6px 14px; border-radius: 9999px;">
+                    <i class="fa-solid fa-shield-halved"></i> Dotation Individuelle Certifiée
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -78,11 +117,11 @@ ob_start();
                     <th>Valeur d'Acquisition</th>
                     <th>État</th>
                     <th>Statut</th>
-                    <th style="min-width: 280px; text-align: center;">Actions</th>
+                    <th style="min-width: 250px; text-align: center;">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($biens)): ?>
+                <?php if (empty($displayBiens)): ?>
                     <tr>
                         <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-text-muted);">
                             <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 10px;"></i>
@@ -90,7 +129,7 @@ ob_start();
                         </td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($biens as $bien): ?>
+                    <?php foreach ($displayBiens as $bien): ?>
                     <tr>
                         <td>
                             <span class="code-badge"><?= htmlspecialchars($bien['code_inventaire']) ?></span>
@@ -122,28 +161,41 @@ ob_start();
                         </td>
                         <td style="text-align: center;">
                             <div class="table-actions">
-                                <!-- BOUTON VOIR -->
+                                <!-- BOUTON VOIR (TOUS LES RÔLES) -->
                                 <button type="button" class="btn btn-info btn-sm" onclick='openViewBienModal(<?= json_encode($bien, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Voir la fiche complète">
                                     <i class="fa-regular fa-eye"></i>
                                     <span>Voir</span>
                                 </button>
-                                <!-- BOUTON MODIFIER -->
-                                <button type="button" class="btn btn-warning btn-sm" onclick='openEditBienModal(<?= json_encode($bien, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Modifier les données du bien">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                    <span>Modifier</span>
-                                </button>
-                                <!-- BOUTON SUPPRIMER -->
-                                <form method="POST" action="/biens/delete" style="display:inline;" onsubmit="return confirm('Confirmer la suppression définitive du bien <?= addslashes($bien['code_inventaire']) ?> (<?= addslashes($bien['libelle']) ?>) ?');">
-                                    <input type="hidden" name="id" value="<?= $bien['id'] ?>">
-                                    <button type="submit" class="btn btn-danger btn-sm" title="Supprimer définitivement ce bien">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                        <span>Supprimer</span>
+
+                                <?php if ($roleKey === 'agent'): ?>
+                                    <!-- ACTION SPÉCIFIQUE AGENT : SIGNALER UNE PANNE -->
+                                    <a href="/maintenances" class="btn btn-outline btn-sm" style="color: #DC2626; border-color: #FCA5A5;" title="Signaler un dysfonctionnement sur ce bien">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                        <span>Signaler Panne</span>
+                                    </a>
+                                <?php else: ?>
+                                    <!-- BOUTON MODIFIER (SUPER-ADMIN & GESTIONNAIRE) -->
+                                    <button type="button" class="btn btn-warning btn-sm" onclick='openEditBienModal(<?= json_encode($bien, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Modifier les données du bien">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        <span>Modifier</span>
                                     </button>
-                                </form>
-                                <!-- BOUTON AFFECTER -->
-                                <a href="/affectations?bien_id=<?= $bien['id'] ?>&code=<?= urlencode($bien['code_inventaire']) ?>" class="btn btn-outline btn-sm" title="Affecter à un agent">
-                                    <i class="fa-solid fa-user-tag"></i>
-                                </a>
+
+                                    <!-- BOUTON SUPPRIMER (SUPER-ADMIN UNIQUEMENT) -->
+                                    <?php if ($roleKey === 'superadmin'): ?>
+                                        <form method="POST" action="/biens/delete" style="display:inline;" onsubmit="return confirm('Confirmer la suppression définitive du bien <?= addslashes($bien['code_inventaire']) ?> (<?= addslashes($bien['libelle']) ?>) ?');">
+                                            <input type="hidden" name="id" value="<?= $bien['id'] ?>">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Supprimer définitivement ce bien">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                                <span>Supprimer</span>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+
+                                    <!-- BOUTON AFFECTER (SUPER-ADMIN & GESTIONNAIRE) -->
+                                    <a href="/affectations?bien_id=<?= $bien['id'] ?>&code=<?= urlencode($bien['code_inventaire']) ?>" class="btn btn-outline btn-sm" title="Affecter à un agent">
+                                        <i class="fa-solid fa-user-tag"></i>
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>

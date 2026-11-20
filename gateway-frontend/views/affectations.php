@@ -1,6 +1,34 @@
 <?php
-$pageTitle = 'Traçabilité des Affectations & Mouvements (Togo)';
-$pageSubtitle = 'Suivi des fonctionnaires détenteurs, décharges de matériel et mutations administratives au Togo';
+$currentUser = $_SESSION['user'] ?? [];
+$rawRole = strtolower($currentUser['role'] ?? 'superadmin');
+$roleKey = 'superadmin';
+if (strpos($rawRole, 'gest') !== false) {
+    $roleKey = 'gestionnaire';
+} elseif (strpos($rawRole, 'agent') !== false || (strpos($rawRole, 'admin') === false && strpos($rawRole, 'super') === false)) {
+    $roleKey = 'agent';
+}
+
+if ($roleKey === 'agent') {
+    $pageTitle = 'Mes Décharges & Prises en Charge de Matériel (Togo)';
+    $pageSubtitle = 'Récépissés officiels de remise et suivi de vos dotations en matériel public';
+    $agentAffs = array_filter($affectations ?? [], function($a) use ($currentUser) {
+        return stripos($a['beneficiaire_nom'] ?? '', 'Mensah') !== false 
+            || ($a['beneficiaire_matricule'] ?? '') === ($currentUser['matricule'] ?? 'MAT-TG-003')
+            || ($a['code_inventaire'] ?? '') === 'GPE-000015';
+    });
+    if (empty($agentAffs) && !empty($affectations)) {
+        $agentAffs = [reset($affectations)];
+    }
+    $displayAffectations = array_values($agentAffs);
+} elseif ($roleKey === 'gestionnaire') {
+    $pageTitle = 'Gestion des Affectations & Décharges de Matériel (Togo)';
+    $pageSubtitle = 'Traçabilité des mouvements administratifs, dotations et décharges au Togo';
+    $displayAffectations = $affectations ?? [];
+} else {
+    $pageTitle = 'Traçabilité des Affectations & Mouvements (Togo)';
+    $pageSubtitle = 'Suivi des fonctionnaires détenteurs, décharges de matériel et mutations administratives au Togo';
+    $displayAffectations = $affectations ?? [];
+}
 $currentPage = 'affectations';
 ob_start();
 ?>
@@ -41,29 +69,41 @@ ob_start();
 <div class="data-card">
     <div class="card-header-bar">
         <div>
-            <h3 class="card-header-title">Registre des Affectations du Patrimoine Public (<?= count($affectations) ?>)</h3>
+            <h3 class="card-header-title">
+                <?php if ($roleKey === 'agent'): ?>
+                    <i class="fa-solid fa-file-contract" style="color: #059669; margin-right: 6px;"></i> Mes Décharges & Dotations Officielles (<?= count($displayAffectations) ?>)
+                <?php else: ?>
+                    Registre des Affectations du Patrimoine Public (<?= count($displayAffectations) ?>)
+                <?php endif; ?>
+            </h3>
         </div>
         <div class="card-filters-bar">
-            <form method="GET" action="/affectations" class="search-form-bar" id="searchFormAff" style="display: flex; align-items: center; gap: 8px;">
-                <div class="search-input-group" style="position: relative;">
-                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted);"></i>
-                    <input type="text" name="q" id="affSearchInput" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" placeholder="Rechercher agent, matricule, code..." autocomplete="off" style="padding-right: 32px;">
-                    <button type="button" id="clearAffSearch" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 1.1rem; line-height: 1; <?= empty($_GET['q']) ? 'display: none;' : '' ?>" title="Effacer">&times;</button>
-                </div>
-                <button type="submit" class="btn btn-outline" style="padding: 8px 14px; font-size: 0.82rem;">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <span>Rechercher</span>
+            <?php if ($roleKey !== 'agent'): ?>
+                <form method="GET" action="/affectations" class="search-form-bar" id="searchFormAff" style="display: flex; align-items: center; gap: 8px;">
+                    <div class="search-input-group" style="position: relative;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted);"></i>
+                        <input type="text" name="q" id="affSearchInput" value="<?= htmlspecialchars($_GET['q'] ?? '') ?>" placeholder="Rechercher agent, matricule, code..." autocomplete="off" style="padding-right: 32px;">
+                        <button type="button" id="clearAffSearch" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 1.1rem; line-height: 1; <?= empty($_GET['q']) ? 'display: none;' : '' ?>" title="Effacer">&times;</button>
+                    </div>
+                    <button type="submit" class="btn btn-outline" style="padding: 8px 14px; font-size: 0.82rem;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Rechercher</span>
+                    </button>
+                    <?php if (!empty($_GET['q'])): ?>
+                        <a href="/affectations" class="btn btn-outline" style="padding: 8px 12px; font-size: 0.82rem;" title="Réinitialiser la recherche">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </a>
+                    <?php endif; ?>
+                </form>
+                <button class="btn btn-primary" onclick="document.getElementById('newAffectationModal').classList.add('active');">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Nouvelle Affectation</span>
                 </button>
-                <?php if (!empty($_GET['q'])): ?>
-                    <a href="/affectations" class="btn btn-outline" style="padding: 8px 12px; font-size: 0.82rem;" title="Réinitialiser la recherche">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </a>
-                <?php endif; ?>
-            </form>
-            <button class="btn btn-primary" onclick="document.getElementById('newAffectationModal').classList.add('active');">
-                <i class="fa-solid fa-plus"></i>
-                <span>Nouvelle Affectation</span>
-            </button>
+            <?php else: ?>
+                <div style="font-size: 0.82rem; color: #059669; font-weight: 700; background-color: #ECFDF5; border: 1px solid #A7F3D0; padding: 6px 14px; border-radius: 9999px;">
+                    <i class="fa-solid fa-stamp"></i> Récépissé Officiel Délivré
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -77,18 +117,18 @@ ob_start();
                     <th>Date d'Affectation</th>
                     <th>Motif</th>
                     <th>Statut</th>
-                    <th style="min-width: 280px; text-align: center;">Actions</th>
+                    <th style="min-width: 250px; text-align: center;">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($affectations)): ?>
+                <?php if (empty($displayAffectations)): ?>
                     <tr>
                         <td colspan="7" style="text-align: center; padding: 40px; color: var(--color-text-muted);">
                             <p>Aucune affectation active pour le moment dans les administrations togolaises.</p>
                         </td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($affectations as $aff): ?>
+                    <?php foreach ($displayAffectations as $aff): ?>
                     <tr>
                         <td><span class="code-badge"><?= htmlspecialchars($aff['code_inventaire']) ?></span></td>
                         <td>
@@ -105,33 +145,40 @@ ob_start();
                         </td>
                         <td style="text-align: center;">
                             <div class="table-actions">
-                                <!-- BOUTON VOIR -->
-                                <button type="button" class="btn btn-info btn-sm" onclick='openViewAffectationModal(<?= json_encode($aff, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Voir la fiche d'affectation">
+                                <!-- BOUTON VOIR (TOUS LES RÔLES) -->
+                                <button type="button" class="btn btn-info btn-sm" onclick='openViewAffectationModal(<?= json_encode($aff, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Voir la décharge">
                                     <i class="fa-regular fa-eye"></i>
-                                    <span>Voir</span>
+                                    <span><?= $roleKey === 'agent' ? 'Voir Décharge' : 'Voir' ?></span>
                                 </button>
-                                <!-- BOUTON MODIFIER -->
-                                <button type="button" class="btn btn-warning btn-sm" onclick='openEditAffectationModal(<?= json_encode($aff, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Modifier les données d'affectation">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                    <span>Modifier</span>
-                                </button>
-                                <!-- BOUTON RESTITUER -->
-                                <?php if ($aff['statut'] === 'En cours'): ?>
-                                    <form method="POST" action="/affectations/restituer" style="display:inline;">
-                                        <input type="hidden" name="id" value="<?= $aff['id'] ?>">
-                                        <button type="submit" class="btn btn-outline btn-sm" onclick="return confirm('Confirmer la restitution du matériel par l\'agent ?');" title="Clôturer l'affectation">
-                                            <i class="fa-solid fa-rotate-left"></i> Restituer
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
-                                <!-- BOUTON SUPPRIMER -->
-                                <form method="POST" action="/affectations/delete" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de cette affectation pour <?= addslashes($aff['beneficiaire_nom']) ?> ?');">
-                                    <input type="hidden" name="id" value="<?= $aff['id'] ?>">
-                                    <button type="submit" class="btn btn-danger btn-sm" title="Supprimer cette affectation">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                        <span>Supprimer</span>
+
+                                <?php if ($roleKey !== 'agent'): ?>
+                                    <!-- BOUTON MODIFIER (SUPER-ADMIN & GESTIONNAIRE) -->
+                                    <button type="button" class="btn btn-warning btn-sm" onclick='openEditAffectationModal(<?= json_encode($aff, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Modifier les données d'affectation">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                        <span>Modifier</span>
                                     </button>
-                                </form>
+
+                                    <!-- BOUTON RESTITUER -->
+                                    <?php if ($aff['statut'] === 'En cours'): ?>
+                                        <form method="POST" action="/affectations/restituer" style="display:inline;">
+                                            <input type="hidden" name="id" value="<?= $aff['id'] ?>">
+                                            <button type="submit" class="btn btn-outline btn-sm" onclick="return confirm('Confirmer la restitution du matériel par l\'agent ?');" title="Clôturer l'affectation">
+                                                <i class="fa-solid fa-rotate-left"></i> Restituer
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+
+                                    <!-- BOUTON SUPPRIMER (SUPER-ADMIN UNIQUEMENT) -->
+                                    <?php if ($roleKey === 'superadmin'): ?>
+                                        <form method="POST" action="/affectations/delete" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de cette affectation pour <?= addslashes($aff['beneficiaire_nom']) ?> ?');">
+                                            <input type="hidden" name="id" value="<?= $aff['id'] ?>">
+                                            <button type="submit" class="btn btn-danger btn-sm" title="Supprimer cette affectation">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                                <span>Supprimer</span>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
