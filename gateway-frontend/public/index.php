@@ -15,7 +15,7 @@ if (!isset($_SESSION['user']) && $uri !== '/login') {
     $_SESSION['user'] = [
         'id' => 1,
         'name' => 'Amele Rolande GOLI',
-        'email' => 'admin@patrimoine.gouv',
+        'email' => 'admin@patrimoine.gouv.tg',
         'role' => 'Super-Administrateur'
     ];
 }
@@ -24,13 +24,16 @@ if (!isset($_SESSION['user']) && $uri !== '/login') {
 if ($uri === '/login') {
     if ($method === 'POST') {
         $res = $client->login($_POST);
-        if ($res['status'] === 200) {
-            $_SESSION['user'] = $res['data']['user'];
-            $_SESSION['token'] = $res['data']['token'];
+        $user = $res['data']['user'] ?? $res['user'] ?? null;
+        $token = $res['data']['token'] ?? $res['token'] ?? 'jwt_token';
+
+        if ($user !== null && (empty($res['status']) || (int)$res['status'] === 200)) {
+            $_SESSION['user'] = $user;
+            $_SESSION['token'] = $token;
             header('Location: /');
             exit;
         }
-        $error = $res['data']['error'] ?? 'Échec connexion.';
+        $error = $res['data']['error'] ?? $res['error'] ?? 'Échec connexion. Identifiants incorrects.';
         require __DIR__ . '/../views/login.php';
         exit;
     }

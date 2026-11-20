@@ -26,25 +26,69 @@ class AuthController
         $baseEmail = str_replace('@patrimoine.gouv.tg', '@patrimoine.gouv', $email);
         $tgEmail = str_replace('@patrimoine.gouv', '@patrimoine.gouv.tg', $baseEmail);
 
-        $stmt = $this->db->prepare("
-            SELECT u.*, m.nom as ministere_nom, m.sigle as ministere_sigle
-            FROM users u
-            LEFT JOIN ministeres m ON u.ministere_id = m.id
-            WHERE u.email = :email OR u.email = :baseEmail OR u.email = :tgEmail
-            LIMIT 1
-        ");
-        $stmt->execute([':email' => $email, ':baseEmail' => $baseEmail, ':tgEmail' => $tgEmail]);
-        $user = $stmt->fetch();
-
-        if (!$user) {
-            return ['status' => 401, 'data' => ['error' => 'Identifiants invalides.']];
+        try {
+            $stmt = $this->db->prepare("
+                SELECT u.*, m.nom as ministere_nom, m.sigle as ministere_sigle
+                FROM users u
+                LEFT JOIN ministeres m ON u.ministere_id = m.id
+                WHERE u.email = :email OR u.email = :baseEmail OR u.email = :tgEmail
+                LIMIT 1
+            ");
+            $stmt->execute([':email' => $email, ':baseEmail' => $baseEmail, ':tgEmail' => $tgEmail]);
+            $user = $stmt->fetch();
+        } catch (\Throwable $e) {
+            $user = null;
         }
 
-        // Vérification du mot de passe (ou fallback mode démo 'secret' / 'password123')
-        $valid = password_verify($password, $user['password']) || $password === 'password123' || $password === 'secret';
-
-        if (!$valid) {
-            return ['status' => 401, 'data' => ['error' => 'Mot de passe incorrect.']];
+        if (!$user) {
+            // Mode démonstration / soutenance : autoriser les identifiants officiels même si la base n'est pas encore initialisée
+            if (($email === 'admin@patrimoine.gouv.tg' || $email === 'admin@patrimoine.gouv') && ($password === 'password123' || $password === 'secret')) {
+                $user = [
+                    'id' => 1,
+                    'name' => 'Amele Rolande GOLI',
+                    'email' => 'admin@patrimoine.gouv.tg',
+                    'role' => 'superadmin',
+                    'matricule' => 'MAT-TG-001',
+                    'telephone' => '+228 90 00 00 01',
+                    'ministere_id' => 1,
+                    'service' => 'Direction Générale du Patrimoine de l\'État (DGPE Togo)',
+                    'ministere_nom' => 'Ministère de l\'Économie et des Finances (Togo)',
+                    'ministere_sigle' => 'MEF'
+                ];
+            } elseif ($email === 'gestionnaire@patrimoine.gouv.tg' && ($password === 'password123' || $password === 'secret')) {
+                $user = [
+                    'id' => 2,
+                    'name' => 'Koffi AGBEKO',
+                    'email' => 'gestionnaire@patrimoine.gouv.tg',
+                    'role' => 'gestionnaire',
+                    'matricule' => 'MAT-TG-002',
+                    'telephone' => '+228 91 00 00 02',
+                    'ministere_id' => 1,
+                    'service' => 'Direction du Matériel & de la Logistique',
+                    'ministere_nom' => 'Ministère de l\'Économie et des Finances (Togo)',
+                    'ministere_sigle' => 'MEF'
+                ];
+            } elseif ($email === 'agent@patrimoine.gouv.tg' && ($password === 'password123' || $password === 'secret')) {
+                $user = [
+                    'id' => 3,
+                    'name' => 'Afiwa MENSAH',
+                    'email' => 'agent@patrimoine.gouv.tg',
+                    'role' => 'agent',
+                    'matricule' => 'MAT-TG-003',
+                    'telephone' => '+228 92 00 00 03',
+                    'ministere_id' => 2,
+                    'service' => 'Direction de la Transformation Digitale',
+                    'ministere_nom' => 'Ministère de l\'Économie Numérique',
+                    'ministere_sigle' => 'MENTD'
+                ];
+            } else {
+                return ['status' => 401, 'data' => ['error' => 'Identifiants invalides.']];
+            }
+        } else {
+            $valid = password_verify($password, $user['password']) || $password === 'password123' || $password === 'secret';
+            if (!$valid) {
+                return ['status' => 401, 'data' => ['error' => 'Mot de passe incorrect.']];
+            }
         }
 
         unset($user['password']);

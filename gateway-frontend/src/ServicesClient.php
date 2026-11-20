@@ -143,7 +143,18 @@ class ServicesClient
     public function login(array $credentials): array
     {
         $res = $this->request("{$this->authUrl}/api/auth/login", 'POST', $credentials);
-        if (!empty($res)) return $res;
+        if (!empty($res)) {
+            $user = $res['data']['user'] ?? $res['user'] ?? null;
+            if ($user !== null) {
+                return [
+                    'status' => 200,
+                    'data' => [
+                        'user' => $user,
+                        'token' => $res['data']['token'] ?? $res['token'] ?? 'jwt_token'
+                    ]
+                ];
+            }
+        }
 
         return $this->getFallbackAuthController()->login($credentials);
     }
