@@ -1,0 +1,13 @@
+{
+    "name": "gest-patrimoine/auth-service",
+    "description": "Microservice d'Authentification et Gestion des Rôles - GEST-PATRIMOINE",
+    "type": "project",
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "AuthService\\": "src/"
+        }
+    }
+}
