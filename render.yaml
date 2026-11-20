@@ -1,0 +1,43 @@
+# Configuration de Déploiement Cloud Gratuit pour Render.com
+# GEST-PATRIMOINE - Solution de Gestion du Patrimoine de l'État
+
+services:
+  # 1. Base de données PostgreSQL Gratuite sur Render
+  - type: pg
+    name: gpe-postgres
+    env: postgresql
+    plan: free
+    region: frankfurt
+    ipAllowList: []
+
+  # 2. Application Web Gateway & Dashboard
+  - type: web
+    name: gest-patrimoine-web
+    env: php
+    plan: free
+    region: frankfurt
+    buildCommand: "composer install --no-dev --optimize-autoloader"
+    startCommand: "php -S 0.0.0.0:$PORT -t gateway-frontend/public"
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DB_HOST
+        fromDatabase:
+          name: gpe-postgres
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: gpe-postgres
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: gpe-postgres
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: gpe-postgres
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: gpe-postgres
+          property: password
