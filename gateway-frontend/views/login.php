@@ -96,21 +96,34 @@
         </div>
 
         <div class="form-group">
-            <label>Mot de passe</label>
-            <input type="password" name="password" id="loginPassword" class="form-control" value="password123" required>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="margin: 0; font-weight: 600;">Mot de passe</label>
+                <span style="font-size: 0.78rem; color: #059669; font-weight: 700; background: #ECFDF5; padding: 2px 8px; border-radius: 4px; border: 1px solid #A7F3D0;">
+                    Mot de passe : <strong>password123</strong>
+                </span>
+            </div>
+            <div style="position: relative;">
+                <input type="password" name="password" id="loginPassword" class="form-control" value="password123" required style="padding-right: 42px;">
+                <button type="button" onclick="togglePasswordVisibility();" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--color-text-muted); font-size: 1.1rem; padding: 4px;" title="Afficher ou masquer le mot de passe">
+                    <i class="fa-solid fa-eye" id="togglePasswordIcon"></i>
+                </button>
+            </div>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px; font-size: 0.95rem;">
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px; font-size: 0.95rem; font-weight: 700;">
             <i class="fa-solid fa-lock"></i> Se Connecter au Système
         </button>
     </form>
 
     <!-- Comptes Démonstration en 1 Clic pour la Soutenance -->
     <div class="demo-credentials-box">
-        <div style="font-weight: 700; color: var(--color-primary); margin-bottom: 6px;">
-            <i class="fa-solid fa-key"></i> Profils de Soutenance & Démonstration :
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <div style="font-weight: 700; color: var(--color-primary);">
+                <i class="fa-solid fa-key"></i> Profils de Soutenance :
+            </div>
+            <span style="font-size: 0.75rem; color: #059669; font-weight: 700;">Pass : password123</span>
         </div>
-        <p style="color: var(--color-text-muted); font-size: 0.75rem;">Cliquez sur un profil pour remplir automatiquement les identifiants :</p>
+        <p style="color: var(--color-text-muted); font-size: 0.75rem; margin-bottom: 8px;">Cliquez sur un profil pour remplir automatiquement les identifiants :</p>
         <div class="demo-btn-row">
             <button type="button" class="btn btn-outline btn-sm" onclick="setDemo('admin@patrimoine.gouv.tg', 'password123');" style="flex:1;">
                 Super-Admin
@@ -129,6 +142,22 @@
 function setDemo(email, pass) {
     document.getElementById('loginEmail').value = email;
     document.getElementById('loginPassword').value = pass;
+}
+
+function togglePasswordVisibility() {
+    const input = document.getElementById('loginPassword');
+    const icon = document.getElementById('togglePasswordIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        icon.style.color = '#0D3B66';
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        icon.style.color = '';
+    }
 }
 </script>
 
