@@ -303,7 +303,10 @@ if (empty($profiles)) {
 
         <div class="demo-profiles-grid">
             <?php foreach ($profiles as $p): ?>
-                <div class="profile-demo-btn" onclick="fillCredentials('<?= htmlspecialchars(addslashes($p['email'])) ?>', '<?= htmlspecialchars(addslashes($p['password_plain'])) ?>');">
+                <div class="profile-demo-btn" 
+                     data-login="<?= htmlspecialchars($p['email'], ENT_QUOTES, 'UTF-8') ?>" 
+                     data-pass="<?= htmlspecialchars($p['password_plain'], ENT_QUOTES, 'UTF-8') ?>" 
+                     onclick="fillFromCard(this);">
                     <div class="role-tag" style="background-color: <?= $p['bg'] ?>; color: <?= $p['color'] ?>; border: 1px solid <?= $p['border'] ?>;">
                         <i class="fa-solid <?= $p['icon'] ?>"></i> <?= htmlspecialchars($p['title']) ?>
                     </div>
@@ -313,7 +316,7 @@ if (empty($profiles)) {
                     <div class="user-sub-info">
                         <?= htmlspecialchars($p['email']) ?>
                     </div>
-                    <button type="button" class="btn-direct-login" onclick="event.stopPropagation(); directLogin('<?= htmlspecialchars(addslashes($p['email'])) ?>', '<?= htmlspecialchars(addslashes($p['password_plain'])) ?>');">
+                    <button type="button" class="btn-direct-login" onclick="event.stopPropagation(); directLoginFromCard(this);">
                         <i class="fa-solid fa-arrow-right-to-bracket"></i> Connexion 1-Clic
                     </button>
                 </div>
@@ -323,6 +326,21 @@ if (empty($profiles)) {
 </div>
 
 <script>
+function fillFromCard(el) {
+    const card = el.closest('.profile-demo-btn') || el;
+    const login = card.getAttribute('data-login') || '';
+    const pass = card.getAttribute('data-pass') || '';
+    fillCredentials(login, pass);
+}
+
+function directLoginFromCard(btn) {
+    const card = btn.closest('.profile-demo-btn');
+    if (!card) return;
+    const login = card.getAttribute('data-login') || '';
+    const pass = card.getAttribute('data-pass') || '';
+    directLogin(login, pass);
+}
+
 function fillCredentials(login, pass) {
     document.getElementById('loginEmail').value = login;
     document.getElementById('loginPassword').value = pass;

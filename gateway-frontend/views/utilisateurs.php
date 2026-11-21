@@ -43,7 +43,13 @@ ob_start();
             </div>
         </div>
 
-        <button type="button" class="btn btn-primary" onclick="openProfileModal(<?= (int)($_SESSION['user']['id'] ?? 1) ?>, '<?= htmlspecialchars(addslashes($_SESSION['user']['name'] ?? 'Amele Rolande GOLI')) ?>', '<?= htmlspecialchars(addslashes($_SESSION['user']['email'] ?? 'admin@patrimoine.gouv.tg')) ?>', '<?= htmlspecialchars(addslashes($_SESSION['user']['telephone'] ?? '+228 90 00 00 01')) ?>');" style="gap: 8px;">
+        <button type="button" class="btn btn-primary" 
+            data-id="<?= (int)($_SESSION['user']['id'] ?? 1) ?>"
+            data-name="<?= htmlspecialchars($_SESSION['user']['name'] ?? 'GOLI Amele Rolande', ENT_QUOTES, 'UTF-8') ?>"
+            data-email="<?= htmlspecialchars($_SESSION['user']['email'] ?? 'admin@patrimoine.gouv.tg', ENT_QUOTES, 'UTF-8') ?>"
+            data-phone="<?= htmlspecialchars($_SESSION['user']['telephone'] ?? '+228 96 49 37 14', ENT_QUOTES, 'UTF-8') ?>"
+            data-role="<?= htmlspecialchars($_SESSION['user']['role'] ?? 'superadmin', ENT_QUOTES, 'UTF-8') ?>"
+            onclick="openProfileFromButton(this);" style="gap: 8px;">
             <i class="fa-solid fa-user-gear"></i>
             <span>Modifier mon Nom & Mot de Passe</span>
         </button>
@@ -91,7 +97,14 @@ ob_start();
                     </td>
                     <td><?= htmlspecialchars($u['telephone'] ?? 'N/A') ?></td>
                     <td style="text-align: right;">
-                        <button type="button" class="btn btn-outline btn-sm" onclick="openProfileModal(<?= (int)$u['id'] ?>, '<?= htmlspecialchars(addslashes($u['name'])) ?>', '<?= htmlspecialchars(addslashes($u['email'])) ?>', '<?= htmlspecialchars(addslashes($u['telephone'] ?? '')) ?>', '<?= htmlspecialchars(addslashes($u['role'])) ?>');" style="padding: 4px 10px; font-size: 0.78rem;" title="Modifier cet utilisateur">
+                        <button type="button" class="btn btn-outline btn-sm btn-edit-user-row" 
+                            data-id="<?= (int)$u['id'] ?>"
+                            data-name="<?= htmlspecialchars($u['name'], ENT_QUOTES, 'UTF-8') ?>"
+                            data-email="<?= htmlspecialchars($u['email'], ENT_QUOTES, 'UTF-8') ?>"
+                            data-phone="<?= htmlspecialchars($u['telephone'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                            data-role="<?= htmlspecialchars($u['role'] ?? 'agent', ENT_QUOTES, 'UTF-8') ?>"
+                            onclick="openProfileFromButton(this);" 
+                            style="padding: 4px 10px; font-size: 0.78rem;" title="Modifier cet utilisateur">
                             <i class="fa-solid fa-pen-to-square"></i> Modifier
                         </button>
                     </td>
@@ -186,6 +199,24 @@ ob_start();
 </div>
 
 <script>
+function openProfileFromButton(btn) {
+    const id = btn.getAttribute('data-id') || '1';
+    const name = btn.getAttribute('data-name') || '';
+    const email = btn.getAttribute('data-email') || '';
+    const phone = btn.getAttribute('data-phone') || '';
+    const role = btn.getAttribute('data-role') || 'agent';
+
+    document.getElementById('editUserId').value = id;
+    document.getElementById('editUserName').value = name;
+    document.getElementById('editUserEmail').value = email;
+    document.getElementById('editUserPhone').value = phone;
+    if (document.getElementById('editUserRole')) {
+        document.getElementById('editUserRole').value = role;
+    }
+    document.getElementById('editUserPassword').value = '';
+    document.getElementById('editProfileModal').classList.add('active');
+}
+
 function openProfileModal(id, name, email, phone, role) {
     document.getElementById('editUserId').value = id;
     document.getElementById('editUserName').value = name;
