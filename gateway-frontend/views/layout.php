@@ -144,6 +144,9 @@ $unreadNotifCount = $isMarkedRead ? 0 : count($activeNotifications);
                 <h1>GEST-PATRIMOINE</h1>
                 <p>Patrimoine de l'État Togolais</p>
             </div>
+            <button type="button" class="btn-close-sidebar" onclick="toggleMobileSidebar()" aria-label="Fermer le menu">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
 
         <nav class="sidebar-menu">
@@ -270,9 +273,14 @@ $unreadNotifCount = $isMarkedRead ? 0 : count($activeNotifications);
     <!-- Conteneur Principal -->
     <div class="app-main">
         <header class="app-topbar">
-            <div class="page-title">
-                <h2><?= $pageTitle ?? 'Tableau de Bord' ?></h2>
-                <p><?= $pageSubtitle ?? 'Système National Intégré de Suivi du Patrimoine de l\'État Togolais' ?></p>
+            <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                <button type="button" class="btn-mobile-menu" id="btnMobileMenu" onclick="toggleMobileSidebar()" aria-label="Ouvrir le menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="page-title">
+                    <h2><?= $pageTitle ?? 'Tableau de Bord' ?></h2>
+                    <p><?= $pageSubtitle ?? 'Système National Intégré de Suivi du Patrimoine de l\'État Togolais' ?></p>
+                </div>
             </div>
             <div class="topbar-actions">
                 <!-- Badge de Rôle Actuel -->
@@ -715,6 +723,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (b) b.remove();
     }
 
+    // 4. MENU MOBILE LATÉRAL TOGO
+    window.toggleMobileSidebar = function() {
+        const sidebar = document.querySelector('.app-sidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        if (sidebar) sidebar.classList.toggle('active');
+        if (backdrop) backdrop.classList.toggle('active');
+    };
+
     document.addEventListener('click', function(e) {
         const container = document.getElementById('notifBellContainer');
         const menu = document.getElementById('notifDropdownMenu');
@@ -724,6 +740,36 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<!-- Volet d'arrière-plan semi-transparent pour mobile -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar()"></div>
+
+<!-- Barre de navigation mobile inférieure (Style Application Mobile) -->
+<nav class="mobile-bottom-nav">
+    <a href="/" class="mobile-nav-item <?= ($currentPage ?? '') === 'dashboard' ? 'active' : '' ?>">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Accueil</span>
+    </a>
+    <a href="/biens" class="mobile-nav-item <?= ($currentPage ?? '') === 'biens' ? 'active' : '' ?>">
+        <i class="fa-solid fa-boxes-stacked"></i>
+        <span>Biens</span>
+    </a>
+    <a href="/affectations" class="mobile-nav-item <?= ($currentPage ?? '') === 'affectations' ? 'active' : '' ?>">
+        <i class="fa-solid fa-people-carry-box"></i>
+        <span><?= $roleKey === 'agent' ? 'Décharges' : 'Affectations' ?></span>
+    </a>
+    <a href="/maintenances" class="mobile-nav-item <?= ($currentPage ?? '') === 'maintenances' ? 'active' : '' ?>">
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+        <span>Pannes</span>
+        <?php if ($nbPendingIncidents > 0 && empty($_SESSION['notifications_read_at'])): ?>
+            <span class="mobile-nav-badge"></span>
+        <?php endif; ?>
+    </a>
+    <button type="button" class="mobile-nav-item" onclick="toggleMobileSidebar()" aria-label="Menu complet">
+        <i class="fa-solid fa-bars"></i>
+        <span>Menu</span>
+    </button>
+</nav>
 
 </body>
 </html>

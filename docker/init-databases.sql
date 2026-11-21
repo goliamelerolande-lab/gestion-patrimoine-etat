@@ -99,8 +99,7 @@ INSERT INTO biens (code_inventaire, libelle, categorie_id, date_acquisition, val
 ('GPE-000013', 'Lot Sanitaire & Robinetterie Institutionnelle', 5, '2026-11-13', 120000, 120000, 'Neuf', 'Disponible', 'Ministère de l''Économie et des Finances', 'Magasin Central - Lomé Bâtiment C', 'Comptoir Togolais de Fourniture'),
 ('GPE-000014', 'Toyota Hilux Double Cabine 4x4 2.8 D-4D', 1, '2026-01-15', 26500000, 24000000, 'Bon état', 'Affecté', 'Ministère de l''Économie et des Finances', 'Garage Central Administratif - Lomé', 'CFAO Motors Togo'),
 ('GPE-000015', 'Serveur Rack Dell PowerEdge R750 64GB', 3, '2026-02-20', 8900000, 7800000, 'Bon état', 'Affecté', 'Ministère de l''Économie Numérique et de la Transformation Digitale', 'Lomé Data Centre - Salle Serveurs', 'Dell Technologies Togo Partner'),
-('GPE-000016', 'Immeuble Administratif R+5 Cité OUA', 2, '2015-05-10', 850000000, 790000000, 'Bon état', 'Affecté', 'Ministère de l''Économie et des Finances', 'Lomé Cité OUA, Avenue de la Libération', 'Société Togolaise de Bâtiment et Travaux Publics (STBTP Lomé)'),
-('GPE-000017', 'Photocopieur Industriel HP LaserJet Enterprise Flow', 3, '2025-08-12', 3200000, 2100000, 'En panne', 'En réparation', 'Ministère des Enseignements Primaire, Secondaire et Technique', 'Secrétariat Général - Lomé Tokoin', 'BuroTop Togo')
+('GPE-000016', 'Immeuble Administratif R+5 Cité OUA', 2, '2015-05-10', 850000000, 790000000, 'Bon état', 'Affecté', 'Ministère de l''Économie et des Finances', 'Lomé Cité OUA, Avenue de la Libération', 'Société Togolaise de Bâtiment et Travaux Publics (STBTP Lomé)')
 ON CONFLICT DO NOTHING;
 
 -- ====================================================================
@@ -143,10 +142,9 @@ CREATE TABLE IF NOT EXISTS maintenances (
 -- Données initiales d'affectations (Togo)
 INSERT INTO affectations (bien_id, code_inventaire, beneficiaire_nom, beneficiaire_matricule, service_nom, date_affectation, motif, statut) VALUES
 (2, 'GPE-000014', 'Kodjo AGBEKO', 'MAT-TG-002', 'Direction Générale du Trésor et de la Comptabilité Publique - Lomé', '2026-01-20', 'Mise à disposition pour mission d''audit régionale', 'En cours'),
-(3, 'GPE-000015', 'Afiwa MENSAH', 'MAT-TG-003', 'Direction de la Transformation Digitale - MENTD', '2026-02-25', 'Hébergement applicatif ministériel national', 'En cours'),
-(5, 'GPE-000017', 'Komi AMEGAN', 'MAT-TG-004', 'Secrétariat Général MEPST Lomé Tokoin', '2025-08-15', 'Équipement d''impression bureautique', 'En cours')
+(3, 'GPE-000015', 'Afiwa MENSAH', 'MAT-TG-003', 'Direction de la Transformation Digitale - MENTD', '2026-02-25', 'Hébergement applicatif ministériel national', 'En cours')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO maintenances (bien_id, code_inventaire, libelle_bien, description_panne, priorite, statut, prestataire, cout_reparation_fcfa, date_signalement) VALUES
-(5, 'GPE-000017', 'Photocopieur Industriel HP LaserJet Enterprise Flow', 'Bourrage papier systématique dans le module d''alimentation et tambour usé.', 'Haute', 'En cours', 'Lomé Maintenance IT Togo', 185000, '2026-11-10')
+(3, 'GPE-000015', 'Serveur Rack Dell PowerEdge R750 64GB', 'DYJONCTION', 'Haute', 'En attente', 'Prise en charge interne MENTD', 0, CURRENT_DATE)
 ON CONFLICT DO NOTHING;

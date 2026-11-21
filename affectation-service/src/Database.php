@@ -94,12 +94,15 @@ class Database
             $pdo->exec("
                 INSERT INTO affectations (bien_id, code_inventaire, beneficiaire_nom, beneficiaire_matricule, service_nom, date_affectation, motif, statut) VALUES
                 (2, 'GPE-000014', 'Kodjo AGBEKO', 'MAT-TG-002', 'Direction Générale du Trésor et de la Comptabilité Publique - Lomé', '2026-01-20', 'Mise à disposition pour mission d''audit régionale', 'En cours'),
-                (3, 'GPE-000015', 'Afiwa MENSAH', 'MAT-TG-003', 'Direction de la Transformation Digitale - MENTD', '2026-02-25', 'Hébergement applicatif ministériel national', 'En cours'),
-                (5, 'GPE-000017', 'Komi AMEGAN', 'MAT-TG-004', 'Secrétariat Général MEPST Lomé Tokoin', '2025-08-15', 'Équipement d''impression bureautique', 'En cours');
+                (3, 'GPE-000015', 'Afiwa MENSAH', 'MAT-TG-003', 'Direction de la Transformation Digitale - MENTD', '2026-02-25', 'Hébergement applicatif ministériel national', 'En cours');
 
                 INSERT INTO maintenances (bien_id, code_inventaire, libelle_bien, description_panne, priorite, statut, prestataire, cout_reparation_fcfa, date_signalement) VALUES
-                (5, 'GPE-000017', 'Photocopieur Industriel HP LaserJet Enterprise Flow', 'Bourrage papier systématique dans le module d''alimentation et tambour usé.', 'Haute', 'En cours', 'Lomé Maintenance IT Togo', 185000, '2026-11-10');
+                (3, 'GPE-000015', 'Serveur Rack Dell PowerEdge R750 64GB', 'DYJONCTION', 'Haute', 'En attente', 'Prise en charge interne MENTD', 0, CURRENT_DATE);
             ");
         }
+
+        // Nettoyage automatique au démarrage pour garantir l'absence de fausses données
+        $pdo->exec("DELETE FROM affectations WHERE code_inventaire = 'GPE-000017'");
+        $pdo->exec("DELETE FROM maintenances WHERE code_inventaire = 'GPE-000017' OR LOWER(libelle_bien) LIKE '%photocopieur%'");
     }
 }

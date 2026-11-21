@@ -92,13 +92,13 @@
     <form method="POST" action="/login">
         <div class="form-group">
             <label>Identifiant / Email Institutionnel</label>
-            <input type="email" name="email" id="loginEmail" class="form-control" value="admin@patrimoine.gouv.tg" required>
+            <input type="email" name="email" id="loginEmail" class="form-control" placeholder="ex: admin@patrimoine.gouv.tg" required autocomplete="email">
         </div>
 
         <div class="form-group">
             <label style="font-weight: 600;">Mot de passe</label>
             <div style="position: relative;">
-                <input type="password" name="password" id="loginPassword" class="form-control" value="password123" required style="padding-right: 42px;">
+                <input type="password" name="password" id="loginPassword" class="form-control" placeholder="Entrez votre mot de passe" required autocomplete="current-password" style="padding-right: 42px;">
                 <button type="button" onclick="togglePasswordVisibility();" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--color-text-muted); font-size: 1.1rem; padding: 4px;" title="Afficher ou masquer le mot de passe">
                     <i class="fa-solid fa-eye" id="togglePasswordIcon"></i>
                 </button>

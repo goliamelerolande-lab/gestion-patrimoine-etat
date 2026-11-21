@@ -767,8 +767,8 @@ function openViewAffectationModal(aff) {
             bienLib.innerText = 'Toyota Hilux Double Cabine 4x4 2.8 D-4D';
         } else if (code === 'GPE-000016') {
             bienLib.innerText = 'Immeuble Administratif R+5 Cité OUA';
-        } else if (code === 'GPE-000017') {
-            bienLib.innerText = 'Photocopieur Industriel HP LaserJet Enterprise Flow';
+        } else if (code === 'GPE-000013') {
+            bienLib.innerText = 'Lot Sanitaire & Robinetterie Institutionnelle';
         } else {
             bienLib.innerText = aff.libelle || 'Matériel de l\'État Togolais';
         }

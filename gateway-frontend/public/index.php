@@ -9,16 +9,10 @@ $client = new \Gateway\ServicesClient();
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Middleware auth minimal
+// Middleware d'authentification obligatoire et professionnel
 if (!isset($_SESSION['user']) && $uri !== '/login') {
-    // Session par défaut pour fluidité de la soutenance (Amele Rolande GOLI)
-    $_SESSION['user'] = [
-        'id' => 1,
-        'name' => 'Amele Rolande GOLI',
-        'email' => 'admin@patrimoine.gouv.tg',
-        'role' => 'superadmin',
-        'telephone' => '+228 90 00 00 01'
-    ];
+    header('Location: /login');
+    exit;
 }
 
 $currentUser = $_SESSION['user'] ?? [];

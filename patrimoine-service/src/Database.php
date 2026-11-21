@@ -98,9 +98,11 @@ class Database
                 ('GPE-000013', 'Lot Sanitaire & Robinetterie Institutionnelle', 5, '2026-11-13', 120000, 120000, 'Neuf', 'Disponible', 'Ministère de l''Économie et des Finances', 'Magasin Central - Lomé Bâtiment C', 'Comptoir Togolais de Fourniture'),
                 ('GPE-000014', 'Toyota Hilux Double Cabine 4x4 2.8 D-4D', 1, '2026-01-15', 26500000, 24000000, 'Bon état', 'Affecté', 'Ministère de l''Économie et des Finances', 'Garage Central Administratif - Lomé', 'CFAO Motors Togo'),
                 ('GPE-000015', 'Serveur Rack Dell PowerEdge R750 64GB', 3, '2026-02-20', 8900000, 7800000, 'Bon état', 'Affecté', 'Ministère de l''Économie Numérique et de la Transformation Digitale', 'Lomé Data Centre - Salle Serveurs', 'Dell Technologies Togo Partner'),
-                ('GPE-000016', 'Immeuble Administratif R+5 Cité OUA', 2, '2015-05-10', 850000000, 790000000, 'Bon état', 'Affecté', 'Ministère de l''Économie et des Finances', 'Lomé Cité OUA, Avenue de la Libération', 'Société Togolaise de Bâtiment et Travaux Publics (STBTP Lomé)'),
-                ('GPE-000017', 'Photocopieur Industriel HP LaserJet Enterprise Flow', 3, '2025-08-12', 3200000, 2100000, 'En panne', 'En réparation', 'Ministère des Enseignements Primaire, Secondaire et Technique', 'Secrétariat Général - Lomé Tokoin', 'BuroTop Togo');
+                ('GPE-000016', 'Immeuble Administratif R+5 Cité OUA', 2, '2015-05-10', 850000000, 790000000, 'Bon état', 'Affecté', 'Ministère de l''Économie et des Finances', 'Lomé Cité OUA, Avenue de la Libération', 'Société Togolaise de Bâtiment et Travaux Publics (STBTP Lomé)');
             ");
         }
+
+        // Nettoyage automatique au démarrage pour garantir exactement 4 biens nationaux réels
+        $pdo->exec("DELETE FROM biens WHERE code_inventaire = 'GPE-000017' OR LOWER(libelle) LIKE '%photocopieur%'");
     }
 }

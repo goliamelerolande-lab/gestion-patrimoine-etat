@@ -65,6 +65,11 @@ ob_start();
     </div>
 
     <!-- 3 Cartes Métriques Spécifiques Agent -->
+    <?php
+        $nbAgentIncidents = !empty($maintenances) ? count(array_filter($maintenances, function($m) {
+            return ($m['code_inventaire'] ?? '') === 'GPE-000015' || ($m['statut'] ?? '') === 'En attente';
+        })) : 0;
+    ?>
     <div class="metrics-grid">
         <div class="metric-card">
             <div class="metric-header">
@@ -86,9 +91,13 @@ ob_start();
                     <i class="fa-solid fa-screwdriver-wrench"></i>
                 </div>
             </div>
-            <div class="metric-val">0</div>
+            <div class="metric-val"><?= $nbAgentIncidents ?></div>
             <div class="metric-footer">
-                <i class="fa-solid fa-circle-check" style="color: #059669;"></i> Aucun problème déclaré
+                <?php if ($nbAgentIncidents > 0): ?>
+                    <i class="fa-solid fa-triangle-exclamation" style="color: #D97706;"></i> En cours de prise en charge DGPE
+                <?php else: ?>
+                    <i class="fa-solid fa-circle-check" style="color: #059669;"></i> Aucun problème déclaré
+                <?php endif; ?>
             </div>
         </div>
 
