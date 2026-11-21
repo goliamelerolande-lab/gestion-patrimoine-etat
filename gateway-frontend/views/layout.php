@@ -127,8 +127,8 @@ $unreadNotifCount = count($activeNotifications);
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- CSS Personnalisé -->
-    <link rel="stylesheet" href="/css/app.css">
+    <!-- CSS Personnalisé avec Cache-Busting -->
+    <link rel="stylesheet" href="/css/app.css?v=<?= time() ?>">
 </head>
 <body>
 

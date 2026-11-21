@@ -169,7 +169,7 @@ ob_start();
 
                                 <?php if ($roleKey === 'agent'): ?>
                                     <!-- ACTION SPÉCIFIQUE AGENT : SIGNALER UNE PANNE -->
-                                    <a href="/maintenances" class="btn btn-outline btn-sm" style="color: #DC2626; border-color: #FCA5A5;" title="Signaler un dysfonctionnement sur ce bien">
+                                    <a href="/maintenances?open_modal=1&bien_id=<?= $bien['id'] ?>" class="btn btn-outline btn-sm" style="color: #DC2626; border-color: #FCA5A5;" title="Signaler un dysfonctionnement sur ce bien">
                                         <i class="fa-solid fa-triangle-exclamation"></i>
                                         <span>Signaler Panne</span>
                                     </a>

@@ -426,7 +426,19 @@ function updateSelectedMaintenanceBien() {
     }
 }
 document.getElementById('bienMaintenanceSelect')?.addEventListener('change', updateSelectedMaintenanceBien);
-document.addEventListener('DOMContentLoaded', updateSelectedMaintenanceBien);
+document.addEventListener('DOMContentLoaded', function() {
+    updateSelectedMaintenanceBien();
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('open_modal')) {
+        const targetBienId = urlParams.get('bien_id');
+        const sel = document.getElementById('bienMaintenanceSelect');
+        if (sel && targetBienId) {
+            sel.value = targetBienId;
+            updateSelectedMaintenanceBien();
+        }
+        document.getElementById('newMaintenanceModal')?.classList.add('active');
+    }
+});
 
 function formatFCFA(val) {
     return new Intl.NumberFormat('fr-FR').format(val) + ' FCFA';
