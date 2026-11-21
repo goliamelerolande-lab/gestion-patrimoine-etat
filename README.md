@@ -179,7 +179,7 @@ Le projet intègre un fichier [`render.yaml`](render.yaml) et un [`Dockerfile`](
    - **Region** : `Frankfurt (EU Central)` *(recommandé pour une latence minimale)*.
 5. Cliquez sur **`Create Web Service`**.
 6. En moins de 2 minutes, votre plateforme est accessible en ligne avec HTTPS gratuit :  
-   `https://gest-patrimoine-togo.onrender.com`
+   `https://gestion-patrimoine-etat-anqt.onrender.com`
 
 ---
 
@@ -214,13 +214,17 @@ Les conteneurs démarrent avec les ports :
 
 ## 🔐 7. Comptes & Identifiants de Démonstration
 
-Des boutons de connexion rapide en 1 clic sont intégrés sur la mire de connexion :
+L'authentification est souple et moderne : la connexion est possible indifféremment par **Email**, par **Matricule** ou par **Nom officiel de l'agent**.  
+Des boutons de connexion rapide en 1 clic sont également intégrés sur la mire de connexion (`/login`) :
 
-| Rôle | Email | Mot de passe | Prérogatives |
+| Rôle & Titre | Identifiant (Email / Matricule / Nom) | Mot de passe | Prérogatives & Ministère |
 | :--- | :--- | :--- | :--- |
-| **Super-Administrateur** | `admin@patrimoine.gouv.tg` | `password123` | Accès universel, gestion des utilisateurs, configuration des sceaux et cachets |
-| **Gestionnaire Logistique** | `gestionnaire@patrimoine.gouv.tg` | `password123` | Gestion de l'inventaire des biens, affectations, pannes et rapports |
-| **Agent / Détenteur** | `agent@patrimoine.gouv.tg` | `password123` | Consultation de ses affectations personnelles et déclaration de panne |
+| **Super-Administrateur** | `admin@patrimoine.gouv.tg`<br>`MAT-TG-001`<br>`GOLI Amele Rolande` | `password123` | **Direction Générale du Patrimoine de l'État (DGPE Lomé)**<br>Accès universel, gestion complète des comptes administratifs, paramétrage du Sceau d'État et du Cachet Officiel circulaire |
+| **Gestionnaire de Parc** | `gestionnaire@patrimoine.gouv.tg`<br>`MAT-TG-002`<br>`GODHOPE'S` | `password123` | **Direction du Matériel & Logistique (MEF Togo)**<br>Recensement des biens, enregistrement des affectations et décharges, suivi et clôture des tickets d'incidents techniques |
+| **Agent Bénéficiaire** | `agent@patrimoine.gouv.tg`<br>`MAT-TG-003`<br>`MY ALL` | `password123` | **Direction de la Transformation Digitale (MENTD)**<br>Espace personnel restreint, consultation du matériel confié sous décharge, déclaration directe de pannes |
+| **Auditeur / Inspecteur** | `auditeur@patrimoine.gouv.tg`<br>`MAT-TG-004`<br>`Komi AMEGAN` | `password123` | **Inspection Générale des Finances (IGF Lomé)**<br>Supervision générale en lecture seule certifiée, tableaux de bord de valorisation, registres exhaustifs et rapports financiers |
+
+> **Sécurité des Mots de Passe** : Chaque utilisateur dispose d'un mot de passe propre (hachage sécurisé BCrypt). Le Super-Administrateur peut modifier les noms, rôles et mots de passe individuels à tout moment depuis le module *Annuaire des Agents & Ministères* (`/utilisateurs`).
 
 ---
 

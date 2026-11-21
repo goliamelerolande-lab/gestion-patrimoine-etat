@@ -15,11 +15,17 @@ Le présent guide accompagne les agents publics et administrateurs dans l'utilis
 
 ## 2. Authentification & Connexion
 
-1. Accédez à l'adresse de la plateforme (ex: `http://localhost:8080` ou URL de production).
-2. Saisissez votre adresse email institutionnelle (ex: `admin@patrimoine.gouv` ou `gestionnaire@patrimoine.gouv`).
-3. Saisissez votre mot de passe sécurisé.
+1. Accédez à l'adresse de la plateforme :
+   - En ligne (Production Render Cloud) : `https://gestion-patrimoine-etat-anqt.onrender.com`
+   - En local : `http://localhost:8080`
+2. Saisissez votre identifiant officiel : la connexion accepte indifféremment votre **Email institutionnel**, votre **Matricule d'État** (ex: `MAT-TG-001`) ou votre **Nom officiel** (ex: `GOLI Amele Rolande`, `GODHOPE'S`, `MY ALL`, `Komi AMEGAN`).
+3. Saisissez votre mot de passe individuel (ou utilisez les boutons de démonstration rapide en 1 clic disponibles sur la page de connexion).
 4. Cliquez sur **« Se Connecter »**.
-5. Vous êtes automatiquement dirigé vers le Tableau de Bord correspondant à vos privilèges (Super-Admin, Gestionnaire ou Agent).
+5. Vous êtes automatiquement dirigé vers le Tableau de Bord dédié à vos privilèges :
+   - **Super-Administrateur (DGPE)** : Contrôle global, gestion des comptes utilisateurs, sceaux et cachets de la République Togolaise.
+   - **Gestionnaire du Parc (MEF)** : Recensement, inventaire, mouvements et suivi opérationnel des pannes.
+   - **Agent Fonctionnaire (MENTD)** : Espace personnel épuré, matériels confiés sous décharge, déclaration de pannes.
+   - **Auditeur / Inspecteur d'État (IGF Lomé)** : Registre exhaustif en lecture seule certifiée, tableaux de bord de valorisation et rapports financiers.
 
 ---
 
