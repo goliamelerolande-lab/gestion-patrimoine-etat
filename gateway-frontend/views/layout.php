@@ -33,6 +33,83 @@ if (strpos($rawRole, 'admin') !== false) {
     $roleBorder = '#A7F3D0';
     $roleIcon = 'fa-user';
 }
+
+// Extraction des notifications en direct du parc national
+$appNotifications = [];
+$nbPendingIncidents = 0;
+$latestPendingTicket = null;
+
+try {
+    if (!isset($globalNotifClient)) {
+        require_once __DIR__ . '/../src/ServicesClient.php';
+        $globalNotifClient = new \Gateway\ServicesClient();
+    }
+    $globalMaints = $globalNotifClient->getMaintenances();
+    foreach ($globalMaints as $gm) {
+        $st = $gm['statut'] ?? 'En attente';
+        if ($st === 'En attente') {
+            $nbPendingIncidents++;
+            if ($latestPendingTicket === null) {
+                $latestPendingTicket = $gm;
+            }
+            $appNotifications[] = [
+                'id' => 'maint_' . ($gm['id'] ?? uniqid()),
+                'type' => 'danger',
+                'icon' => 'fa-triangle-exclamation',
+                'title' => 'Panne : ' . ($gm['libelle_bien'] ?? 'Matériel'),
+                'desc' => 'Panne "' . ($gm['description_panne'] ?? '') . '" sur ' . ($gm['code_inventaire'] ?? '') . ' (Priorité : ' . ($gm['priorite'] ?? 'Haute') . ')',
+                'time' => !empty($gm['date_signalement']) ? date('d/m/Y', strtotime($gm['date_signalement'])) : 'Aujourd\'hui',
+                'link' => '/maintenances',
+                'badge' => 'En attente',
+                'badge_color' => '#DC2626',
+                'badge_bg' => '#FEE2E2',
+                'is_agent_target' => ($roleKey === 'agent' && (($gm['code_inventaire'] ?? '') === 'GPE-000015' || stripos($gm['libelle_bien'] ?? '', 'Serveur') !== false || stripos($gm['prestataire'] ?? '', 'MENTD') !== false))
+            ];
+        } elseif ($st === 'En cours') {
+            $appNotifications[] = [
+                'id' => 'maint_' . ($gm['id'] ?? uniqid()),
+                'type' => 'warning',
+                'icon' => 'fa-screwdriver-wrench',
+                'title' => 'Réparation : ' . ($gm['libelle_bien'] ?? 'Matériel'),
+                'desc' => 'Prise en charge par ' . ($gm['prestataire'] ?? 'Prestataire agréé') . ' (' . ($gm['code_inventaire'] ?? '') . ')',
+                'time' => !empty($gm['date_signalement']) ? date('d/m/Y', strtotime($gm['date_signalement'])) : 'Aujourd\'hui',
+                'link' => '/maintenances',
+                'badge' => 'En cours',
+                'badge_color' => '#D97706',
+                'badge_bg' => '#FEF3C7',
+                'is_agent_target' => ($roleKey === 'agent' && (($gm['code_inventaire'] ?? '') === 'GPE-000015' || stripos($gm['libelle_bien'] ?? '', 'Serveur') !== false))
+            ];
+        }
+    }
+} catch (\Throwable $e) {
+    // Ne pas bloquer l'affichage si indisponible
+}
+
+if ($roleKey === 'agent') {
+    $appNotifications[] = [
+        'id' => 'notif_decharge_officielle',
+        'type' => 'success',
+        'icon' => 'fa-file-signature',
+        'title' => 'Bon de Décharge Officiel Disponible',
+        'desc' => 'Matériel confié : Serveur Dell PowerEdge R750 (GPE-000015) certifié par la DGPE',
+        'time' => 'Actif',
+        'link' => '/affectations',
+        'badge' => 'Certifié DGPE',
+        'badge_color' => '#059669',
+        'badge_bg' => '#ECFDF5',
+        'is_agent_target' => true
+    ];
+}
+
+// Filtrage des notifications selon le profil connecté
+if ($roleKey === 'agent') {
+    $activeNotifications = array_values(array_filter($appNotifications, function($n) {
+        return !empty($n['is_agent_target']);
+    }));
+} else {
+    $activeNotifications = $appNotifications;
+}
+$unreadNotifCount = count($activeNotifications);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -89,6 +166,9 @@ if (strpos($rawRole, 'admin') !== false) {
                 <a href="/maintenances" class="nav-item <?= ($currentPage ?? '') === 'maintenances' ? 'active' : '' ?>">
                     <i class="fa-solid fa-screwdriver-wrench"></i>
                     <span>Maintenance & Pannes</span>
+                    <?php if ($nbPendingIncidents > 0): ?>
+                        <span class="badge-nav-counter animate-pulse" title="<?= $nbPendingIncidents ?> incident(s) en attente"><?= $nbPendingIncidents ?></span>
+                    <?php endif; ?>
                 </a>
 
                 <div class="menu-category">Sceau & Sécurité</div>
@@ -126,6 +206,9 @@ if (strpos($rawRole, 'admin') !== false) {
                 <a href="/maintenances" class="nav-item <?= ($currentPage ?? '') === 'maintenances' ? 'active' : '' ?>">
                     <i class="fa-solid fa-screwdriver-wrench"></i>
                     <span>Maintenance & Pannes</span>
+                    <?php if ($nbPendingIncidents > 0): ?>
+                        <span class="badge-nav-counter animate-pulse" title="<?= $nbPendingIncidents ?> incident(s) en attente"><?= $nbPendingIncidents ?></span>
+                    <?php endif; ?>
                 </a>
 
                 <div class="menu-category">Justificatifs</div>
@@ -156,6 +239,9 @@ if (strpos($rawRole, 'admin') !== false) {
                 <a href="/maintenances" class="nav-item <?= ($currentPage ?? '') === 'maintenances' ? 'active' : '' ?>">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     <span>Signaler une Panne</span>
+                    <?php if ($nbPendingIncidents > 0): ?>
+                        <span class="badge-nav-counter" style="background-color: #D97706;" title="Signalement en cours de prise en charge"><?= $nbPendingIncidents ?></span>
+                    <?php endif; ?>
                 </a>
             <?php endif; ?>
         </nav>
@@ -203,6 +289,55 @@ if (strpos($rawRole, 'admin') !== false) {
                     </button>
                 </div>
 
+                <!-- Centre Global de Notifications (Togo) -->
+                <div class="notif-bell-container" id="notifBellContainer">
+                    <button type="button" class="btn-notif-bell" id="btnNotifBell" onclick="toggleNotifDropdown(event)" title="Centre de notifications et alertes nationales">
+                        <i class="fa-solid fa-bell"></i>
+                        <?php if ($unreadNotifCount > 0): ?>
+                            <span class="notif-badge-pill animate-pulse" id="notifBadgePill"><?= $unreadNotifCount ?></span>
+                        <?php endif; ?>
+                    </button>
+                    
+                    <!-- Menu Déroulant des Notifications -->
+                    <div class="notif-dropdown-menu" id="notifDropdownMenu">
+                        <div class="notif-dropdown-header">
+                            <h4><i class="fa-solid fa-bell" style="color: var(--color-primary);"></i> Notifications & Alertes</h4>
+                            <span class="notif-count-badge" id="notifHeaderCount"><?= $unreadNotifCount ?> active(s)</span>
+                        </div>
+                        <div class="notif-items-list" id="notifItemsList">
+                            <?php if (empty($activeNotifications)): ?>
+                                <div style="padding: 28px 20px; text-align: center; color: var(--color-text-muted); font-size: 0.85rem;">
+                                    <i class="fa-solid fa-circle-check" style="color: #059669; font-size: 1.6rem; margin-bottom: 8px;"></i>
+                                    <p style="margin: 0;">Aucune alerte en attente. Tout le matériel fonctionne normalement.</p>
+                                </div>
+                            <?php else: ?>
+                                <?php foreach ($activeNotifications as $notif): ?>
+                                    <a href="<?= htmlspecialchars($notif['link']) ?>" class="notif-item-link unread">
+                                        <div class="notif-icon-box <?= htmlspecialchars($notif['type']) ?>">
+                                            <i class="fa-solid <?= htmlspecialchars($notif['icon']) ?>"></i>
+                                        </div>
+                                        <div class="notif-content-text">
+                                            <div class="notif-item-title">
+                                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;"><?= htmlspecialchars($notif['title']) ?></span>
+                                                <span style="font-size: 0.68rem; font-weight: 700; background: <?= $notif['badge_bg'] ?>; color: <?= $notif['badge_color'] ?>; padding: 1px 6px; border-radius: 4px;"><?= htmlspecialchars($notif['badge']) ?></span>
+                                            </div>
+                                            <div class="notif-item-desc"><?= htmlspecialchars($notif['desc']) ?></div>
+                                            <div class="notif-meta-row">
+                                                <span><i class="fa-regular fa-clock"></i> <?= htmlspecialchars($notif['time']) ?></span>
+                                                <span style="color: var(--color-primary); font-weight: 600;">Consulter &rarr;</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                        <div class="notif-dropdown-footer">
+                            <a href="/maintenances"><i class="fa-solid fa-screwdriver-wrench"></i> Voir les interventions</a>
+                            <button type="button" class="btn-mark-read" onclick="clearNotifBadge()">Marquer comme lu</button>
+                        </div>
+                    </div>
+                </div>
+
                 <span class="badge-official" style="background-color: #ECFDF5; border-color: #A7F3D0; color: #065F46; font-weight: 700;">
                     <i class="fa-solid fa-flag" style="color: #059669;"></i> Togo
                 </span>
@@ -210,6 +345,53 @@ if (strpos($rawRole, 'admin') !== false) {
         </header>
 
         <main class="app-content">
+            <!-- Bannière d'alerte globale d'incident pour Super-Admin et Gestionnaire -->
+            <?php if ($nbPendingIncidents > 0 && ($roleKey === 'superadmin' || $roleKey === 'gestionnaire') && $latestPendingTicket): ?>
+                <div class="urgent-incident-alert-banner" id="adminUrgentBanner">
+                    <div class="alert-icon-pulse">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="alert-text-content" style="flex: 1;">
+                        <div class="alert-top-title">
+                            <span class="pulse-tag">ALERTE IMMÉDIATE</span>
+                            <span>Signalement de Panne en attente de prise en charge</span>
+                        </div>
+                        <div class="alert-main-msg">
+                            Un agent public a signalé une panne sur <strong><?= htmlspecialchars($latestPendingTicket['code_inventaire']) ?> — <?= htmlspecialchars($latestPendingTicket['libelle_bien']) ?></strong> : 
+                            <em>"<?= htmlspecialchars($latestPendingTicket['description_panne']) ?>"</em> 
+                            (Degré d'urgence : <strong><?= htmlspecialchars($latestPendingTicket['priorite']) ?></strong>). Action requise : mandater un prestataire agréé.
+                        </div>
+                    </div>
+                    <div class="alert-action-btns">
+                        <a href="/maintenances" class="btn-banner-action">
+                            <i class="fa-solid fa-wrench"></i> Prendre en charge
+                        </a>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Bannière de suivi de signalement pour Agent Public -->
+            <?php if ($roleKey === 'agent' && $latestPendingTicket): ?>
+                <div class="agent-ticket-status-banner" id="agentPendingBanner">
+                    <div class="agent-status-icon">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div class="alert-text-content" style="flex: 1;">
+                        <div class="alert-top-title" style="color: #0369A1;">
+                            <span class="agent-pulse-tag">SIGNALEMENT TRANSMIS</span>
+                            <span>Assistance Technique Matérielle de l'État</span>
+                        </div>
+                        <div class="alert-main-msg" style="color: #0C4A6E;">
+                            Votre signalement de panne sur <strong><?= htmlspecialchars($latestPendingTicket['code_inventaire']) ?> (<?= htmlspecialchars($latestPendingTicket['description_panne']) ?>)</strong> a bien été transmis aux gestionnaires de parc. Il est actuellement <strong>en attente d'attribution de réparateur</strong>.
+                        </div>
+                    </div>
+                    <div class="alert-action-btns">
+                        <a href="/maintenances" class="btn-banner-agent">
+                            <i class="fa-solid fa-eye"></i> Suivre mon ticket
+                        </a>
+                    </div>
+                </div>
+            <?php endif; ?>
             <!-- Alerte de restriction de droits RBAC -->
             <?php if (!empty($_GET['unauthorized'])): ?>
                 <div class="alert-notification alert-danger alert-auto-dismiss" style="margin-bottom: 20px;">
@@ -441,6 +623,32 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.reload();
         }
     }, 1000);
+    // 3. CENTRE DE NOTIFICATIONS TOGO
+    window.toggleNotifDropdown = function(e) {
+        if (e) e.stopPropagation();
+        const menu = document.getElementById('notifDropdownMenu');
+        if (menu) {
+            menu.classList.toggle('active');
+        }
+    };
+
+    window.clearNotifBadge = function() {
+        const badge = document.getElementById('notifBadgePill');
+        if (badge) badge.style.display = 'none';
+        const headerCount = document.getElementById('notifHeaderCount');
+        if (headerCount) headerCount.innerText = '0 active(s)';
+        document.querySelectorAll('.notif-item-link.unread').forEach(function(el) {
+            el.classList.remove('unread');
+        });
+    };
+
+    document.addEventListener('click', function(e) {
+        const container = document.getElementById('notifBellContainer');
+        const menu = document.getElementById('notifDropdownMenu');
+        if (container && menu && !container.contains(e.target)) {
+            menu.classList.remove('active');
+        }
+    });
 });
 </script>
 

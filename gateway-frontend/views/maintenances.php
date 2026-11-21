@@ -12,10 +12,25 @@ if ($roleKey === 'agent') {
     $pageTitle = 'Assistance & Signalement de Pannes (Togo)';
     $pageSubtitle = 'Déclaration rapide d\'incident sur vos matériels de fonction pour prise en charge';
     $agentMaints = array_filter($maintenances ?? [], function($m) {
-        return ($m['code_inventaire'] ?? '') === 'GPE-000015' 
-            || stripos($m['libelle_bien'] ?? '', 'Serveur') !== false;
+        // Matériel direct de l'agent
+        if (($m['code_inventaire'] ?? '') === 'GPE-000015' || stripos($m['libelle_bien'] ?? '', 'Serveur') !== false) {
+            return true;
+        }
+        // Tout signalement récent / en attente
+        if (($m['statut'] ?? '') === 'En attente') {
+            return true;
+        }
+        // Toute intervention confiée en interne MENTD
+        if (stripos($m['prestataire'] ?? '', 'MENTD') !== false) {
+            return true;
+        }
+        return false;
     });
-    $displayMaintenances = array_values($agentMaints);
+    if (empty($agentMaints) && !empty($maintenances)) {
+        $displayMaintenances = array_values($maintenances);
+    } else {
+        $displayMaintenances = array_values($agentMaints);
+    }
 } elseif ($roleKey === 'gestionnaire') {
     $pageTitle = 'Gestion de la Maintenance & Suivi des Pannes (Togo)';
     $pageSubtitle = 'Signalement d\'incidents, gestion des prestataires et validation des devis de réparation';
@@ -30,10 +45,13 @@ ob_start();
 ?>
 
 <?php if (!empty($_GET['success'])): ?>
-    <div class="alert-notification alert-success alert-auto-dismiss">
+    <div class="alert-notification alert-success alert-auto-dismiss" style="box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);">
         <div class="alert-icon-text">
-            <i class="fa-solid fa-circle-check"></i>
-            <span>Ticket de maintenance enregistré avec succès !</span>
+            <i class="fa-solid fa-circle-check" style="font-size: 1.4rem; color: #059669;"></i>
+            <div>
+                <strong>Signalement d'incident enregistré et transmis avec succès !</strong><br>
+                <span>Une notification d'alerte immédiate a été diffusée à l'ensemble des gestionnaires de parc et à la DGPE pour prise en charge.</span>
+            </div>
         </div>
         <button type="button" class="alert-close-btn" onclick="this.closest('.alert-notification').remove()">&times;</button>
         <div class="alert-timer-bar"></div>
@@ -143,7 +161,23 @@ ob_start();
                             </span>
                         </td>
                         <td>
-                            <span class="status-pill status-panne">● <?= htmlspecialchars($m['statut']) ?></span>
+                            <?php
+                                $statusClass = 'status-panne';
+                                $statusIcon = 'fa-clock';
+                                if ($m['statut'] === 'En attente') {
+                                    $statusClass = 'status-warning';
+                                    $statusIcon = 'fa-hourglass-half';
+                                } elseif ($m['statut'] === 'En cours') {
+                                    $statusClass = 'status-panne';
+                                    $statusIcon = 'fa-wrench';
+                                } elseif ($m['statut'] === 'Réparé') {
+                                    $statusClass = 'status-bon';
+                                    $statusIcon = 'fa-check';
+                                }
+                            ?>
+                            <span class="status-pill <?= $statusClass ?>" style="<?= $m['statut'] === 'En attente' ? 'background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;' : '' ?>">
+                                <i class="fa-solid <?= $statusIcon ?>"></i> <?= htmlspecialchars($m['statut']) ?>
+                            </span>
                         </td>
                         <?php if ($roleKey !== 'agent'): ?>
                             <td><?= htmlspecialchars($m['prestataire'] ?? 'Régie Directe Lomé') ?></td>
