@@ -11,7 +11,7 @@ class ServicesClient
 
     public function __construct()
     {
-        $this->isStandalone   = empty(getenv('AUTH_SERVICE_URL')) && !file_exists('/.dockerenv');
+        $this->isStandalone   = empty(getenv('AUTH_SERVICE_URL'));
         $this->authUrl        = getenv('AUTH_SERVICE_URL') ?: 'http://127.0.0.1:8001';
         $this->patrimoineUrl   = getenv('PATRIMOINE_SERVICE_URL') ?: 'http://127.0.0.1:8002';
         $this->affectationUrl = getenv('AFFECTATION_SERVICE_URL') ?: 'http://127.0.0.1:8003';
