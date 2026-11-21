@@ -4,27 +4,37 @@
    ========================================================================== */
 
 :root {
-    --color-primary: #0D3B66;       /* Bleu Institutionnel / République */
+    --color-primary: #0D3B66;
+    /* Bleu Institutionnel / République */
     --color-primary-dark: #082440;
     --color-primary-light: #1D70B8;
-    --color-accent: #C29B70;        /* Or / Doré République */
-    
-    --color-bg: #F4F6F9;           /* Fond de page gris doux */
-    --color-surface: #FFFFFF;      /* Fond des cartes et tables */
+    --color-accent: #C29B70;
+    /* Or / Doré République */
+
+    --color-bg: #F4F6F9;
+    /* Fond de page gris doux */
+    --color-surface: #FFFFFF;
+    /* Fond des cartes et tables */
     --color-border: #E2E8F0;
-    
-    --color-text-main: #1E293B;    /* Texte foncé */
-    --color-text-muted: #64748B;   /* Texte secondaire */
-    
-    --color-success: #15803D;      /* Vert Neuf / Valide */
+
+    --color-text-main: #1E293B;
+    /* Texte foncé */
+    --color-text-muted: #64748B;
+    /* Texte secondaire */
+
+    --color-success: #15803D;
+    /* Vert Neuf / Valide */
     --color-success-bg: #DCFCE7;
-    --color-warning: #B45309;      /* Ambre Moyen / Passable */
+    --color-warning: #B45309;
+    /* Ambre Moyen / Passable */
     --color-warning-bg: #FEF3C7;
-    --color-danger: #B91C1C;       /* Rouge Panne / Alerte */
+    --color-danger: #B91C1C;
+    /* Rouge Panne / Alerte */
     --color-danger-bg: #FEE2E2;
-    --color-info: #0369A1;         /* Bleu information */
+    --color-info: #0369A1;
+    /* Bleu information */
     --color-info-bg: #E0F2FE;
-    
+
     --sidebar-width: 260px;
     --radius-md: 10px;
     --radius-lg: 14px;
@@ -32,7 +42,9 @@
     --shadow-elevated: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -525,6 +537,7 @@ body {
     border-color: var(--color-info);
     color: var(--color-info);
 }
+
 .btn-info:hover {
     background-color: var(--color-info);
     color: #FFFFFF;
@@ -535,6 +548,7 @@ body {
     border-color: var(--color-warning);
     color: var(--color-warning);
 }
+
 .btn-warning:hover {
     background-color: var(--color-warning);
     color: #FFFFFF;
@@ -545,6 +559,7 @@ body {
     border-color: var(--color-danger);
     color: var(--color-danger);
 }
+
 .btn-danger:hover {
     background-color: var(--color-danger);
     color: #FFFFFF;
@@ -555,6 +570,7 @@ body {
     border-color: var(--color-success);
     color: var(--color-success);
 }
+
 .btn-success:hover {
     background-color: var(--color-success);
     color: #FFFFFF;
@@ -687,15 +703,22 @@ body {
 
 /* Modèle d'impression officiel pour les rapports (Rapports - GPE) */
 @media print {
-    .app-sidebar, .app-topbar, .btn, .no-print {
+
+    .app-sidebar,
+    .app-topbar,
+    .btn,
+    .no-print {
         display: none !important;
     }
+
     .app-main {
         margin-left: 0 !important;
     }
+
     body {
         background-color: #FFFFFF !important;
     }
+
     .app-content {
         padding: 0 !important;
     }
@@ -707,12 +730,15 @@ body {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
     }
+
     .app-sidebar.active {
         transform: translateX(0);
     }
+
     .app-main {
         margin-left: 0;
     }
+
     .charts-grid {
         grid-template-columns: 1fr;
     }
@@ -795,8 +821,13 @@ body {
 }
 
 @keyframes alert-progress {
-    from { width: 100%; }
-    to { width: 0%; }
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
 }
 
 /* ==========================================================================
@@ -837,10 +868,12 @@ body {
         transform: scale(0.95);
         box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
     }
+
     70% {
         transform: scale(1);
         box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
     }
+
     100% {
         transform: scale(0.95);
         box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
@@ -907,7 +940,8 @@ body {
     transition: all 0.25s ease;
 }
 
-.cachet-dropzone:hover, .cachet-dropzone.dragover {
+.cachet-dropzone:hover,
+.cachet-dropzone.dragover {
     border-color: var(--color-primary-light);
     background-color: #EFF6FF;
     transform: translateY(-2px);
@@ -971,7 +1005,6 @@ body {
     filter: drop-shadow(0 2px 4px rgba(13, 59, 102, 0.25));
     pointer-events: none;
 }
-
 
 /* ========================================================================= */
 /* CENTRE GLOBAL DE NOTIFICATIONS & ALERTES DE L'APPLICATION (Togo)          */
@@ -1204,15 +1237,18 @@ body {
 .btn-mark-read {
     background: none;
     border: none;
-    color: var(--color-text-muted);
-    font-size: 0.74rem;
+    color: var(--color-primary);
+    font-size: 0.78rem;
+    font-weight: 700;
     cursor: pointer;
-    padding: 0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s ease;
 }
 
 .btn-mark-read:hover {
-    color: var(--color-text);
-    text-decoration: underline;
+    background: #E2E8F0;
+    text-decoration: none;
 }
 
 /* Badge dans le menu latéral (Sidebar Counter) */

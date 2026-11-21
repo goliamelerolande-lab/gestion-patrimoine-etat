@@ -220,6 +220,13 @@ if ($uri === '/maintenances/delete' && $method === 'POST') {
     exit;
 }
 
+if ($uri === '/notifications/mark-all-read' && $method === 'POST') {
+    $_SESSION['notifications_read_at'] = time();
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'success', 'timestamp' => time()]);
+    exit;
+}
+
 // 7. ROUTE : RAPPORTS GLOBAUX, CACHET & SIGNATAIRE OFFICIEL (Togo)
 function getSignataireSettings(): array {
     $settingsFile = __DIR__ . '/uploads/signataire_settings.json';

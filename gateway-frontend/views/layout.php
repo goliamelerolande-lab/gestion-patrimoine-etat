@@ -109,7 +109,8 @@ if ($roleKey === 'agent') {
 } else {
     $activeNotifications = $appNotifications;
 }
-$unreadNotifCount = count($activeNotifications);
+$isMarkedRead = !empty($_SESSION['notifications_read_at']);
+$unreadNotifCount = $isMarkedRead ? 0 : count($activeNotifications);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -166,7 +167,7 @@ $unreadNotifCount = count($activeNotifications);
                 <a href="/maintenances" class="nav-item <?= ($currentPage ?? '') === 'maintenances' ? 'active' : '' ?>">
                     <i class="fa-solid fa-screwdriver-wrench"></i>
                     <span>Maintenance & Pannes</span>
-                    <?php if ($nbPendingIncidents > 0): ?>
+                    <?php if ($nbPendingIncidents > 0 && empty($_SESSION['notifications_read_at'])): ?>
                         <span class="badge-nav-counter animate-pulse" title="<?= $nbPendingIncidents ?> incident(s) en attente"><?= $nbPendingIncidents ?></span>
                     <?php endif; ?>
                 </a>
@@ -206,7 +207,7 @@ $unreadNotifCount = count($activeNotifications);
                 <a href="/maintenances" class="nav-item <?= ($currentPage ?? '') === 'maintenances' ? 'active' : '' ?>">
                     <i class="fa-solid fa-screwdriver-wrench"></i>
                     <span>Maintenance & Pannes</span>
-                    <?php if ($nbPendingIncidents > 0): ?>
+                    <?php if ($nbPendingIncidents > 0 && empty($_SESSION['notifications_read_at'])): ?>
                         <span class="badge-nav-counter animate-pulse" title="<?= $nbPendingIncidents ?> incident(s) en attente"><?= $nbPendingIncidents ?></span>
                     <?php endif; ?>
                 </a>
@@ -239,7 +240,7 @@ $unreadNotifCount = count($activeNotifications);
                 <a href="/maintenances" class="nav-item <?= ($currentPage ?? '') === 'maintenances' ? 'active' : '' ?>">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     <span>Signaler une Panne</span>
-                    <?php if ($nbPendingIncidents > 0): ?>
+                    <?php if ($nbPendingIncidents > 0 && empty($_SESSION['notifications_read_at'])): ?>
                         <span class="badge-nav-counter" style="background-color: #D97706;" title="Signalement en cours de prise en charge"><?= $nbPendingIncidents ?></span>
                     <?php endif; ?>
                 </a>
@@ -312,7 +313,7 @@ $unreadNotifCount = count($activeNotifications);
                                 </div>
                             <?php else: ?>
                                 <?php foreach ($activeNotifications as $notif): ?>
-                                    <a href="<?= htmlspecialchars($notif['link']) ?>" class="notif-item-link unread">
+                                    <a href="<?= htmlspecialchars($notif['link']) ?>" class="notif-item-link unread" data-notif-id="<?= htmlspecialchars($notif['id']) ?>" onclick="markSingleNotifRead(this, '<?= htmlspecialchars($notif['id']) ?>')">
                                         <div class="notif-icon-box <?= htmlspecialchars($notif['type']) ?>">
                                             <i class="fa-solid <?= htmlspecialchars($notif['icon']) ?>"></i>
                                         </div>
@@ -333,7 +334,7 @@ $unreadNotifCount = count($activeNotifications);
                         </div>
                         <div class="notif-dropdown-footer">
                             <a href="/maintenances"><i class="fa-solid fa-screwdriver-wrench"></i> Voir les interventions</a>
-                            <button type="button" class="btn-mark-read" onclick="clearNotifBadge()">Marquer comme lu</button>
+                            <button type="button" class="btn-mark-read" onclick="clearNotifBadge(event)"><i class="fa-solid fa-check-double"></i> Tout marquer comme lu</button>
                         </div>
                     </div>
                 </div>
@@ -362,10 +363,11 @@ $unreadNotifCount = count($activeNotifications);
                             (Degré d'urgence : <strong><?= htmlspecialchars($latestPendingTicket['priorite']) ?></strong>). Action requise : mandater un prestataire agréé.
                         </div>
                     </div>
-                    <div class="alert-action-btns">
+                    <div class="alert-action-btns" style="display: flex; align-items: center; gap: 8px;">
                         <a href="/maintenances" class="btn-banner-action">
                             <i class="fa-solid fa-wrench"></i> Prendre en charge
                         </a>
+                        <button type="button" onclick="this.closest('.urgent-incident-alert-banner').remove(); sessionStorage.setItem('banner_admin_dismissed', '1');" style="background: none; border: none; font-size: 1.4rem; color: #BE123C; cursor: pointer; padding: 0 4px; line-height: 1;" title="Fermer cette alerte">&times;</button>
                     </div>
                 </div>
             <?php endif; ?>
@@ -385,10 +387,11 @@ $unreadNotifCount = count($activeNotifications);
                             Votre signalement de panne sur <strong><?= htmlspecialchars($latestPendingTicket['code_inventaire']) ?> (<?= htmlspecialchars($latestPendingTicket['description_panne']) ?>)</strong> a bien été transmis aux gestionnaires de parc. Il est actuellement <strong>en attente d'attribution de réparateur</strong>.
                         </div>
                     </div>
-                    <div class="alert-action-btns">
+                    <div class="alert-action-btns" style="display: flex; align-items: center; gap: 8px;">
                         <a href="/maintenances" class="btn-banner-agent">
                             <i class="fa-solid fa-eye"></i> Suivre mon ticket
                         </a>
+                        <button type="button" onclick="this.closest('.agent-ticket-status-banner').remove(); sessionStorage.setItem('banner_agent_dismissed', '1');" style="background: none; border: none; font-size: 1.4rem; color: #0284C7; cursor: pointer; padding: 0 4px; line-height: 1;" title="Fermer cette alerte">&times;</button>
                     </div>
                 </div>
             <?php endif; ?>
@@ -632,7 +635,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    window.clearNotifBadge = function() {
+    window.clearNotifBadge = function(e) {
+        if (e) e.stopPropagation();
         const badge = document.getElementById('notifBadgePill');
         if (badge) badge.style.display = 'none';
         const headerCount = document.getElementById('notifHeaderCount');
@@ -640,7 +644,76 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.notif-item-link.unread').forEach(function(el) {
             el.classList.remove('unread');
         });
+        document.querySelectorAll('.badge-nav-counter').forEach(function(el) {
+            el.style.display = 'none';
+        });
+        // Enregistrer la lecture dans le stockage local persistant
+        localStorage.setItem('patrimoine_all_notifs_read', '1');
+        localStorage.setItem('patrimoine_notifs_cleared_at', Date.now().toString());
+        // Enregistrer la lecture dans la session PHP serveur
+        fetch('/notifications/mark-all-read', { method: 'POST' }).catch(() => {});
     };
+
+    window.markSingleNotifRead = function(element, notifId) {
+        if (element) element.classList.remove('unread');
+        let readIds = [];
+        try {
+            readIds = JSON.parse(localStorage.getItem('patrimoine_read_single_ids') || '[]');
+        } catch(err) {}
+        if (!readIds.includes(notifId)) {
+            readIds.push(notifId);
+            localStorage.setItem('patrimoine_read_single_ids', JSON.stringify(readIds));
+        }
+        const remainingUnread = document.querySelectorAll('.notif-item-link.unread').length;
+        const badge = document.getElementById('notifBadgePill');
+        if (badge) {
+            if (remainingUnread <= 0) {
+                badge.style.display = 'none';
+            } else {
+                badge.innerText = remainingUnread;
+            }
+        }
+        const headerCount = document.getElementById('notifHeaderCount');
+        if (headerCount) headerCount.innerText = remainingUnread + ' active(s)';
+    };
+
+    // Restaurer l'état lu au chargement de la page
+    try {
+        if (localStorage.getItem('patrimoine_all_notifs_read') === '1') {
+            const badge = document.getElementById('notifBadgePill');
+            if (badge) badge.style.display = 'none';
+            const headerCount = document.getElementById('notifHeaderCount');
+            if (headerCount) headerCount.innerText = '0 active(s)';
+            document.querySelectorAll('.notif-item-link.unread').forEach(function(el) {
+                el.classList.remove('unread');
+            });
+            document.querySelectorAll('.badge-nav-counter').forEach(function(el) {
+                el.style.display = 'none';
+            });
+        } else {
+            const readIds = JSON.parse(localStorage.getItem('patrimoine_read_single_ids') || '[]');
+            readIds.forEach(function(id) {
+                const item = document.querySelector('[data-notif-id="' + id + '"]');
+                if (item) item.classList.remove('unread');
+            });
+            const unreadCount = document.querySelectorAll('.notif-item-link.unread').length;
+            const badge = document.getElementById('notifBadgePill');
+            if (badge) {
+                if (unreadCount <= 0) badge.style.display = 'none';
+                else badge.innerText = unreadCount;
+            }
+        }
+    } catch(err) {}
+
+    // Masquer les bannières déjà fermées au cours de la session
+    if (sessionStorage.getItem('banner_admin_dismissed') === '1') {
+        const b = document.getElementById('adminUrgentBanner');
+        if (b) b.remove();
+    }
+    if (sessionStorage.getItem('banner_agent_dismissed') === '1') {
+        const b = document.getElementById('agentPendingBanner');
+        if (b) b.remove();
+    }
 
     document.addEventListener('click', function(e) {
         const container = document.getElementById('notifBellContainer');
