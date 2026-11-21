@@ -20,6 +20,8 @@ $rawRole = strtolower($currentUser['role'] ?? 'superadmin');
 $roleKey = 'superadmin';
 if (strpos($rawRole, 'gest') !== false) {
     $roleKey = 'gestionnaire';
+} elseif (strpos($rawRole, 'audit') !== false || strpos($rawRole, 'inspect') !== false) {
+    $roleKey = 'auditeur';
 } elseif (strpos($rawRole, 'agent') !== false || (strpos($rawRole, 'admin') === false && strpos($rawRole, 'super') === false)) {
     $roleKey = 'agent';
 }
@@ -57,6 +59,24 @@ if ($uri !== '/login' && $uri !== '/logout' && $uri !== '/profil/update') {
             exit;
         }
     }
+
+    // 3. RÈGLES AUDITEUR (Inspection Générale des Finances - IGF Lomé)
+    if ($roleKey === 'auditeur') {
+        // Interdiction du Sceau d'État officiel, Signature DGPE et Annuaire de gestion des comptes
+        if (in_array($uri, ['/cachet', '/parametres', '/signature', '/utilisateurs'])) {
+            header('Location: /?unauthorized=1');
+            exit;
+        }
+        // Interdiction formelle de toute mutation/création/modification/suppression (Lecture seule d'audit)
+        if (in_array($uri, [
+            '/biens/create', '/biens/update', '/biens/delete',
+            '/affectations/create', '/affectations/update', '/affectations/delete', '/affectations/restituer',
+            '/maintenances/create', '/maintenances/update', '/maintenances/delete'
+        ]) && $method === 'POST') {
+            header('Location: /?unauthorized=1');
+            exit;
+        }
+    }
 }
 
 // 1. ROUTE : LOGIN
@@ -73,9 +93,11 @@ if ($uri === '/login') {
             exit;
         }
         $error = $res['data']['error'] ?? $res['error'] ?? 'Échec connexion. Identifiants incorrects.';
+        $demoUsers = $client->getUsers();
         require __DIR__ . '/../views/login.php';
         exit;
     }
+    $demoUsers = $client->getUsers();
     require __DIR__ . '/../views/login.php';
     exit;
 }
@@ -427,19 +449,26 @@ if (($uri === '/profil/update' || $uri === '/utilisateurs/update') && $method ==
     $email = trim($_POST['email'] ?? '');
     $password = trim($_POST['password'] ?? '');
     $telephone = trim($_POST['telephone'] ?? '');
+    $role = trim($_POST['role'] ?? '');
 
-    $client->updateUser($id, [
+    $updateData = [
         'name' => $name,
         'email' => $email,
         'password' => $password,
         'telephone' => $telephone
-    ]);
+    ];
+    if (!empty($role)) {
+        $updateData['role'] = $role;
+    }
+
+    $client->updateUser($id, $updateData);
 
     // Mettre à jour la session active pour refléter immédiatement le nouveau nom/email
     if ($id === (int)($_SESSION['user']['id'] ?? 1) || empty($_POST['id'])) {
         if (!empty($name)) $_SESSION['user']['name'] = $name;
         if (!empty($email)) $_SESSION['user']['email'] = $email;
         if (!empty($telephone)) $_SESSION['user']['telephone'] = $telephone;
+        if (!empty($role)) $_SESSION['user']['role'] = $role;
     }
 
     $defaultRedirect = ($roleKey === 'superadmin') ? '/utilisateurs' : '/';

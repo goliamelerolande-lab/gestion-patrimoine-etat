@@ -69,6 +69,7 @@ class Database
                 name TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
+                password_plain TEXT DEFAULT 'password123',
                 role TEXT NOT NULL DEFAULT 'agent',
                 matricule TEXT UNIQUE NOT NULL,
                 telephone TEXT,
@@ -78,6 +79,11 @@ class Database
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         ");
+
+        // Migration douce pour tables existantes sans la colonne password_plain
+        try {
+            $pdo->exec("ALTER TABLE users ADD COLUMN password_plain TEXT DEFAULT 'password123'");
+        } catch (\Throwable $e) {}
 
         // Seeders si vide
         $stmt = $pdo->query("SELECT COUNT(*) as count FROM users");
@@ -90,12 +96,18 @@ class Database
                 ('MEPST', 'Ministère des Enseignements Primaire, Secondaire et Technique', 'MEPST'),
                 ('MSHPAUS', 'Ministère de la Santé, de l''Hygiène Publique et de l''Accès Universel aux Soins', 'MSHPAUS');
 
-                INSERT INTO users (name, email, password, role, matricule, telephone, ministere_id, service) VALUES
-                ('Amele Rolande GOLI', 'admin@patrimoine.gouv.tg', '" . password_hash('password123', PASSWORD_BCRYPT) . "', 'superadmin', 'MAT-TG-001', '+228 90 00 00 01', 1, 'Direction Générale du Patrimoine de l''État (DGPE Togo)'),
-                ('Koffi AGBEKO', 'gestionnaire@patrimoine.gouv.tg', '" . password_hash('password123', PASSWORD_BCRYPT) . "', 'gestionnaire', 'MAT-TG-002', '+228 91 00 00 02', 1, 'Direction du Matériel & de la Logistique'),
-                ('Afiwa MENSAH', 'agent@patrimoine.gouv.tg', '" . password_hash('password123', PASSWORD_BCRYPT) . "', 'agent', 'MAT-TG-003', '+228 92 00 00 03', 2, 'Direction de la Transformation Digitale'),
-                ('Komi AMEGAN', 'auditeur@patrimoine.gouv.tg', '" . password_hash('password123', PASSWORD_BCRYPT) . "', 'agent', 'MAT-TG-004', '+228 93 00 00 04', 1, 'Inspection Générale des Finances - Lomé');
+                INSERT INTO users (name, email, password, password_plain, role, matricule, telephone, ministere_id, service) VALUES
+                ('GOLI Amele Rolande', 'admin@patrimoine.gouv.tg', '" . password_hash('password123', PASSWORD_BCRYPT) . "', 'password123', 'superadmin', 'MAT-TG-001', '+228 96 49 37 14', 1, 'Direction Générale du Patrimoine de l''État (DGPE Togo)'),
+                ('GODHOPE''S', 'gestionnaire@patrimoine.gouv.tg', '" . password_hash('password123', PASSWORD_BCRYPT) . "', 'password123', 'gestionnaire', 'MAT-TG-002', '+228 96 83 01 54', 1, 'Direction du Matériel & de la Logistique'),
+                ('MY ALL', 'agent@patrimoine.gouv.tg', '" . password_hash('password123', PASSWORD_BCRYPT) . "', 'password123', 'agent', 'MAT-TG-003', '+228 96 08 12 83', 2, 'Direction de la Transformation Digitale'),
+                ('Komi AMEGAN', 'auditeur@patrimoine.gouv.tg', '" . password_hash('password123', PASSWORD_BCRYPT) . "', 'password123', 'auditeur', 'MAT-TG-004', '+228 92 50 97 05', 1, 'Inspection Générale des Finances (IGF Lomé)');
             ");
+        } else {
+            // Mettre à jour automatiquement le rôle Auditeur pour Komi AMEGAN et initialiser password_plain
+            try {
+                $pdo->exec("UPDATE users SET role = 'auditeur', service = 'Inspection Générale des Finances (IGF Lomé)' WHERE email = 'auditeur@patrimoine.gouv.tg' OR matricule = 'MAT-TG-004'");
+                $pdo->exec("UPDATE users SET password_plain = 'password123' WHERE password_plain IS NULL OR password_plain = ''");
+            } catch (\Throwable $e) {}
         }
     }
 }

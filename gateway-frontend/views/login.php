@@ -1,3 +1,113 @@
+<?php
+// Préparer la liste des comptes officiels et de démonstration
+$profiles = [];
+if (!empty($demoUsers) && is_array($demoUsers)) {
+    foreach ($demoUsers as $du) {
+        $r = strtolower($du['role'] ?? 'agent');
+        $rk = 'agent';
+        $title = 'Agent Public';
+        $color = '#059669';
+        $bg = '#ECFDF5';
+        $border = '#A7F3D0';
+        $icon = 'fa-user';
+
+        if (strpos($r, 'admin') !== false || strpos($r, 'super') !== false) {
+            $rk = 'superadmin';
+            $title = 'Super-Admin (DGPE)';
+            $color = '#7C3AED';
+            $bg = '#F5F3FF';
+            $border = '#DDD6FE';
+            $icon = 'fa-shield-halved';
+        } elseif (strpos($r, 'gest') !== false) {
+            $rk = 'gestionnaire';
+            $title = 'Gestionnaire (MEF)';
+            $color = '#2563EB';
+            $bg = '#EFF6FF';
+            $border = '#BFDBFE';
+            $icon = 'fa-user-tie';
+        } elseif (strpos($r, 'audit') !== false || strpos($r, 'inspect') !== false) {
+            $rk = 'auditeur';
+            $title = 'Auditeur (IGF Lomé)';
+            $color = '#D97706';
+            $bg = '#FFFBEB';
+            $border = '#FDE68A';
+            $icon = 'fa-clipboard-check';
+        }
+
+        $profiles[] = [
+            'id' => $du['id'] ?? 1,
+            'name' => $du['name'] ?? '',
+            'email' => $du['email'] ?? '',
+            'matricule' => $du['matricule'] ?? '',
+            'role_key' => $rk,
+            'title' => $title,
+            'color' => $color,
+            'bg' => $bg,
+            'border' => $border,
+            'icon' => $icon,
+            'password_plain' => !empty($du['password_plain']) ? $du['password_plain'] : 'password123'
+        ];
+    }
+}
+
+// Secours garanti pour la soutenance
+if (empty($profiles)) {
+    $profiles = [
+        [
+            'id' => 1,
+            'name' => 'GOLI Amele Rolande',
+            'email' => 'admin@patrimoine.gouv.tg',
+            'matricule' => 'MAT-TG-001',
+            'role_key' => 'superadmin',
+            'title' => 'Super-Admin (DGPE)',
+            'color' => '#7C3AED',
+            'bg' => '#F5F3FF',
+            'border' => '#DDD6FE',
+            'icon' => 'fa-shield-halved',
+            'password_plain' => 'password123'
+        ],
+        [
+            'id' => 2,
+            'name' => "GODHOPE'S",
+            'email' => 'gestionnaire@patrimoine.gouv.tg',
+            'matricule' => 'MAT-TG-002',
+            'role_key' => 'gestionnaire',
+            'title' => 'Gestionnaire (MEF)',
+            'color' => '#2563EB',
+            'bg' => '#EFF6FF',
+            'border' => '#BFDBFE',
+            'icon' => 'fa-user-tie',
+            'password_plain' => 'password123'
+        ],
+        [
+            'id' => 3,
+            'name' => 'MY ALL',
+            'email' => 'agent@patrimoine.gouv.tg',
+            'matricule' => 'MAT-TG-003',
+            'role_key' => 'agent',
+            'title' => 'Agent Public (MENTD)',
+            'color' => '#059669',
+            'bg' => '#ECFDF5',
+            'border' => '#A7F3D0',
+            'icon' => 'fa-user',
+            'password_plain' => 'password123'
+        ],
+        [
+            'id' => 4,
+            'name' => 'Komi AMEGAN',
+            'email' => 'auditeur@patrimoine.gouv.tg',
+            'matricule' => 'MAT-TG-004',
+            'role_key' => 'auditeur',
+            'title' => 'Auditeur (IGF Lomé)',
+            'color' => '#D97706',
+            'bg' => '#FFFBEB',
+            'border' => '#FDE68A',
+            'icon' => 'fa-clipboard-check',
+            'password_plain' => 'password123'
+        ],
+    ];
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -18,31 +128,31 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px 16px;
         }
         .login-card {
             background-color: #FFFFFF;
             width: 100%;
-            max-width: 460px;
+            max-width: 520px;
             border-radius: var(--radius-lg);
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            padding: 36px 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
         }
         .login-brand-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
         .login-brand-icon {
-            width: 54px;
-            height: 54px;
+            width: 52px;
+            height: 52px;
             background: linear-gradient(135deg, var(--color-accent), #8A6D3B);
             color: #FFFFFF;
-            font-size: 1.6rem;
+            font-size: 1.55rem;
             border-radius: 12px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         .login-brand-header h2 {
             font-size: 1.35rem;
@@ -62,12 +172,81 @@
             padding: 16px;
             border-radius: var(--radius-md);
             margin-top: 24px;
-            font-size: 0.82rem;
         }
-        .demo-btn-row {
-            display: flex;
-            gap: 8px;
+        .demo-profiles-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
             margin-top: 10px;
+        }
+        @media (max-width: 520px) {
+            .demo-profiles-grid {
+                grid-template-columns: 1fr;
+            }
+            .login-card {
+                padding: 24px 18px;
+            }
+        }
+        .profile-demo-btn {
+            background: #FFFFFF;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            position: relative;
+        }
+        .profile-demo-btn:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 12px rgba(13, 59, 102, 0.12);
+            transform: translateY(-2px);
+        }
+        .profile-demo-btn .role-tag {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 7px;
+            border-radius: 9999px;
+            width: fit-content;
+        }
+        .profile-demo-btn .user-title-name {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--color-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .profile-demo-btn .user-sub-info {
+            font-size: 0.72rem;
+            color: var(--color-text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .btn-direct-login {
+            margin-top: 4px;
+            padding: 4px 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            background-color: var(--color-primary);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        .btn-direct-login:hover {
+            background-color: var(--color-primary-light);
         }
     </style>
 </head>
@@ -89,14 +268,14 @@
         </div>
     <?php endif; ?>
 
-    <form method="POST" action="/login">
+    <form method="POST" action="/login" id="loginForm">
         <div class="form-group">
-            <label>Identifiant / Email Institutionnel</label>
-            <input type="email" name="email" id="loginEmail" class="form-control" placeholder="ex: admin@patrimoine.gouv.tg" required autocomplete="email">
+            <label style="font-weight: 700;">Identifiant (Email, Nom ou Matricule)</label>
+            <input type="text" name="email" id="loginEmail" class="form-control" placeholder="ex: admin@patrimoine.gouv.tg ou GODHOPE'S" required autocomplete="username">
         </div>
 
         <div class="form-group">
-            <label style="font-weight: 600;">Mot de passe</label>
+            <label style="font-weight: 700;">Mot de passe</label>
             <div style="position: relative;">
                 <input type="password" name="password" id="loginPassword" class="form-control" placeholder="Entrez votre mot de passe" required autocomplete="current-password" style="padding-right: 42px;">
                 <button type="button" onclick="togglePasswordVisibility();" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--color-text-muted); font-size: 1.1rem; padding: 4px;" title="Afficher ou masquer le mot de passe">
@@ -110,30 +289,49 @@
         </button>
     </form>
 
-    <!-- Comptes Démonstration en 1 Clic pour la Soutenance -->
+    <!-- Comptes Démonstration & Soutenance (4 Profils Complets dont AUDITEUR) -->
     <div class="demo-credentials-box">
-        <div style="font-weight: 700; color: var(--color-primary); margin-bottom: 6px;">
-            <i class="fa-solid fa-key"></i> Profils de Soutenance & Démonstration :
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <div style="font-weight: 800; color: var(--color-primary); font-size: 0.85rem;">
+                <i class="fa-solid fa-users"></i> Profils Officiels & Démonstration :
+            </div>
+            <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">1-Clic Soutenance</span>
         </div>
-        <p style="color: var(--color-text-muted); font-size: 0.75rem; margin-bottom: 8px;">Cliquez sur un profil pour remplir automatiquement les identifiants :</p>
-        <div class="demo-btn-row">
-            <button type="button" class="btn btn-outline btn-sm" onclick="setDemo('admin@patrimoine.gouv.tg', 'password123');" style="flex:1;">
-                Super-Admin
-            </button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="setDemo('gestionnaire@patrimoine.gouv.tg', 'password123');" style="flex:1;">
-                Gestionnaire
-            </button>
-            <button type="button" class="btn btn-outline btn-sm" onclick="setDemo('agent@patrimoine.gouv.tg', 'password123');" style="flex:1;">
-                Agent
-            </button>
+        <p style="color: var(--color-text-muted); font-size: 0.74rem; margin-bottom: 8px;">
+            Cliquez sur un profil pour remplir les identifiants ou vous connecter immédiatement :
+        </p>
+
+        <div class="demo-profiles-grid">
+            <?php foreach ($profiles as $p): ?>
+                <div class="profile-demo-btn" onclick="fillCredentials('<?= htmlspecialchars(addslashes($p['email'])) ?>', '<?= htmlspecialchars(addslashes($p['password_plain'])) ?>');">
+                    <div class="role-tag" style="background-color: <?= $p['bg'] ?>; color: <?= $p['color'] ?>; border: 1px solid <?= $p['border'] ?>;">
+                        <i class="fa-solid <?= $p['icon'] ?>"></i> <?= htmlspecialchars($p['title']) ?>
+                    </div>
+                    <div class="user-title-name" title="<?= htmlspecialchars($p['name']) ?>">
+                        <?= htmlspecialchars($p['name']) ?>
+                    </div>
+                    <div class="user-sub-info">
+                        <?= htmlspecialchars($p['email']) ?>
+                    </div>
+                    <button type="button" class="btn-direct-login" onclick="event.stopPropagation(); directLogin('<?= htmlspecialchars(addslashes($p['email'])) ?>', '<?= htmlspecialchars(addslashes($p['password_plain'])) ?>');">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Connexion 1-Clic
+                    </button>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>
 
 <script>
-function setDemo(email, pass) {
-    document.getElementById('loginEmail').value = email;
+function fillCredentials(login, pass) {
+    document.getElementById('loginEmail').value = login;
     document.getElementById('loginPassword').value = pass;
+    document.getElementById('loginPassword').focus();
+}
+
+function directLogin(login, pass) {
+    fillCredentials(login, pass);
+    document.getElementById('loginForm').submit();
 }
 
 function togglePasswordVisibility() {

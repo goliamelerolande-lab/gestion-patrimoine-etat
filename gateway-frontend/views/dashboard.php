@@ -4,6 +4,8 @@ $rawRole = strtolower($currentUser['role'] ?? 'superadmin');
 $roleKey = 'superadmin';
 if (strpos($rawRole, 'gest') !== false) {
     $roleKey = 'gestionnaire';
+} elseif (strpos($rawRole, 'audit') !== false || strpos($rawRole, 'inspect') !== false) {
+    $roleKey = 'auditeur';
 } elseif (strpos($rawRole, 'agent') !== false || (strpos($rawRole, 'admin') === false && strpos($rawRole, 'super') === false)) {
     $roleKey = 'agent';
 }
@@ -14,6 +16,9 @@ if ($roleKey === 'agent') {
 } elseif ($roleKey === 'gestionnaire') {
     $pageTitle = 'Tableau de Bord du Gestionnaire de Parc (Togo)';
     $pageSubtitle = 'Supervision logistique, taux de disponibilité des matériels et suivi des interventions';
+} elseif ($roleKey === 'auditeur') {
+    $pageTitle = 'Tableau de Bord d\'Audit & Inspection (IGF Lomé)';
+    $pageSubtitle = 'Supervision générale de conformité, valorisation du patrimoine et contrôle des dotations publiques';
 } else {
     $pageTitle = 'Tableau de Bord Exécutif (Togo)';
     $pageSubtitle = 'Aperçu synthétique et valorisation du parc mobilier et immobilier de l\'État Togolais';
@@ -340,8 +345,37 @@ ob_start();
 
 <?php else: ?>
     <!-- ===================================================================== -->
-    <!-- 3. VUE EXÉCUTIVE DGPE : SUPER-ADMINISTRATEUR (Amele Rolande GOLI)       -->
+    <!-- 3. VUE EXÉCUTIVE DGPE & AUDIT NATIONAL (Super-Admin & Auditeur IGF)   -->
     <!-- ===================================================================== -->
+
+    <?php if ($roleKey === 'auditeur'): ?>
+        <!-- Bandeau officiel d'inspection générale -->
+        <div class="data-card" style="margin-bottom: 24px; padding: 20px 24px; background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%); border-left: 5px solid #D97706;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #D97706, #B45309); color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <h2 style="font-size: 1.15rem; font-weight: 800; color: #92400E; margin: 0;">
+                                <?= htmlspecialchars($currentUser['name'] ?? 'Komi AMEGAN') ?>
+                            </h2>
+                            <span style="font-size: 0.75rem; font-weight: 700; background-color: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; padding: 3px 10px; border-radius: 9999px;">
+                                <i class="fa-solid fa-shield-halved"></i> Auditeur / Inspecteur d'État
+                            </span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #78350F; margin-top: 4px;">
+                            <strong>Direction :</strong> Inspection Générale des Finances (IGF Lomé) &bull; <strong>Habilitation :</strong> Audit & Contrôle des Biens Publics
+                        </div>
+                    </div>
+                </div>
+                <a href="/rapports" class="btn btn-outline" style="border-color: #D97706; color: #92400E; font-weight: 700;">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Consulter l'Inventaire & Rapports
+                </a>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <!-- Cartes Métriques Nationales -->
     <div class="metrics-grid">

@@ -47,10 +47,10 @@ ON CONFLICT DO NOTHING;
 -- Insertion des utilisateurs de démonstration (Mot de passe : 'password123' ou 'secret')
 -- Hash bcrypt pour 'password123' : $2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi
 INSERT INTO users (name, email, password, role, matricule, telephone, ministere_id, service) VALUES
-('Amele Rolande GOLI', 'admin@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'superadmin', 'MAT-TG-001', '+228 90 00 00 01', 1, 'Direction Générale du Patrimoine de l''État (DGPE Togo)'),
-('Koffi AGBEKO', 'gestionnaire@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'gestionnaire', 'MAT-TG-002', '+228 91 00 00 02', 1, 'Direction du Matériel & de la Logistique'),
-('Afiwa MENSAH', 'agent@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'agent', 'MAT-TG-003', '+228 92 00 00 03', 2, 'Direction de la Transformation Digitale'),
-('Komi AMEGAN', 'auditeur@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'agent', 'MAT-TG-004', '+228 93 00 00 04', 1, 'Inspection Générale des Finances - Lomé')
+('GOLI Amele Rolande', 'admin@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'superadmin', 'MAT-TG-001', '+228 96 49 37 14', 1, 'Direction Générale du Patrimoine de l''État (DGPE Togo)'),
+('GODHOPE''S', 'gestionnaire@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'gestionnaire', 'MAT-TG-002', '+228 96 83 01 54', 1, 'Direction du Matériel & de la Logistique'),
+('MY ALL', 'agent@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'agent', 'MAT-TG-003', '+228 96 08 12 83', 2, 'Direction de la Transformation Digitale'),
+('Komi AMEGAN', 'auditeur@patrimoine.gouv.tg', '$2y$10$wTfD6g0u3lUfN7zZ9X0Xee1R3aQ9JgVqGj1gXyU2oJ8qM1fB9lImi', 'auditeur', 'MAT-TG-004', '+228 92 50 97 05', 1, 'Inspection Générale des Finances (IGF Lomé)')
 ON CONFLICT DO NOTHING;
 
 -- ====================================================================

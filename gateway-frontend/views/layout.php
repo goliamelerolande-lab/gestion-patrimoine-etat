@@ -24,6 +24,14 @@ if (strpos($rawRole, 'admin') !== false) {
     $roleBg = '#EFF6FF';
     $roleBorder = '#BFDBFE';
     $roleIcon = 'fa-user-tie';
+} elseif (strpos($rawRole, 'audit') !== false || strpos($rawRole, 'inspect') !== false) {
+    $roleKey = 'auditeur';
+    $roleTitle = 'Auditeur / Inspecteur d\'État';
+    $roleBadgeText = 'Auditeur • IGF Lomé';
+    $roleColor = '#D97706';
+    $roleBg = '#FFFBEB';
+    $roleBorder = '#FDE68A';
+    $roleIcon = 'fa-clipboard-check';
 } else {
     $roleKey = 'agent';
     $roleTitle = 'Agent Public';
@@ -219,6 +227,37 @@ $unreadNotifCount = $isMarkedRead ? 0 : count($activeNotifications);
                 <a href="/rapports" class="nav-item <?= ($currentPage ?? '') === 'rapports' ? 'active' : '' ?>">
                     <i class="fa-solid fa-file-lines"></i>
                     <span>Rapports d'Inventaire</span>
+                </a>
+
+            <?php elseif ($roleKey === 'auditeur'): ?>
+                <!-- 3. MENU AUDITEUR / INSPECTION GÉNÉRALE DES FINANCES (IGF TOGO) -->
+                <div class="menu-category">Audit & Contrôle</div>
+                <a href="/" class="nav-item <?= ($currentPage ?? '') === 'dashboard' ? 'active' : '' ?>">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Tableau de Bord Audit</span>
+                </a>
+
+                <div class="menu-category">Inspection du Patrimoine</div>
+                <a href="/biens" class="nav-item <?= ($currentPage ?? '') === 'biens' ? 'active' : '' ?>">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <span>Registre Exhaustif</span>
+                </a>
+                <a href="/affectations" class="nav-item <?= ($currentPage ?? '') === 'affectations' ? 'active' : '' ?>">
+                    <i class="fa-solid fa-people-carry-box"></i>
+                    <span>Affectations & Décharges</span>
+                </a>
+                <a href="/maintenances" class="nav-item <?= ($currentPage ?? '') === 'maintenances' ? 'active' : '' ?>">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    <span>Registre des Pannes</span>
+                    <?php if ($nbPendingIncidents > 0 && empty($_SESSION['notifications_read_at'])): ?>
+                        <span class="badge-nav-counter animate-pulse" title="<?= $nbPendingIncidents ?> incident(s) en attente"><?= $nbPendingIncidents ?></span>
+                    <?php endif; ?>
+                </a>
+
+                <div class="menu-category">États Financiers</div>
+                <a href="/rapports" class="nav-item <?= ($currentPage ?? '') === 'rapports' ? 'active' : '' ?>">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <span>Rapports & Valorisation</span>
                 </a>
 
             <?php else: ?>

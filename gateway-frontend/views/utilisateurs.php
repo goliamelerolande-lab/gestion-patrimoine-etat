@@ -78,6 +78,8 @@ ob_start();
                             $roleBadge = 'var(--color-primary)';
                             if ($u['role'] === 'superadmin') $roleBadge = '#7C3AED';
                             if ($u['role'] === 'gestionnaire') $roleBadge = '#2563EB';
+                            if ($u['role'] === 'auditeur') $roleBadge = '#D97706';
+                            if ($u['role'] === 'agent') $roleBadge = '#059669';
                         ?>
                         <span style="font-size: 0.75rem; font-weight: 700; background-color: #F1F5F9; color: <?= $roleBadge ?>; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase;">
                             <?= htmlspecialchars($u['role']) ?>
@@ -89,7 +91,7 @@ ob_start();
                     </td>
                     <td><?= htmlspecialchars($u['telephone'] ?? 'N/A') ?></td>
                     <td style="text-align: right;">
-                        <button type="button" class="btn btn-outline btn-sm" onclick="openProfileModal(<?= (int)$u['id'] ?>, '<?= htmlspecialchars(addslashes($u['name'])) ?>', '<?= htmlspecialchars(addslashes($u['email'])) ?>', '<?= htmlspecialchars(addslashes($u['telephone'] ?? '')) ?>');" style="padding: 4px 10px; font-size: 0.78rem;" title="Modifier cet utilisateur">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="openProfileModal(<?= (int)$u['id'] ?>, '<?= htmlspecialchars(addslashes($u['name'])) ?>', '<?= htmlspecialchars(addslashes($u['email'])) ?>', '<?= htmlspecialchars(addslashes($u['telephone'] ?? '')) ?>', '<?= htmlspecialchars(addslashes($u['role'])) ?>');" style="padding: 4px 10px; font-size: 0.78rem;" title="Modifier cet utilisateur">
                             <i class="fa-solid fa-pen-to-square"></i> Modifier
                         </button>
                     </td>
@@ -155,6 +157,16 @@ ob_start();
                 <input type="text" name="telephone" id="editUserPhone" class="form-control" value="<?= htmlspecialchars($_SESSION['user']['telephone'] ?? '+228 90 00 00 01') ?>" placeholder="+228 XX XX XX XX">
             </div>
 
+            <div class="form-group" style="margin-top: 14px;">
+                <label style="font-weight: 700;">Rôle & Privilèges Système</label>
+                <select name="role" id="editUserRole" class="form-control">
+                    <option value="superadmin">SUPERADMIN • Direction Générale DGPE</option>
+                    <option value="gestionnaire">GESTIONNAIRE • Logistique & Matériel MEF</option>
+                    <option value="auditeur">AUDITEUR • Inspection Générale des Finances (IGF Lomé)</option>
+                    <option value="agent">AGENT • Bénéficiaire de Dotation Publique</option>
+                </select>
+            </div>
+
             <div class="form-group" style="margin-top: 18px; border-top: 1px solid var(--color-border); padding-top: 16px;">
                 <label style="font-weight: 700; color: #B91C1C;">
                     <i class="fa-solid fa-key"></i> Nouveau Mot de Passe
@@ -174,11 +186,14 @@ ob_start();
 </div>
 
 <script>
-function openProfileModal(id, name, email, phone) {
+function openProfileModal(id, name, email, phone, role) {
     document.getElementById('editUserId').value = id;
     document.getElementById('editUserName').value = name;
     document.getElementById('editUserEmail').value = email;
     document.getElementById('editUserPhone').value = phone || '';
+    if (document.getElementById('editUserRole')) {
+        document.getElementById('editUserRole').value = role || 'agent';
+    }
     document.getElementById('editUserPassword').value = '';
     document.getElementById('editProfileModal').classList.add('active');
 }

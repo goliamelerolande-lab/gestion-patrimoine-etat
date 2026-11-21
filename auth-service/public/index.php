@@ -49,6 +49,13 @@ if ($method === 'POST' && ($uri === '/api/users' || $uri === '/users')) {
     exit;
 }
 
+if (($method === 'PUT' || $method === 'POST') && preg_match('#^/api/users/([0-9]+)$#', $uri, $m)) {
+    $response = $controller->updateUser((int)$m[1], $body);
+    http_response_code($response['status']);
+    echo json_encode($response['data'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 if ($method === 'GET' && ($uri === '/api/ministeres' || $uri === '/ministeres')) {
     $response = $controller->getMinisteres();
     http_response_code($response['status']);
