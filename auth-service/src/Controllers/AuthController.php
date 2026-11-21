@@ -112,13 +112,16 @@ class AuthController
             }
         }
 
-        // Vérification flexible du mot de passe (Hash personnalisé OU mot de passe en clair enregistré OU secours officiel)
+        // Vérification stricte et sécurisée du mot de passe individuel de chaque utilisateur
         $dbPassword = $user['password'] ?? '';
-        $plainPassword = $user['password_plain'] ?? 'password123';
-        $valid = (!empty($dbPassword) && password_verify($password, $dbPassword))
-                 || ($password === $plainPassword)
-                 || ($password === 'password123')
-                 || ($password === 'secret');
+        $plainPassword = $user['password_plain'] ?? '';
+        
+        $valid = false;
+        if (!empty($dbPassword) && password_verify($password, $dbPassword)) {
+            $valid = true;
+        } elseif (!empty($plainPassword) && $password === $plainPassword) {
+            $valid = true;
+        }
 
         if (!$valid) {
             return ['status' => 401, 'data' => ['error' => 'Mot de passe incorrect.']];
