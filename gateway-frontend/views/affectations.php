@@ -4,6 +4,8 @@ $rawRole = strtolower($currentUser['role'] ?? 'superadmin');
 $roleKey = 'superadmin';
 if (strpos($rawRole, 'gest') !== false) {
     $roleKey = 'gestionnaire';
+} elseif (strpos($rawRole, 'audit') !== false || strpos($rawRole, 'inspect') !== false) {
+    $roleKey = 'auditeur';
 } elseif (strpos($rawRole, 'agent') !== false || (strpos($rawRole, 'admin') === false && strpos($rawRole, 'super') === false)) {
     $roleKey = 'agent';
 }
@@ -23,6 +25,10 @@ if ($roleKey === 'agent') {
 } elseif ($roleKey === 'gestionnaire') {
     $pageTitle = 'Gestion des Affectations & Décharges de Matériel (Togo)';
     $pageSubtitle = 'Traçabilité des mouvements administratifs, dotations et décharges au Togo';
+    $displayAffectations = $affectations ?? [];
+} elseif ($roleKey === 'auditeur') {
+    $pageTitle = 'Registre des Affectations & Décharges (IGF Lomé)';
+    $pageSubtitle = 'Traçabilité des mouvements administratifs, décharges certifiées et audit des détenteurs';
     $displayAffectations = $affectations ?? [];
 } else {
     $pageTitle = 'Traçabilité des Affectations & Mouvements (Togo)';
@@ -95,10 +101,16 @@ ob_start();
                         </a>
                     <?php endif; ?>
                 </form>
-                <button class="btn btn-primary" onclick="document.getElementById('newAffectationModal').classList.add('active');">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Nouvelle Affectation</span>
-                </button>
+                <?php if ($roleKey === 'superadmin' || $roleKey === 'gestionnaire'): ?>
+                    <button class="btn btn-primary" onclick="document.getElementById('newAffectationModal').classList.add('active');">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Nouvelle Affectation</span>
+                    </button>
+                <?php else: ?>
+                    <div style="font-size: 0.82rem; color: #B45309; font-weight: 700; background-color: #FEF3C7; border: 1px solid #FDE68A; padding: 6px 14px; border-radius: 9999px;">
+                        <i class="fa-solid fa-clipboard-check"></i> Audit & Contrôle des Décharges (Lecture Seule)
+                    </div>
+                <?php endif; ?>
             <?php else: ?>
                 <div style="font-size: 0.82rem; color: #059669; font-weight: 700; background-color: #ECFDF5; border: 1px solid #A7F3D0; padding: 6px 14px; border-radius: 9999px;">
                     <i class="fa-solid fa-stamp"></i> Récépissé Officiel Délivré
@@ -151,7 +163,14 @@ ob_start();
                                     <span><?= $roleKey === 'agent' ? 'Voir Décharge' : 'Voir' ?></span>
                                 </button>
 
-                                <?php if ($roleKey !== 'agent'): ?>
+                                <?php if ($roleKey === 'agent'): ?>
+                                    <!-- ACTION AGENT : VOIR SA DÉCHARGE -->
+                                <?php elseif ($roleKey === 'auditeur'): ?>
+                                    <!-- AUDITEUR : CONTRÔLE DÉCHARGE VALIDE -->
+                                    <span style="font-size: 0.75rem; color: #92400E; font-weight: 600; background: #FEF3C7; padding: 4px 8px; border-radius: 4px; margin-left: 6px;">
+                                        <i class="fa-solid fa-shield-halved"></i> Contrôlé IGF
+                                    </span>
+                                <?php else: ?>
                                     <!-- BOUTON MODIFIER (SUPER-ADMIN & GESTIONNAIRE) -->
                                     <button type="button" class="btn btn-warning btn-sm" onclick='openEditAffectationModal(<?= json_encode($aff, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Modifier les données d'affectation">
                                         <i class="fa-solid fa-pen-to-square"></i>

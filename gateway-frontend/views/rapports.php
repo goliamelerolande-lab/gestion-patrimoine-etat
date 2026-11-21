@@ -1,4 +1,15 @@
 <?php
+$currentUser = $_SESSION['user'] ?? [];
+$rawRole = strtolower($currentUser['role'] ?? 'superadmin');
+$roleKey = 'superadmin';
+if (strpos($rawRole, 'gest') !== false) {
+    $roleKey = 'gestionnaire';
+} elseif (strpos($rawRole, 'audit') !== false || strpos($rawRole, 'inspect') !== false) {
+    $roleKey = 'auditeur';
+} elseif (strpos($rawRole, 'agent') !== false || (strpos($rawRole, 'admin') === false && strpos($rawRole, 'super') === false)) {
+    $roleKey = 'agent';
+}
+
 $pageTitle = 'Rapports Globaux du Patrimoine (Togo)';
 $pageSubtitle = 'Analyse détaillée, certification administrative et exportation des données du patrimoine national';
 $currentPage = 'rapports';
@@ -74,10 +85,12 @@ ob_start();
 
 <!-- Boutons d'actions supérieurs -->
 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 24px;" class="no-print">
-    <a href="/cachet" class="btn btn-outline" style="gap: 8px;">
-        <i class="fa-solid fa-stamp" style="color: var(--color-primary-light);"></i>
-        <span>Gérer / Importer le Cachet</span>
-    </a>
+    <?php if ($roleKey === 'superadmin'): ?>
+        <a href="/cachet" class="btn btn-outline" style="gap: 8px;">
+            <i class="fa-solid fa-stamp" style="color: var(--color-primary-light);"></i>
+            <span>Gérer / Importer le Cachet</span>
+        </a>
+    <?php endif; ?>
     <button class="btn btn-primary" onclick="window.print();" style="gap: 8px;">
         <i class="fa-solid fa-print"></i>
         <span>Imprimer / Exporter en PDF</span>

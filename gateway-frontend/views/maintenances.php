@@ -4,6 +4,8 @@ $rawRole = strtolower($currentUser['role'] ?? 'superadmin');
 $roleKey = 'superadmin';
 if (strpos($rawRole, 'gest') !== false) {
     $roleKey = 'gestionnaire';
+} elseif (strpos($rawRole, 'audit') !== false || strpos($rawRole, 'inspect') !== false) {
+    $roleKey = 'auditeur';
 } elseif (strpos($rawRole, 'agent') !== false || (strpos($rawRole, 'admin') === false && strpos($rawRole, 'super') === false)) {
     $roleKey = 'agent';
 }
@@ -34,6 +36,10 @@ if ($roleKey === 'agent') {
 } elseif ($roleKey === 'gestionnaire') {
     $pageTitle = 'Gestion de la Maintenance & Suivi des Pannes (Togo)';
     $pageSubtitle = 'Signalement d\'incidents, gestion des prestataires et validation des devis de réparation';
+    $displayMaintenances = $maintenances ?? [];
+} elseif ($roleKey === 'auditeur') {
+    $pageTitle = 'Registre d\'Audit des Pannes & Maintenances (IGF Lomé)';
+    $pageSubtitle = 'Contrôle des coûts de réparation, suivi des prestataires et audit de disponibilité du parc';
     $displayMaintenances = $maintenances ?? [];
 } else {
     $pageTitle = 'Gestion de la Maintenance & Suivi des Pannes (Togo)';
@@ -110,10 +116,16 @@ ob_start();
                     <?php endif; ?>
                 </form>
             <?php endif; ?>
-            <button class="btn btn-primary" onclick="document.getElementById('newMaintenanceModal').classList.add('active');" style="<?= $roleKey === 'agent' ? 'background-color: #DC2626; border-color: #DC2626;' : '' ?>">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <span><?= $roleKey === 'agent' ? 'Signaler une Panne sur mon Matériel' : 'Signaler une Panne' ?></span>
-            </button>
+            <?php if ($roleKey !== 'auditeur'): ?>
+                <button class="btn btn-primary" onclick="document.getElementById('newMaintenanceModal').classList.add('active');" style="<?= $roleKey === 'agent' ? 'background-color: #DC2626; border-color: #DC2626;' : '' ?>">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span><?= $roleKey === 'agent' ? 'Signaler une Panne sur mon Matériel' : 'Signaler une Panne' ?></span>
+                </button>
+            <?php else: ?>
+                <div style="font-size: 0.82rem; color: #B45309; font-weight: 700; background-color: #FEF3C7; border: 1px solid #FDE68A; padding: 6px 14px; border-radius: 9999px;">
+                    <i class="fa-solid fa-clipboard-check"></i> Audit & Contrôle des Pannes (Lecture Seule)
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -192,7 +204,14 @@ ob_start();
                                     <span>Voir</span>
                                 </button>
 
-                                <?php if ($roleKey !== 'agent'): ?>
+                                <?php if ($roleKey === 'agent'): ?>
+                                    <!-- AGENT -->
+                                <?php elseif ($roleKey === 'auditeur'): ?>
+                                    <!-- AUDITEUR : CONTRÔLE CONFORME -->
+                                    <span style="font-size: 0.75rem; color: #92400E; font-weight: 600; background: #FEF3C7; padding: 4px 8px; border-radius: 4px; margin-left: 6px;">
+                                        <i class="fa-solid fa-shield-halved"></i> Audit Conforme
+                                    </span>
+                                <?php else: ?>
                                     <!-- BOUTON MODIFIER (SUPER-ADMIN & GESTIONNAIRE) -->
                                     <button type="button" class="btn btn-warning btn-sm" onclick='openEditMaintenanceModal(<?= json_encode($m, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Modifier le ticket / devis">
                                         <i class="fa-solid fa-pen-to-square"></i>

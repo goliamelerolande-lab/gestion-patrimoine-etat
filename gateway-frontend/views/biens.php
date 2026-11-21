@@ -4,6 +4,8 @@ $rawRole = strtolower($currentUser['role'] ?? 'superadmin');
 $roleKey = 'superadmin';
 if (strpos($rawRole, 'gest') !== false) {
     $roleKey = 'gestionnaire';
+} elseif (strpos($rawRole, 'audit') !== false || strpos($rawRole, 'inspect') !== false) {
+    $roleKey = 'auditeur';
 } elseif (strpos($rawRole, 'agent') !== false || (strpos($rawRole, 'admin') === false && strpos($rawRole, 'super') === false)) {
     $roleKey = 'agent';
 }
@@ -22,6 +24,10 @@ if ($roleKey === 'agent') {
 } elseif ($roleKey === 'gestionnaire') {
     $pageTitle = 'Registre du Patrimoine Public (MEF - Togo)';
     $pageSubtitle = 'Gestion technique, inventaire permanent et suivi signalétique du parc togolais';
+    $displayBiens = $biens ?? [];
+} elseif ($roleKey === 'auditeur') {
+    $pageTitle = 'Registre Exhaustif & Contrôle du Patrimoine (IGF Lomé)';
+    $pageSubtitle = 'Supervision générale de conformité, inventaire contradictoire et audit des dotations de l\'État';
     $displayBiens = $biens ?? [];
 } else {
     $pageTitle = 'Registre National des Biens de l\'État (Togo)';
@@ -94,10 +100,16 @@ ob_start();
                         </a>
                     <?php endif; ?>
                 </form>
-                <button class="btn btn-primary" onclick="document.getElementById('newBienModal').classList.add('active');">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Nouveau Bien</span>
-                </button>
+                <?php if ($roleKey === 'superadmin' || $roleKey === 'gestionnaire'): ?>
+                    <button class="btn btn-primary" onclick="document.getElementById('newBienModal').classList.add('active');">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Nouveau Bien</span>
+                    </button>
+                <?php else: ?>
+                    <div style="font-size: 0.82rem; color: #B45309; font-weight: 700; background-color: #FEF3C7; border: 1px solid #FDE68A; padding: 6px 14px; border-radius: 9999px;">
+                        <i class="fa-solid fa-clipboard-check"></i> Audit & Contrôle des Biens Publics (Lecture Seule)
+                    </div>
+                <?php endif; ?>
             <?php else: ?>
                 <div style="font-size: 0.82rem; color: #059669; font-weight: 700; background-color: #ECFDF5; border: 1px solid #A7F3D0; padding: 6px 14px; border-radius: 9999px;">
                     <i class="fa-solid fa-shield-halved"></i> Dotation Individuelle Certifiée
@@ -173,6 +185,11 @@ ob_start();
                                         <i class="fa-solid fa-triangle-exclamation"></i>
                                         <span>Signaler Panne</span>
                                     </a>
+                                <?php elseif ($roleKey === 'auditeur'): ?>
+                                    <!-- AUDITEUR : LECTURE SEULE CONTRÔLE CONFORME -->
+                                    <span style="font-size: 0.75rem; color: #92400E; font-weight: 600; background: #FEF3C7; padding: 4px 8px; border-radius: 4px;">
+                                        <i class="fa-solid fa-shield-halved"></i> Contrôle Conforme
+                                    </span>
                                 <?php else: ?>
                                     <!-- BOUTON MODIFIER (SUPER-ADMIN & GESTIONNAIRE) -->
                                     <button type="button" class="btn btn-warning btn-sm" onclick='openEditBienModal(<?= json_encode($bien, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Modifier les données du bien">
