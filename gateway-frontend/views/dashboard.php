@@ -500,68 +500,77 @@ ob_start();
 <!-- Scripts des Graphiques Chart.js -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    <?php if ($roleKey === 'superadmin'): ?>
+    <?php if ($roleKey === 'superadmin' || $roleKey === 'auditeur'): ?>
         // Données pour le Graphique par État
         const etatLabels = <?= json_encode(array_column($stats['repartition_etat'] ?? [], 'etat')) ?>;
         const etatData   = <?= json_encode(array_column($stats['repartition_etat'] ?? [], 'count')) ?>;
         
-        new Chart(document.getElementById('etatChart'), {
-            type: 'doughnut',
-            data: {
-                labels: etatLabels.length ? etatLabels : ['Neuf', 'Bon état', 'En panne'],
-                datasets: [{
-                    data: etatData.length ? etatData : [1, 3, 1],
-                    backgroundColor: ['#10B981', '#3B82F6', '#EF4444', '#F59E0B']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } }
-            }
-        });
+        const etatEl = document.getElementById('etatChart');
+        if (etatEl) {
+            new Chart(etatEl, {
+                type: 'doughnut',
+                data: {
+                    labels: etatLabels.length ? etatLabels : ['Neuf', 'Bon état'],
+                    datasets: [{
+                        data: etatData.length ? etatData : [1, 3],
+                        backgroundColor: ['#10B981', '#3B82F6', '#EF4444', '#F59E0B']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
     <?php endif; ?>
 
     <?php if ($roleKey === 'gestionnaire'): ?>
         // Données pour la Disponibilité du Parc (Total = <?= $totalBiensCount ?> biens)
-        new Chart(document.getElementById('dispoChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['En Service Opérationnel', 'Disponible en Stock', 'En Réparation'],
-                datasets: [{
-                    data: [<?= $nbEnServiceOp ?>, <?= $nbEnStock ?>, <?= $nbEnPanne ?>],
-                    backgroundColor: ['#2563EB', '#10B981', '#EF4444']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } }
-            }
-        });
+        const dispoEl = document.getElementById('dispoChart');
+        if (dispoEl) {
+            new Chart(dispoEl, {
+                type: 'doughnut',
+                data: {
+                    labels: ['En Service Opérationnel', 'Disponible en Stock', 'En Réparation'],
+                    datasets: [{
+                        data: [<?= $nbEnServiceOp ?>, <?= $nbEnStock ?>, <?= $nbEnPanne ?>],
+                        backgroundColor: ['#2563EB', '#10B981', '#EF4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
     <?php endif; ?>
 
-    <?php if ($roleKey === 'superadmin' || $roleKey === 'gestionnaire'): ?>
+    <?php if ($roleKey === 'superadmin' || $roleKey === 'gestionnaire' || $roleKey === 'auditeur'): ?>
         // Données pour le Graphique par Catégorie
         const catLabels = <?= json_encode(array_column($stats['repartition_categorie'] ?? [], 'libelle')) ?>;
         const catData   = <?= json_encode(array_column($stats['repartition_categorie'] ?? [], 'valeur')) ?>;
 
-        new Chart(document.getElementById('categorieChart'), {
-            type: 'bar',
-            data: {
-                labels: catLabels.length ? catLabels : ['Véhicules', 'Bâtiments', 'Informatique', 'Mobilier'],
-                datasets: [{
-                    label: 'Valeur (FCFA)',
-                    data: catData.length ? catData : [26500000, 850000000, 12100000, 120000],
-                    backgroundColor: '#0D3B66'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true } }
-            }
-        });
+        const catEl = document.getElementById('categorieChart');
+        if (catEl) {
+            new Chart(catEl, {
+                type: 'bar',
+                data: {
+                    labels: catLabels.length ? catLabels : ['Véhicules', 'Bâtiments', 'Informatique', 'Divers'],
+                    datasets: [{
+                        label: 'Valeur (FCFA)',
+                        data: catData.length ? catData : [26500000, 850000000, 8900000, 120000],
+                        backgroundColor: '#0D3B66'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
     <?php endif; ?>
 });
 </script>
