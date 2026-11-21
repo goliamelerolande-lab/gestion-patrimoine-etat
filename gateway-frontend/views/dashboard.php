@@ -190,6 +190,19 @@ ob_start();
     <!-- ===================================================================== -->
     <!-- 2. VUE PERSONNALISÉE : GESTIONNAIRE DU PATRIMOINE (MEF)                 -->
     <!-- ===================================================================== -->
+    <?php
+        $totalBiensCount = !empty($biens) ? count($biens) : (int)($stats['total_biens'] ?? 4);
+        $totalAffCount = count($affectations ?? []);
+        $totalMaintCount = count($maintenances ?? []);
+        // Le bien en réparation fait partie du parc existant (déjà compté dans les affectations ou le stock)
+        $nbEnPanne = min($totalMaintCount, $totalBiensCount);
+        // Biens affectés 100% opérationnels (sans panne)
+        $nbEnServiceOp = max(0, $totalAffCount - $nbEnPanne);
+        // Biens disponibles en stock (non affectés)
+        $nbEnStock = max(0, $totalBiensCount - $totalAffCount);
+        // Taux de disponibilité opérationnelle réelle (3 opérationnels / 4 au total = 75%)
+        $tauxDispo = $totalBiensCount > 0 ? round((($totalBiensCount - $nbEnPanne) / $totalBiensCount) * 100) : 100;
+    ?>
 
     <!-- Raccourcis Rapides de Gestion Opérationnelle -->
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
@@ -209,7 +222,7 @@ ob_start();
         </div>
     </div>
 
-    <!-- 4 Cartes Métriques Opérationnelles Gestionnaire -->
+    <!-- 4 Cartes Métriques Opérationnelles Gestionnaire (Cohérence stricte 4 Biens au total) -->
     <div class="metrics-grid">
         <div class="metric-card">
             <div class="metric-header">
@@ -218,7 +231,7 @@ ob_start();
                     <i class="fa-solid fa-people-carry-box"></i>
                 </div>
             </div>
-            <div class="metric-val"><?= count($affectations ?? []) ?></div>
+            <div class="metric-val"><?= $totalAffCount ?></div>
             <div class="metric-footer">
                 <i class="fa-solid fa-arrow-right" style="color: #2563EB;"></i> Confiés aux fonctionnaires
             </div>
@@ -231,7 +244,7 @@ ob_start();
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
             </div>
-            <div class="metric-val"><?= max(0, ($stats['total_biens'] ?? 5) - count($affectations ?? [])) ?></div>
+            <div class="metric-val"><?= $nbEnStock ?></div>
             <div class="metric-footer">
                 <i class="fa-solid fa-circle-check" style="color: #059669;"></i> Prêts à être affectés
             </div>
@@ -244,7 +257,7 @@ ob_start();
                     <i class="fa-solid fa-screwdriver-wrench"></i>
                 </div>
             </div>
-            <div class="metric-val"><?= count($maintenances ?? []) ?></div>
+            <div class="metric-val"><?= $nbEnPanne ?></div>
             <div class="metric-footer">
                 <i class="fa-solid fa-triangle-exclamation" style="color: #DC2626;"></i> Suivi des prestataires agréés
             </div>
@@ -252,14 +265,14 @@ ob_start();
 
         <div class="metric-card">
             <div class="metric-header">
-                <span class="metric-label">Taux d'Exploitation du Parc</span>
+                <span class="metric-label">Disponibilité du Parc</span>
                 <div class="metric-icon-box" style="background-color: #FEF3C7; color: #D97706;">
                     <i class="fa-solid fa-chart-pie"></i>
                 </div>
             </div>
-            <div class="metric-val" style="color: #D97706;">80 %</div>
+            <div class="metric-val" style="color: #059669;"><?= $tauxDispo ?> %</div>
             <div class="metric-footer">
-                <i class="fa-solid fa-check"></i> Ratio affectations / total
+                <i class="fa-solid fa-check"></i> <?= ($totalBiensCount - $nbEnPanne) ?> sur <?= $totalBiensCount ?> biens opérationnels
             </div>
         </div>
     </div>
@@ -467,13 +480,13 @@ document.addEventListener('DOMContentLoaded', function() {
     <?php endif; ?>
 
     <?php if ($roleKey === 'gestionnaire'): ?>
-        // Données pour la Disponibilité du Parc
+        // Données pour la Disponibilité du Parc (Total = <?= $totalBiensCount ?> biens)
         new Chart(document.getElementById('dispoChart'), {
             type: 'doughnut',
             data: {
-                labels: ['En Service Actif', 'Disponible en Stock', 'En Réparation'],
+                labels: ['En Service Opérationnel', 'Disponible en Stock', 'En Réparation'],
                 datasets: [{
-                    data: [<?= count($affectations ?? []) ?>, <?= max(1, ($stats['total_biens'] ?? 5) - count($affectations ?? [])) ?>, <?= count($maintenances ?? []) ?>],
+                    data: [<?= $nbEnServiceOp ?>, <?= $nbEnStock ?>, <?= $nbEnPanne ?>],
                     backgroundColor: ['#2563EB', '#10B981', '#EF4444']
                 }]
             },
